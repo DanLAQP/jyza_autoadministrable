@@ -9,13 +9,27 @@
                 <?= h($odontograma->titulo) ?> de: <?= h($odontograma->pacientes1->nombre . ' ' . $odontograma->pacientes1->apellido ?? 'Paciente no especificado') ?>
             </h4>
             <?php
+            // Factor de escala para los símbolos (0.54 = 54%)
+            $simboloScaleFactor = 0.54;
+
+            // Función helper para obtener dimensiones escaladas de símbolos
+            if (!function_exists('getScaledSymbolDimensions')) {
+                function getScaledSymbolDimensions($imagePath, $scaleFactor) {
+                    list($originalWidth, $originalHeight) = getimagesize($imagePath);
+                    return [
+                        'width' => round($originalWidth * $scaleFactor),
+                        'height' => round($originalHeight * $scaleFactor)
+                    ];
+                }
+            }
+            
             // Renderizado especial para tipo 'mixto':
             // - Fila superior: dientes adultos superiores (combina 18..11 y 21..28 -> 16)
             // - Fila central: dientes de niño superiores (combina 55..51 y 61..65 -> 10)
             // - Fila inferior: dientes adultos inferiores (combina 48..41 y 31..38 -> 16)
 
             // Helper para renderizar una lista de posiciones
-            $renderDientes = function($positions) use ($odontograma) {
+            $renderDientes = function($positions) use ($odontograma, $simboloScaleFactor) {
                 foreach ($positions as $posicion) {
                     // Filtrar el diente correspondiente
                     $odontogramaDiente = array_filter($odontograma->odontograma_dientes, fn($d) => $d->diente->posicion == $posicion);
@@ -29,15 +43,14 @@
                     <!-- Contenedor de cada diente -->
                     <div class="diente" 
                         data-diente-id="<?= $dienteId ?>" 
-                            style="position: relative; width: 55px; height: 250px; 
+                            style="position: relative; width: 30px; height: 134px; 
                                     background-image: url('<?= $this->Url->image($odontogramaDiente->diente->imagen ?? '') ?>'); 
                                     background-size: contain; border: 1px solid transparent;">
                         
                         <?php if (!empty($odontogramaDiente->simbolos)): ?>
                             <?php foreach ($odontogramaDiente->simbolos as $simbolo): ?>
                                 <?php
-                                // Obtener dimensiones de la imagen del símbolo
-                                list($originalWidth, $originalHeight) = getimagesize(WWW_ROOT . $simbolo->simbolo->imagen);
+                                $dims = getScaledSymbolDimensions(WWW_ROOT . $simbolo->simbolo->imagen, $simboloScaleFactor);
                                 ?>
                                 <?= $this->Html->image($simbolo->simbolo->imagen, [
                                     'alt' => $simbolo->simbolo->nombre,
@@ -45,7 +58,7 @@
                                     'data-id' => $simbolo->simbolo->id,
                                     'data-pos-x' => $simbolo->posicion_x,
                                     'data-pos-y' => $simbolo->posicion_y,
-                                    'style' => 'position: absolute; left: ' . h($simbolo->posicion_x ?? 0) . 'px; top: ' . h($simbolo->posicion_y ?? 0) . 'px; width: ' . $originalWidth . 'px; height: ' . $originalHeight . 'px; max-width: none; max-height: none;',
+                                    'style' => 'position: absolute; left: ' . h($simbolo->posicion_x ?? 0) . 'px; top: ' . h($simbolo->posicion_y ?? 0) . 'px; width: ' . $dims['width'] . 'px; height: ' . $dims['height'] . 'px; max-width: none; max-height: none;',
                                     'draggable' => true,
                                 ]) ?>
                             <?php endforeach; ?>
@@ -107,15 +120,14 @@
                         <!-- Contenedor de cada diente -->
                         <div class="diente" 
                             data-diente-id="<?= $dienteId ?>" 
-                                style="position: relative; width: 55px; height: 250px; 
+                                style="position: relative; width: 30px; height: 134px; 
                                         background-image: url('<?= $this->Url->image($odontogramaDiente->diente->imagen ?? '') ?>'); 
                                         background-size: contain; border: 1px solid transparent;">
                             
                             <?php if (!empty($odontogramaDiente->simbolos)): ?>
                                     <?php foreach ($odontogramaDiente->simbolos as $simbolo): ?>
                                         <?php
-                                        // Obtener dimensiones de la imagen del símbolo
-                                        list($originalWidth, $originalHeight) = getimagesize(WWW_ROOT . $simbolo->simbolo->imagen);
+                                        $dims = getScaledSymbolDimensions(WWW_ROOT . $simbolo->simbolo->imagen, $simboloScaleFactor);
                                         ?>
                                         <?= $this->Html->image($simbolo->simbolo->imagen, [
                                             'alt' => $simbolo->simbolo->nombre,
@@ -123,7 +135,7 @@
                                             'data-id' => $simbolo->simbolo->id,
                                             'data-pos-x' => $simbolo->posicion_x,
                                             'data-pos-y' => $simbolo->posicion_y,
-                                            'style' => 'position: absolute; left: ' . h($simbolo->posicion_x ?? 0) . 'px; top: ' . h($simbolo->posicion_y ?? 0) . 'px; width: ' . $originalWidth . 'px; height: ' . $originalHeight . 'px; max-width: none; max-height: none;',
+                                            'style' => 'position: absolute; left: ' . h($simbolo->posicion_x ?? 0) . 'px; top: ' . h($simbolo->posicion_y ?? 0) . 'px; width: ' . $dims['width'] . 'px; height: ' . $dims['height'] . 'px; max-width: none; max-height: none;',
                                             'draggable' => true,
                                         ]) ?>
                                     <?php endforeach; ?>
@@ -203,8 +215,8 @@
 /* Rejilla del odontograma para adultos */
 .odontograma-grid {
     display: grid;
-    grid-template-columns: repeat(16, 55px); /* Configuración de la rejilla */
-    gap: 5px;
+    grid-template-columns: repeat(16, 30px); /* Configuración de la rejilla */
+    gap: 3px;
     justify-content: flex-start;
     transform-origin: top left;
 }
@@ -212,8 +224,8 @@
 /* Rejilla del odontograma para niños */
 .odontogramaN-grid {
     display: grid;
-    grid-template-columns: repeat(10, 55px); /* Configuración de la rejilla */
-    gap: 5px;
+    grid-template-columns: repeat(10, 30px); /* Configuración de la rejilla */
+    gap: 3px;
     justify-content: flex-start;
     transform-origin: top left;
 }
@@ -231,8 +243,8 @@
 /* Estilo de cada diente */
 .diente {
     position: relative;
-    width: 55px;
-    height: 250px;
+    width: 30px !important;
+    height: 134px !important;
     background-size: contain;
     /* border: 2px solid #B3B3B3; */
     border-radius: 5px;

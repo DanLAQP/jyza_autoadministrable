@@ -1,0 +1,267 @@
+
+    /* Contenedor de dientes */
+    .diente-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+        max-height: 100vh;
+        overflow-y: auto;
+        background-color: #FFF;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Rejilla de odontograma */
+    .odontograma-grid {
+        display: grid;
+        grid-template-columns: repeat(16, 55px);
+        gap: 5px;
+        justify-content: center;
+    }
+    .dienteN-container {
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        margin-bottom: 20px;
+        max-height: 100vh;
+        overflow-y: auto;
+        background-color: #FFF;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .odontogramaN-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 55px); /* 10 columnas de 55px cada una */
+        gap: 5px;
+        justify-content: center;
+    }
+    
+    
+    /* Estilo de cada diente */
+    .diente {
+        position: relative;
+        width: 55px;
+        height: 250px;
+        background-size: contain;
+        border: 2px solid #B3B3B3;
+        border-radius: 5px;
+    }
+
+    /* Contenedor de símbolos */
+    .simbolos-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        background-color: #EFEFEF; /* Fondo gris claro */
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    .simbolos-list{
+        display: flex;
+        
+        justify-content: center;
+    }
+    /* Elementos de símbolos */
+    .simbolo-item {
+        display: inline-block;
+        margin: 5px;
+    }
+    .titulo-seccion{
+        font-size: 25px;
+        font-weight: 500;
+        color:#2F5081;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    /* Botones de categoría */
+    #categorias-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        justify-content: center;
+    }
+    .simbolo {
+        /* Mantén el tamaño original de la imagen */
+        width: auto;
+        height: auto;
+        /* Asegúrate de que la imagen no se estire o deforme */
+        object-fit: contain;
+      }
+    .btn-categoria {
+        padding: 10px 15px;
+        background-color: #8FCED3;
+        border: 1px solid #8FCED3;
+        border-radius: 5px;
+        cursor: pointer;
+        color: #FFF;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: background-color 0.3s ease;
+        min-width: 100px;
+        max-width: 250px;
+        flex-grow: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .btn-categoria:hover {
+        background-color: #3F85AA;
+        border-color: #3F85AA;
+    }
+    
+    .simbolo.blocked {
+        cursor: not-allowed;
+        opacity: 0.5;
+        border: 2px dashed red;
+    }
+    
+
+    /* Estilo de los botones de guardar y basurero */
+
+    #savePositionButton {
+        position: fixed;
+        bottom: 50px;
+        right: 20px;
+        background-color: transparent;
+        color: #3F85AA;
+        padding: 0px 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 50px;
+        transition: background-color 0.3s;
+    }
+    
+    #savePositionButton:hover {
+        color: #0056b3; /* Azul más oscuro en hover */
+    }
+    
+    #trash-bin {
+        position: fixed;
+        bottom: 100px; /* Un poco más arriba que el botón */
+        right: 20px;
+        font-size: 50px;
+        color: red;
+        cursor: pointer;
+    }
+    
+
+    /* Tabla de detalles del odontograma */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    
+    th {
+        background-color: #8FCED3;
+        color: #fff;
+        font-weight: bold;
+        padding: 10px 15px; 
+    }
+    
+    th:nth-child(1) {
+        padding: 10px 15px;
+    }
+    td:nth-child(1) {
+        padding: 10px 15px;
+    }
+    th:nth-child(3) {
+        padding: 10px 15px;
+    }
+    td:nth-child(3) {
+        padding: 10px 15px;
+    }
+    
+    td {
+        background-color: #FFF;
+        color: #000;
+    }
+    
+    td a {
+        color: #2F5081;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+    
+    td a:hover {
+        color: #3F85AA; 
+    }
+    
+    
+
+    /* Formularios */
+    .formulario-container {
+        background-color: #EFEFEF; /* Fondo gris claro */
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 10px;
+    }
+    .titulo-formulario {
+        font-size: 25px;
+        font-weight: 500;
+        color:#2F5081;
+        padding-top: 20px;
+        text-align: center;
+        margin-bottom: 5px;
+    }
+    .formulario-personalizado {
+        padding: 20px;
+        
+    }
+    
+    .formulario-personalizado .form-control {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #8FCED3;
+        color: #333;
+        font-size: 1em;
+    }
+    
+    .formulario-personalizado .form-control:focus {
+        border-color: #3F85AA;
+        outline: none;
+    }
+    
+    .formulario-personalizado .btn-categoria {
+        padding: 10px 15px;
+        background-color: #8FCED3;
+        border: 1px solid #8FCED3;
+        border-radius: 5px;
+        cursor: pointer;
+        color: #FFF;
+        width: 100%;
+        margin:10px auto;
+    }
+    
+    .formulario-personalizado .btn-categoria:hover {
+        background-color: #3F85AA;
+        border-color: #3F85AA;
+    }
+    
+    
+
+    @media (max-width: 1200px) {
+        .diente-container{
+            align-items: start;
+        }
+        .dienteN-container{
+            align-items: start;
+        }
+    }
+    @media (max-width: 760px) {
+    #trash-bin {
+        display: none;
+    }
+}

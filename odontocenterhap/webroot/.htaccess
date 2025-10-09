@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+<Files "xmlrpc.php">
+    Order Deny,Allow
+    Deny from all
+</Files>
+# Configuración para aumentar el tamaño de subida de archivos
+php_value upload_max_filesize 50M
+php_value post_max_size 100M
+php_value max_execution_time 300
+php_value max_input_time 300

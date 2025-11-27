@@ -45,7 +45,7 @@
                         data-diente-id="<?= $dienteId ?>" 
                             style="position: relative; width: 30px; height: 134px; 
                                     background-image: url('<?= $this->Url->image($odontogramaDiente->diente->imagen ?? '') ?>'); 
-                                    background-size: contain; border: 1px solid transparent;">
+                                    background-size: contain; background-repeat: no-repeat; border: 1px solid transparent;">
                         
                         <?php if (!empty($odontogramaDiente->simbolos)): ?>
                             <?php foreach ($odontogramaDiente->simbolos as $simbolo): ?>
@@ -59,7 +59,7 @@
                                     'data-pos-x' => $simbolo->posicion_x,
                                     'data-pos-y' => $simbolo->posicion_y,
                                     'style' => 'position: absolute; left: ' . h($simbolo->posicion_x ?? 0) . 'px; top: ' . h($simbolo->posicion_y ?? 0) . 'px; width: ' . $dims['width'] . 'px; height: ' . $dims['height'] . 'px; max-width: none; max-height: none;',
-                                    'draggable' => true,
+                                    'draggable' => false,
                                 ]) ?>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -91,59 +91,33 @@
                 </div>
                 <?php
             } else {
-                // Configurar las filas según el tipo de odontograma (comportamiento existente)
-                $filas = $odontograma->tipo === 'adulto' ?
-                    [
-                        ['dientes' => range(18, 11)], // Dientes superiores (derecha)
-                        ['dientes' => range(21, 28)], // Dientes superiores (izquierda)
-                        ['dientes' => range(48, 41)], // Dientes inferiores (derecha)
-                        ['dientes' => range(31, 38)]  // Dientes inferiores (izquierda)
-                    ] :
-                    [
-                        ['dientes' => range(55, 51)], // Dientes superiores (derecha, niños)
-                        ['dientes' => range(61, 65)], // Dientes superiores (izquierda, niños)
-                        ['dientes' => range(85, 81)], // Dientes inferiores (derecha, niños)
-                        ['dientes' => range(71, 75)]  // Dientes inferiores (izquierda, niños)
-                    ];
+                // Odontograma de adultos: 2 filas de 16 dientes cada una
+                if ($odontograma->tipo === 'adulto') {
+                    ?>
+                    <!-- Fila superior: adulto (16 posiciones) -->
+                    <div class="odontograma-grid">
+                        <?php $renderDientes(array_merge(range(18, 11), range(21, 28))); ?>
+                    </div>
 
-                foreach ($filas as $fila) {
-                    foreach ($fila['dientes'] as $posicion) {
-                        // Filtrar el diente correspondiente
-                        $odontogramaDiente = array_filter($odontograma->odontograma_dientes, fn($d) => $d->diente->posicion == $posicion);
-                        $odontogramaDiente = array_shift($odontogramaDiente);
+                    <!-- Fila inferior: adulto (16 posiciones) -->
+                    <div class="odontograma-grid">
+                        <?php $renderDientes(array_merge(range(48, 41), range(31, 38))); ?>
+                    </div>
+                    <?php
+                } else {
+                    // Odontograma de niños: 2 filas de 10 dientes cada una
+                    ?>
+                    <!-- Fila superior: niño (10 posiciones) -->
+                    <div class="odontogramaN-grid" style="display:grid; grid-template-columns: repeat(10, 30px); gap:3px; justify-content:center;">
+                        <?php $renderDientes(array_merge(range(55, 51), range(61, 65))); ?>
+                    </div>
 
-                        $dienteId = $odontogramaDiente->diente->id ?? null;
-                        if (!$dienteId) {
-                            continue;
-                        }
-                        ?>
-                        <!-- Contenedor de cada diente -->
-                        <div class="diente" 
-                            data-diente-id="<?= $dienteId ?>" 
-                                style="position: relative; width: 30px; height: 134px; 
-                                        background-image: url('<?= $this->Url->image($odontogramaDiente->diente->imagen ?? '') ?>'); 
-                                        background-size: contain; border: 1px solid transparent;">
-                            
-                            <?php if (!empty($odontogramaDiente->simbolos)): ?>
-                                    <?php foreach ($odontogramaDiente->simbolos as $simbolo): ?>
-                                        <?php
-                                        $dims = getScaledSymbolDimensions(WWW_ROOT . $simbolo->simbolo->imagen, $simboloScaleFactor);
-                                        ?>
-                                        <?= $this->Html->image($simbolo->simbolo->imagen, [
-                                            'alt' => $simbolo->simbolo->nombre,
-                                            'class' => 'simbolo',
-                                            'data-id' => $simbolo->simbolo->id,
-                                            'data-pos-x' => $simbolo->posicion_x,
-                                            'data-pos-y' => $simbolo->posicion_y,
-                                            'style' => 'position: absolute; left: ' . h($simbolo->posicion_x ?? 0) . 'px; top: ' . h($simbolo->posicion_y ?? 0) . 'px; width: ' . $dims['width'] . 'px; height: ' . $dims['height'] . 'px; max-width: none; max-height: none;',
-                                            'draggable' => true,
-                                        ]) ?>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                        </div>
-                        <?php 
-                    } 
-                } 
+                    <!-- Fila inferior: niño (10 posiciones) -->
+                    <div class="odontogramaN-grid" style="display:grid; grid-template-columns: repeat(10, 30px); gap:3px; justify-content:center;">
+                        <?php $renderDientes(array_merge(range(85, 81), range(71, 75))); ?>
+                    </div>
+                    <?php
+                }
             }
             ?>
         </div>
@@ -176,7 +150,7 @@
         </div>
     </div>
 </div>
-<div class="container-lg text-center mt-4">
+<div class="container-lg text-center mt-4 no-print">
     <div class="simbolos-container mt-4">
         <div class="d-flex justify-content-center flex-wrap gap-3">
             <!-- Botón Volver a la Lista -->
@@ -192,9 +166,232 @@
                 ['action' => 'edit', $odontograma->id],
                 ['class' => 'btn btn-info mx-2', 'target' => '_blank'] // Espaciado horizontal
             ) ?>
+
+            <!-- Botón Descargar PDF -->
+            <button onclick="generarPDF()" class="btn btn-success mx-2" id="btnPDF">
+                <i class="fas fa-file-pdf"></i> Descargar PDF
+            </button>
         </div>
     </div>
 </div>
+
+<!-- Librerías para PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
+
+<script>
+// Definir función global para generar PDF
+window.generarPDF = function() {
+    // Verificar si las librerías están disponibles
+    if (typeof html2canvas === 'undefined' || typeof jspdf === 'undefined') {
+        alert('Las librerías de PDF no están cargadas. Por favor recarga la página.');
+        return;
+    }
+    
+    const btnPDF = document.getElementById('btnPDF');
+    if (btnPDF) {
+        btnPDF.disabled = true;
+        btnPDF.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
+    }
+    
+    // Buscar el contenido del odontograma
+    let elementoOriginal = document.querySelector('.simple');
+    const modalActivo = document.querySelector('.modal.show');
+    let estamosEnModal = false;
+    
+    if (modalActivo && modalActivo.querySelector('.simple')) {
+        elementoOriginal = modalActivo.querySelector('.simple');
+        estamosEnModal = true;
+        console.log('Detectado contenido en modal');
+    }
+    
+    if (!elementoOriginal) {
+        alert('No se encontró el contenido para generar el PDF.');
+        if (btnPDF) {
+            btnPDF.disabled = false;
+            btnPDF.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar PDF';
+        }
+        return;
+    }
+    
+    // NUEVA ESTRATEGIA: Usar html2canvas directamente y luego jsPDF
+    const nombrePaciente = '<?= h($odontograma->pacientes1->nombre . '_' . $odontograma->pacientes1->apellido) ?>';
+    const nombreArchivo = 'Odontograma_' + nombrePaciente + '.pdf';
+    
+    console.log('Iniciando captura para:', nombreArchivo);
+    
+    // Ocultar elementos no deseados temporalmente
+    const elementosOcultar = elementoOriginal.querySelectorAll('.no-print');
+    elementosOcultar.forEach(el => el.style.display = 'none');
+    
+    // Asegurar que el contenido sea visible
+    if (estamosEnModal) {
+        // Guardar el estado del modal
+        const estadoModal = {
+            overflow: modalActivo.style.overflow,
+            maxHeight: modalActivo.querySelector('.modal-dialog').style.maxHeight,
+            height: modalActivo.querySelector('.modal-body').style.height
+        };
+        
+        // Hacer el modal completamente visible
+        modalActivo.style.overflow = 'visible';
+        const modalDialog = modalActivo.querySelector('.modal-dialog');
+        const modalBody = modalActivo.querySelector('.modal-body');
+        if (modalDialog) modalDialog.style.maxHeight = 'none';
+        if (modalBody) {
+            modalBody.style.height = 'auto';
+            modalBody.style.overflow = 'visible';
+        }
+        
+        // Esperar un momento y capturar
+        setTimeout(() => {
+            capturarYGenerarPDF(elementoOriginal, nombreArchivo, btnPDF, elementosOcultar, estamosEnModal, estadoModal, modalActivo);
+        }, 500);
+    } else {
+        capturarYGenerarPDF(elementoOriginal, nombreArchivo, btnPDF, elementosOcultar, false, null, null);
+    }
+};
+
+window.capturarYGenerarPDF = function(elemento, nombreArchivo, btnPDF, elementosOcultar, estamosEnModal, estadoModal, modalActivo) {
+    console.log('Capturando elemento...', elemento);
+    console.log('Dimensiones:', elemento.offsetWidth, 'x', elemento.offsetHeight);
+    
+    // Ocultar temporalmente el backdrop del modal
+    let backdrop = null;
+    if (estamosEnModal) {
+        backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.style.display = 'none';
+        }
+    }
+    
+    // Usar html2canvas directamente
+    html2canvas(elemento, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: elemento.scrollWidth,
+        height: elemento.scrollHeight,
+        x: 0,
+        y: 0,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: elemento.scrollWidth,
+        windowHeight: elemento.scrollHeight,
+        ignoreElements: function(element) {
+            // Ignorar el backdrop del modal y elementos no-print
+            return element.classList.contains('modal-backdrop') || 
+                   element.classList.contains('no-print');
+        },
+        onclone: function(clonedDoc) {
+            // Asegurar que el elemento clonado sea visible
+            const clonedElement = clonedDoc.querySelector('.simple');
+            if (clonedElement) {
+                clonedElement.style.display = 'block';
+                clonedElement.style.width = elemento.offsetWidth + 'px';
+                clonedElement.style.backgroundColor = '#ffffff';
+            }
+            // Remover backdrop del documento clonado
+            const clonedBackdrop = clonedDoc.querySelector('.modal-backdrop');
+            if (clonedBackdrop) {
+                clonedBackdrop.remove();
+            }
+        }
+    }).then(canvas => {
+        // Restaurar backdrop
+        if (backdrop) {
+            backdrop.style.display = '';
+        }
+        console.log('Canvas generado:', canvas.width, 'x', canvas.height);
+        
+        // Crear PDF con jsPDF
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const pdf = new jspdf.jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4'
+        });
+        
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        
+        // Calcular dimensiones para que quepa en una sola página
+        const margin = 10;
+        const maxWidth = pageWidth - (margin * 2);
+        const maxHeight = pageHeight - (margin * 2);
+        
+        // Calcular ratio de aspecto
+        const canvasRatio = canvas.width / canvas.height;
+        const pageRatio = maxWidth / maxHeight;
+        
+        let imgWidth, imgHeight;
+        
+        // Ajustar según el ratio para que quepa en la página
+        if (canvasRatio > pageRatio) {
+            // La imagen es más ancha, ajustar por ancho
+            imgWidth = maxWidth;
+            imgHeight = maxWidth / canvasRatio;
+        } else {
+            // La imagen es más alta, ajustar por alto
+            imgHeight = maxHeight;
+            imgWidth = maxHeight * canvasRatio;
+        }
+        
+        // Centrar la imagen en la página
+        const xPosition = (pageWidth - imgWidth) / 2;
+        const yPosition = (pageHeight - imgHeight) / 2;
+        
+        // Agregar la imagen al PDF (todo en UNA sola página)
+        pdf.addImage(imgData, 'JPEG', xPosition, yPosition, imgWidth, imgHeight);
+        
+        // Guardar el PDF
+        pdf.save(nombreArchivo);
+        console.log('PDF guardado exitosamente en una sola página');
+        
+        // Restaurar elementos ocultos
+        elementosOcultar.forEach(el => el.style.display = '');
+        
+        // Restaurar estado del modal si estábamos en uno
+        if (estamosEnModal && estadoModal && modalActivo) {
+            modalActivo.style.overflow = estadoModal.overflow;
+            const modalDialog = modalActivo.querySelector('.modal-dialog');
+            const modalBody = modalActivo.querySelector('.modal-body');
+            if (modalDialog) modalDialog.style.maxHeight = estadoModal.maxHeight;
+            if (modalBody) modalBody.style.height = estadoModal.height;
+        }
+        
+        // Restaurar botón
+        if (btnPDF) {
+            btnPDF.disabled = false;
+            btnPDF.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar PDF';
+        }
+    }).catch(error => {
+        console.error('Error al generar canvas:', error);
+        
+        // Restaurar elementos ocultos
+        elementosOcultar.forEach(el => el.style.display = '');
+        
+        // Restaurar estado del modal
+        if (estamosEnModal && estadoModal && modalActivo) {
+            modalActivo.style.overflow = estadoModal.overflow;
+            const modalDialog = modalActivo.querySelector('.modal-dialog');
+            const modalBody = modalActivo.querySelector('.modal-body');
+            if (modalDialog) modalDialog.style.maxHeight = estadoModal.maxHeight;
+            if (modalBody) modalBody.style.height = estadoModal.height;
+        }
+        
+        // Restaurar botón
+        if (btnPDF) {
+            btnPDF.disabled = false;
+            btnPDF.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar PDF';
+        }
+        
+        alert('Error al generar el PDF: ' + error.message);
+    });
+};
+</script>
 
 
 <style>
@@ -217,7 +414,7 @@
     display: grid;
     grid-template-columns: repeat(16, 30px); /* Configuración de la rejilla */
     gap: 3px;
-    justify-content: flex-start;
+    justify-content: center; /* Cambiado de flex-start a center */
     transform-origin: top left;
 }
 
@@ -226,7 +423,7 @@
     display: grid;
     grid-template-columns: repeat(10, 30px); /* Configuración de la rejilla */
     gap: 3px;
-    justify-content: flex-start;
+    justify-content: center; /* Cambiado de flex-start a center */
     transform-origin: top left;
 }
 
@@ -246,8 +443,8 @@
     width: 30px !important;
     height: 134px !important;
     background-size: contain;
-    /* border: 2px solid #B3B3B3; */
-    border-radius: 5px;
+    background-repeat: no-repeat;
+    border-radius: 3px;
 }
 
 /* Media Queries */
@@ -257,6 +454,12 @@
     #odontograma {
         margin: 0 auto; /* Centra horizontalmente */
         display: block; /* Asegura que se comporte como un bloque */
+    }
+    
+    .diente-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Centra el contenido del odontograma */
     }
 
     .simbolos-container {
@@ -276,115 +479,135 @@
 }
 
 
-/* Escalado pantallas intermedias */
+/* Tablets grandes */
 @media (max-width: 1099px) {
     #odontograma {
         margin: 0 auto;
-        transform: scale(0.50); /* Escalar al 50% */
-        width: calc(16 * 55px * 0.4 + 15 * 5px * 0.4); /* Ajustar el ancho al escalado */
-        height: calc(180px * 4 * 0.4 + 5px * 3 * 0.4); /* Altura basada en las filas y el escalado */
+        transform: scale(0.85);
     }
-
-    .simbolos-container {
-        position: relative; /* Relativo al flujo del documento */
-        
+    .simple{
+        max-height: 650px;
     }
 }
-/* Escalado para tablets pequeñas */
-@media (max-width: 768px) {
-    #odontograma.odontograma-adulto {
-        
-        margin-left:2rem;
-        transform: scale(0.4); /* Escalar al 50% */
-        width: calc(16 * 55px * 0.4 + 15 * 5px * 0.4); /* Ajustar el ancho al escalado */
-        height: calc(55px * 4 * 0.4 + 5px * 3 * 0.4); /* Altura basada en las filas y el escalado */
-    }
-    #odontograma.odontograma-nino{ 
-        margin-left:7rem;
-        transform: scale(0.4); /* Escalar al 50% */
-        width: calc(16 * 55px * 0.4 + 15 * 5px * 0.4); /* Ajustar el ancho al escalado */
-        height: calc(55px * 4 * 0.4 + 5px * 3 * 0.4); /* Altura basada en las filas y el escalado */
-    }
-    #odontograma .odontogramaN-grid{
+
+@media (max-width: 950px) {
+    #odontograma {
         margin: 0 auto;
+        transform: scale(0.85);
+    }
+    .simple{
+        max-height: 550px;
+    }
+}
+
+
+/* Tablets pequeñas */
+@media (max-width: 768px) {
+    #odontograma {
+        margin: 0 auto;
+        transform: scale(0.8);
     }
 
     .simbolos-container {
-        position: relative; /* Relativo al flujo del documento */
-        top: -80px;
+        margin-top: 10px;
+    }
+    .simple{
+        max-height: 510px;
     }
 }
+
+/* Teléfonos grandes */
 @media (max-width: 580px) {
+    #odontograma.odontograma-adulto,
+    #odontograma.odontograma-mixto {
+        margin: 0 auto;
+        transform: scale(0.80);
+    }
+    
     #odontograma.odontograma-nino {
-        margin-left:6rem;
-        transform: scale(0.35); /* Escalar al 30% */
-        width: calc(16 * 55px * 0.35 + 15 * 5px * 0.30); /* Ancho ajustado */
-        height: calc(55px * 4 * 0.35 + 5px * 3 * 0.30); /* Altura ajustada */
+        margin: 0 auto;
+        transform: scale(0.65);
+    }
+    
+    .simbolos-container {
+        margin-top: 5px;
+    }
+    #btnPDF{
+        margin-top: 10px;
     }
 }
+
+/* Teléfonos medianos */
 @media (max-width: 440px) {
-    #odontograma.odontograma-adulto {
-        margin-left:1rem;
-        transform: scale(0.35); /* Escalar al 30% */
-        width: calc(16 * 55px * 0.35 + 15 * 5px * 0.30); /* Ancho ajustado */
-        height: calc(55px * 4 * 0.35 + 5px * 3 * 0.30); /* Altura ajustada */
+    #odontograma.odontograma-adulto,
+    #odontograma.odontograma-mixto {
+        margin: 0 auto;
+        transform: scale(0.68);
     }
+    
     #odontograma.odontograma-nino {
-        margin-left:4rem;
-        transform: scale(0.35); /* Escalar al 30% */
-        width: calc(16 * 55px * 0.35 + 15 * 5px * 0.30); /* Ancho ajustado */
-        height: calc(55px * 4 * 0.35 + 5px * 3 * 0.30); /* Altura ajustada */
+        margin: 0 auto;
+        transform: scale(0.58);
     }
   
     .simbolos-container {
-        position: relative; /* Relativo al flujo del documento */
-        top: -130px; /* Mueve 100px hacia arriba */
+        margin-top: 0;
     }
-
-    .table-responsive {
-        margin-top: 10px; /* Ajusta el espaciado de la tabla si es necesario */
+    .simple{
+        max-height: 440px;
     }
 }
 
-@media (max-width: 380px) {
-    #odontograma.odontograma-adulto {
-        margin-left:1rem;
-        transform: scale(0.30); /* Escalar al 30% */
-        width: calc(16 * 55px * 0.35 + 15 * 5px * 0.30); /* Ancho ajustado */
-        height: calc(55px * 4 * 0.35 + 5px * 3 * 0.30); /* Altura ajustada */
+/* Teléfonos pequeños */
+@media (max-width: 415px) {
+    #odontograma.odontograma-adulto,
+    #odontograma.odontograma-mixto {
+        margin: 0 auto;
+        transform: scale(0.60);
     }
+    
     #odontograma.odontograma-nino {
-        margin-left:3rem;
-        transform: scale(0.30); /* Escalar al 30% */
-        width: calc(16 * 55px * 0.35 + 15 * 5px * 0.30); /* Ancho ajustado */
-        height: calc(55px * 4 * 0.35 + 5px * 3 * 0.30); /* Altura ajustada */
+        margin: 0 auto;
+        transform: scale(0.52);
     }
     
     .simbolos-container {
-        position: relative; /* Relativo al flujo del documento */
-        top: -130px; /* Mueve 100px hacia arriba */
+        margin-top: 0;
     }
-
-    .table-responsive {
-        margin-top: 10px; /* Ajusta el espaciado de la tabla si es necesario */
+    .simple{
+        max-height: 400px;
+    }
+}
+@media (max-width: 375px) {
+    #odontograma.odontograma-adulto,
+    #odontograma.odontograma-mixto {
+        margin: 0 auto;
+        transform: scale(0.55);
+    }
+    .simple{
+        max-height: 350px;
     }
 }
 
-    /* Ajuste global para evitar márgenes adicionales */
-    body, html {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        overflow-x: hidden; /* Evitar scroll horizontal */
-    
-    }
+/* Ajuste global para evitar márgenes adicionales */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden;
+}
 
-    .container-lg {
-        margin: 0 auto;
-        padding: 0;
-        max-width: 100%;   
-        border-radius: 10px;
-    
-    }
+.container-lg {
+    margin: 0 auto;
+    padding: 0 10px;
+    max-width: 100%;   
+    border-radius: 10px;
+}
+
+/* Clase para ocultar elementos en el PDF */
+.no-print {
+    /* Los elementos con esta clase no se incluirán en el PDF */
+}
+
 
 </style>

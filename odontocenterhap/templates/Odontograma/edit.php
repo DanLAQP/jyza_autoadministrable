@@ -12,8 +12,8 @@ function getScaledSymbolDimensions($imagePath, $scaleFactor) {
     ];
 }
 ?>
-<div class="odontograma-layout" style="display:flex; gap:20px; align-items:flex-start;">
-    <div class="container-lg" style="flex:1;">
+<div class="odontograma-layout" style="display:flex; gap:15px; align-items:flex-start; max-width: fit-content; margin: 0 auto;">
+    <div style="flex: 0 0 auto; width: fit-content;">
 
     <?php if ($odontograma->tipo === 'adulto'): ?>
         
@@ -48,7 +48,7 @@ function getScaledSymbolDimensions($imagePath, $scaleFactor) {
                                 data-diente-id="<?= $dienteId ?>" 
                                 style="position: relative; width: 30px; height: 136px; 
                                         background-image: url('<?= $this->Url->image($odontogramaDiente->diente->imagen ?? '') ?>'); 
-                                        background-size: contain; border: 1px solid #111;">
+                                        background-size: contain; border: 1px solid #111; margin: 10px 0;">
                                 
                                 <?php if (!empty($odontogramaDiente->simbolos)): ?>
                                     <?php foreach ($odontogramaDiente->simbolos as $simbolo): ?>
@@ -78,16 +78,11 @@ function getScaledSymbolDimensions($imagePath, $scaleFactor) {
         <?php elseif ($odontograma->tipo === 'mixto'): ?>
     <div id="odontograma">
             <div class="diente-container">
-                <h4 class="titulo-seccion"><?php
-                    echo h(!empty($odontograma->pacientes1)
-                        ? $odontograma->pacientes1->nombre . ' ' . $odontograma->pacientes1->apellido
-                        : (!empty($odontograma->paciente)
-                            ? $odontograma->paciente->nombre . ' ' . $odontograma->paciente->apellido
-                            : 'Paciente no especificado'));
-                ?> de: <?= h($odontograma->titulo) ?></h4>
+                <h4 class="titulo-seccion">
+                    <h4 class="titulo-seccion"><?= h($odontograma->titulo) ?> de: <?= h($odontograma->pacientes1->nombre . ' ' . $odontograma->pacientes1->apellido ?? 'Paciente no especificado') ?></h4>
 
                 <!-- Fila superior: adulto (16 posiciones) -->
-                <div class="odontograma-grid">
+                <div class="odontograma-grid" style="margin:10px 0;">
                     <?php
                     $positions = array_merge(range(18, 11), range(21, 28));
                     foreach ($positions as $posicion) {
@@ -190,7 +185,7 @@ function getScaledSymbolDimensions($imagePath, $scaleFactor) {
                 </div>
 
                 <!-- Fila inferior: adulto (16 posiciones) -->
-                <div class="odontograma-grid">
+                <div class="odontograma-grid" style="margin:10px 0;">
                     <?php
                     $positions = array_merge(range(48, 41), range(31, 38));
                     foreach ($positions as $posicion) {
@@ -226,8 +221,7 @@ function getScaledSymbolDimensions($imagePath, $scaleFactor) {
         <?php else: ?>
     <div id="odontograma">
             <div class="dienteN-container">
-                <h4 class="titulo-seccion"><?= h($odontograma->titulo) ?> de: <?= h($odontograma->paciente->nombre . ' ' . $odontograma->paciente->apellido ?? 'Paciente no especificado') ?></h4>
-
+                <h4 class="titulo-seccion"><?= h($odontograma->titulo) ?> de: <?= h($odontograma->pacientes1->nombre . ' ' . $odontograma->pacientes1->apellido ?? 'Paciente no especificado') ?></h4>
                 <div class="odontogramaN-grid">
                     <?php
                     // Posiciones para niños
@@ -252,7 +246,7 @@ function getScaledSymbolDimensions($imagePath, $scaleFactor) {
                             <!-- Contenedor de cada diente -->
                             <div class="diente" 
                                 data-diente-id="<?= $dienteId ?>" 
-                                style="position: relative; width: 30px; height: 136px; 
+                                style="position: relative; width: 30px; height: 136px; margin: 10px 0;
                                         background-image: url('<?= $this->Url->image($odontogramaDiente->diente->imagen ?? '') ?>'); 
                                         background-size: contain; border: 1px solid #111;">
                                 
@@ -281,41 +275,44 @@ function getScaledSymbolDimensions($imagePath, $scaleFactor) {
             </div>
         </div>
     <?php endif; ?>
-<!-- Filtro de categorías -->
-<div class="container-lg">
-    <div class="simbolos-container">
-        <!-- Área de símbolos disponibles -->
-        <!-- <h4 class="titulo-seccion">Arrastra un símbolo al diente</h4> -->
-        <h4 class="titulo-seccion">
-            <span id="titulo-filtro">Arrastra un símbolo al diente</span>
-        </h4>
-        <div id="simbolos-list">
-            <?php foreach ($simbolosDisponibles as $simbolo): ?>
-                <?php $dims = getScaledSymbolDimensions(WWW_ROOT . $simbolo->imagen, $simboloScaleFactor); ?>
-                <div class="simbolo-item" data-categoria="<?= $simbolo->categoria ?>" style="display: none; margin: 5px;">
-                    <?= $this->Html->image($simbolo->imagen, [
-                        'alt' => $simbolo->nombre,
-                        'class' => 'simbolo-draggable',
-                        'data-id' => $simbolo->id,
-                        'draggable' => true,
-                        'style' => 'cursor: move; width: ' . $dims['width'] . 'px; height: ' . $dims['height'] . 'px;'
-                    ]) ?>
-                </div>
-            <?php endforeach; ?>
-        </div>
-        <h4 class="titulo-seccion">Filtrar por Categoría</h4>
-        <!-- Buscador de categorías -->
-        <input type="text" id="buscador-categorias" class="form-control form-control-md customized-input bg-light text-dark border-primary mb-3" placeholder="Buscar categoría..." style="width: 200px;">
-         <!-- Contenedor de categorías -->
-        <div id="categorias-container" style="margin-bottom: 15px;">
-            <?php foreach ($categorias as $categoria): ?>
-                <button class="btn-categoria" data-categoria="<?= $categoria ?>" style="margin-right: 5px;">
-                    <?= h($categoria) ?>
-                </button>
-            <?php endforeach; ?>
+    </div> <!-- Cierre del contenedor del odontograma -->
+
+    <!-- Panel de categorías al lado derecho -->
+    <div style="flex: 0 0 auto; width: fit-content; max-width: 600px;">
+        <div class="simbolos-container" style="width: fit-content; min-width: 300px;">
+            <!-- Área de símbolos disponibles -->
+            <h4 class="titulo-seccion">
+                <span id="titulo-filtro">Arrastra un símbolo de la categoría</span>
+            </h4>
+            <div id="simbolos-list" style="max-height: 400px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center;">
+                <?php foreach ($simbolosDisponibles as $simbolo): ?>
+                    <?php $dims = getScaledSymbolDimensions(WWW_ROOT . $simbolo->imagen, $simboloScaleFactor); ?>
+                    <div class="simbolo-item" data-categoria="<?= $simbolo->categoria ?>" style="display: none; margin: 5px;">
+                        <?= $this->Html->image($simbolo->imagen, [
+                            'alt' => $simbolo->nombre,
+                            'class' => 'simbolo-draggable',
+                            'data-id' => $simbolo->id,
+                            'draggable' => true,
+                            'style' => 'cursor: move; width: ' . $dims['width'] . 'px; height: ' . $dims['height'] . 'px;'
+                        ]) ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <h4 class="titulo-seccion" style="margin-top: 10px;">Filtrar por Categoría</h4>
+            <!-- Buscador de categorías -->
+            <input type="text" id="buscador-categorias" class="form-control form-control-sm customized-input bg-light text-dark border-primary mb-2" placeholder="Buscar categoría..." style="width: 100%; font-size: 13px;">
+            <!-- Contenedor de categorías -->
+            <div id="categorias-container" style="margin-bottom: 15px;">
+                <?php foreach ($categorias as $categoria): ?>
+                    <button class="btn-categoria" data-categoria="<?= $categoria ?>" style="margin-right: 5px;">
+                        <?= h($categoria) ?>
+                    </button>
+                <?php endforeach; ?>
+            </div>
         </div>
     </div>
-</div>
+</div> <!-- Cierre del odontograma-layout -->
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <!-- Botón de Guardar -->
 <button id="savePositionButton"><i class="fas fa-save"></i></button>
@@ -505,6 +502,29 @@ document.addEventListener('DOMContentLoaded', function () {
     function dragStartFromSymbolsList(event) {
         initializeCurrentSymbol(event.target, event.clientX, event.clientY);
         event.dataTransfer.setData('text/plain', JSON.stringify(currentSymbol));
+        
+        // Crear un elemento img temporal con el tamaño completo
+        const dragImg = document.createElement('img');
+        dragImg.src = event.target.src;
+        dragImg.style.position = 'absolute';
+        dragImg.style.top = '-1000px'; // Fuera de la vista
+        dragImg.style.left = '-1000px';
+        dragImg.style.width = currentSymbol.originalWidth + 'px';
+        dragImg.style.height = currentSymbol.originalHeight + 'px';
+        dragImg.style.maxWidth = 'none';
+        dragImg.style.maxHeight = 'none';
+        
+        document.body.appendChild(dragImg);
+        
+        // Usar la imagen temporal como preview
+        event.dataTransfer.setDragImage(dragImg, currentSymbol.offsetX, currentSymbol.offsetY);
+        
+        // Eliminar la imagen temporal después de un momento
+        setTimeout(() => {
+            if (dragImg.parentNode) {
+                dragImg.parentNode.removeChild(dragImg);
+            }
+        }, 0);
     }
    // prubas
    let touchCount = 0; // Contador de toques consecutivos
@@ -552,32 +572,61 @@ function setupTripleTapDelete() {
 
     function dragStart(event) {
     const rect = event.target.getBoundingClientRect();
+    
+    // Traer el símbolo al frente cuando se empieza a arrastrar
+    bringSymbolToFront(event.target);
 
     currentSymbol = {
         id: event.target.dataset.id,
         imageUrl: event.target.src,
         originalWidth: rect.width,
         originalHeight: rect.height,
-        offsetX: event.clientX - rect.left,
-        offsetY: event.clientY - rect.top,
+        offsetX: Math.round(event.clientX - rect.left),
+        offsetY: Math.round(event.clientY - rect.top),
         isNew: false, // Indica que es un símbolo existente
         element: event.target, // Referencia al elemento actual
     };
 
     event.dataTransfer.setData('text/plain', JSON.stringify(currentSymbol));
+    
+    // Crear un elemento img temporal con el tamaño completo
+    const dragImg = document.createElement('img');
+    dragImg.src = event.target.src;
+    dragImg.style.position = 'absolute';
+    dragImg.style.top = '-1000px'; // Fuera de la vista
+    dragImg.style.left = '-1000px';
+    dragImg.style.width = currentSymbol.originalWidth + 'px';
+    dragImg.style.height = currentSymbol.originalHeight + 'px';
+    dragImg.style.maxWidth = 'none';
+    dragImg.style.maxHeight = 'none';
+    
+    document.body.appendChild(dragImg);
+    
+    // Usar la imagen temporal como preview
+    event.dataTransfer.setDragImage(dragImg, currentSymbol.offsetX, currentSymbol.offsetY);
+    
+    // Eliminar la imagen temporal después de un momento
+    setTimeout(() => {
+        if (dragImg.parentNode) {
+            dragImg.parentNode.removeChild(dragImg);
+        }
+    }, 0);
 }
 
 function touchStart(event) {
     const touch = event.touches[0];
     const rect = event.target.getBoundingClientRect();
+    
+    // Traer el símbolo al frente cuando se empieza a arrastrar
+    bringSymbolToFront(event.target);
 
     currentSymbol = {
         id: event.target.dataset.id,
         imageUrl: event.target.src,
         originalWidth: rect.width,
         originalHeight: rect.height,
-        offsetX: touch.clientX - rect.left,
-        offsetY: touch.clientY - rect.top,
+        offsetX: Math.round(touch.clientX - rect.left),
+        offsetY: Math.round(touch.clientY - rect.top),
         isNew: false, // Indica que no es un símbolo nuevo
         element: event.target, // Aseguramos que el elemento esté definido
     };
@@ -593,8 +642,8 @@ function touchStartFromSymbolsList(event) {
             imageUrl: event.target.src,
             originalWidth: rect.width,
             originalHeight: rect.height,
-            offsetX: touch.clientX - rect.left,
-            offsetY: touch.clientY - rect.top,
+            offsetX: Math.round(touch.clientX - rect.left),
+            offsetY: Math.round(touch.clientY - rect.top),
             isNew: true, // Indica que es un nuevo símbolo
         };
     }
@@ -607,10 +656,20 @@ function touchStartFromSymbolsList(event) {
             imageUrl: target.src,
             originalWidth: rect.width,
             originalHeight: rect.height,
-            offsetX: clientX - rect.left,
-            offsetY: clientY - rect.top,
+            offsetX: Math.round(clientX - rect.left),
+            offsetY: Math.round(clientY - rect.top),
             isNew: true,
         };
+    }
+    
+    function bringSymbolToFront(symbolElement) {
+        // Resetear z-index de todos los símbolos
+        document.querySelectorAll('.simbolo').forEach(symbol => {
+            symbol.style.zIndex = '10';
+        });
+        
+        // Poner el símbolo actual al frente
+        symbolElement.style.zIndex = '100';
     }
 
     function dragOver(event) {
@@ -683,6 +742,7 @@ function touchDrop(event) {
     }
 
     const rect = targetContainer.getBoundingClientRect();
+    // Calcular posición exacta considerando el offset del cursor
     const x = touch.clientX - rect.left - currentSymbol.offsetX;
     const y = touch.clientY - rect.top - currentSymbol.offsetY;
 
@@ -719,8 +779,9 @@ function getDienteContainerAtPoint(x, y) {
         }
 
         const rect = event.currentTarget.getBoundingClientRect();
-        const x = clientX - rect.left - currentSymbol.offsetX;
-        const y = clientY - rect.top - currentSymbol.offsetY;
+        // Calcular posición exacta considerando el offset del cursor, con redondeo para precisión
+        const x = Math.round(clientX - rect.left - currentSymbol.offsetX);
+        const y = Math.round(clientY - rect.top - currentSymbol.offsetY);
 
         if (currentSymbol.isNew) {
             createNewSymbol(event.currentTarget, x, y, dienteId);
@@ -913,9 +974,10 @@ document.getElementById('savePositionButton').addEventListener('click', () => {
     /* max-height: 100vh; */
     overflow-y: auto;
     background-color: var(--background-color);
-    padding: 20px;
+    padding: 15px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: fit-content;
 }
 
 /* Rejilla de odontograma */
@@ -948,11 +1010,11 @@ document.getElementById('savePositionButton').addEventListener('click', () => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    padding: 12px;
     background-color: var(--background-color);
-    border-radius: 10px;
+    border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .simbolos-list {
@@ -967,10 +1029,10 @@ document.getElementById('savePositionButton').addEventListener('click', () => {
 }
 
 .titulo-seccion {
-    font-size: 25px;
+    font-size: 18px;
     font-weight: 500;
     color: var(--text-color);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     text-align: center;
 }
 
@@ -978,9 +1040,9 @@ document.getElementById('savePositionButton').addEventListener('click', () => {
 #categorias-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 5px;
     justify-content: center;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .simbolo {
@@ -989,6 +1051,13 @@ document.getElementById('savePositionButton').addEventListener('click', () => {
     object-fit: contain;
     /* Los símbolos ahora vienen pre-escalados al 54% desde PHP y JS */
     /* No aplicar transform scale aquí para evitar doble escalado */
+    z-index: 10;
+    cursor: move;
+}
+
+.simbolo:hover,
+.simbolo:active {
+    z-index: 100;
 }
 
 /* Símbolos arrastrables del panel de categorías */
@@ -999,23 +1068,17 @@ document.getElementById('savePositionButton').addEventListener('click', () => {
 }
 
 .btn-categoria {
-    padding: 10px 15px;
+    padding: 6px 10px;
     background-color: var(--secondary-color);
     border: 1px solid var(--secondary-color);
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
     color: #FFF;
     text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    font-size: 13px;
     transition: background-color 0.3s ease;
-    min-width: 100px;
-    max-width: 250px;
-    flex-grow: 1;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin: 3px;
 }
 
 .btn-categoria:hover,
@@ -1044,29 +1107,43 @@ document.getElementById('savePositionButton').addEventListener('click', () => {
 /* Botones de guardar y basurero */
 #savePositionButton {
     position: fixed;
-    bottom: 50px;
+    bottom: 100px; 
     right: 20px;
-    background-color: transparent;
-    color: var(--secondary-color);
-    padding: 0px 10px;
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 12px 18px;
     border: none;
-    border-radius: 5px;
+    border-radius: 50px;
     cursor: pointer;
-    font-size: 50px;
-    transition: color 0.3s ease;
+    font-size: 24px;
+    transition: all 0.3s ease;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    min-height: 60px;
 }
 
 #savePositionButton:hover {
-    color: #0056b3;
+    background-color: var(--primary-color);
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+#savePositionButton:active {
+    transform: scale(0.95);
 }
 
 #trash-bin {
     position: fixed;
-    bottom: 100px;
+    bottom: 20px;
     right: 20px;
     font-size: 50px;
     color: red;
     cursor: pointer;
+    z-index: 9998;
 }
 
 /* Tabla de detalles del odontograma */
@@ -1152,15 +1229,59 @@ td a:hover {
     border-color: var(--primary-color);
 }
 
-@media (max-width: 1200px) {
-    .diente-container, .dienteN-container {
-        align-items: start;
+/* Responsive: Layout en columna para pantallas pequeñas */
+@media (max-width: 1024px) {
+    .odontograma-layout {
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+    
+    .odontograma-layout > div {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .simbolos-container {
+        width: 100% !important;
     }
 }
 
+/* Scroll horizontal suave para móviles */
 @media (max-width: 760px) {
+    #odontograma {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+        width: 100%;
+        max-width: 100vw;
+    }
+    
+    .diente-container, .dienteN-container {
+        min-width: fit-content;
+        margin: 0 auto;
+    }
+    
     #trash-bin {
         display: none;
+    }
+    
+    .btn-categoria {
+        font-size: 12px;
+        padding: 5px 8px;
+    }
+    
+    .titulo-seccion {
+        font-size: 16px;
+    }
+    
+    /* Botón de guardar más pequeño en móviles */
+    #savePositionButton {
+        bottom: 80px; /* Mantenemos la posición inferior derecha */
+        right: 10px;  /* Más cerca del borde en móvil */
+        width: 45px;  /* Más pequeño en móviles */
+        height: 45px;
+        font-size: 18px;  /* Fuente más pequeña */
+        padding: 8px 12px;
     }
 }
 

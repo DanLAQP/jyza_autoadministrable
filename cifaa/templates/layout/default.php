@@ -114,16 +114,50 @@
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                 <!-- Custom Navigation Items -->
             
-                <li class="nav-item">
+                <li class="nav-item mt-3">
                     <a href="<?= $this->Url->build(['controller' => 'Pages', 'action' => 'home']) ?>" class="nav-link">
                         <i class="nav-icon fas fa-home"></i>
                         <p>Inicio</p>
                     </a>
+                </li>
+                
+                <!-- Cursos - Visible para todos los usuarios autenticados -->
+                <li class="nav-item">
+                    <a href="<?= $this->Url->build(['controller' => 'Cursos', 'action' => 'index']) ?>" class="nav-link">
+                        <i class="fas fa-book nav-icon"></i>
+                        <p>Cursos</p>
+                    </a>
+                </li>
+                
                 <?php if (in_array($usuario->rol, [1])): ?>
                 <li class="nav-item">
                     <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'index']) ?>" class="nav-link">
                         <i class="fas fa-users-cog nav-icon"></i>
                         <p>Usuarios</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?= $this->Url->build(['controller' => 'Modulos', 'action' => 'index']) ?>" class="nav-link">
+                        <i class="fas fa-layer-group nav-icon"></i>
+                        <p>Módulos</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?= $this->Url->build(['controller' => 'Lecciones', 'action' => 'index']) ?>" class="nav-link">
+                        <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                        <p>Lecciones</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?= $this->Url->build(['controller' => 'ContenidosLeccion', 'action' => 'index']) ?>" class="nav-link">
+                        <i class="fas fa-file-alt nav-icon"></i>
+                        <p>Contenidos Lección</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?= $this->Url->build(['controller' => 'Inscripciones', 'action' => 'index']) ?>" class="nav-link">
+                        <i class="fas fa-user-check nav-icon"></i>
+                        <p>Inscripciones</p>
                     </a>
                 </li>
                 <?php endif; ?>

@@ -55,9 +55,103 @@ class AppController extends Controller
         $this->set('usuario', $usuario);
     }
 
+    /**
+     * Verifica si el usuario actual está inscrito Y APROBADO en un curso
+     *
+     * @param int|string $cursoId ID del curso
+     * @return bool true si está inscrito y aprobado, false si no
+     */
+    public function verificarInscripcion(int|string $cursoId): bool
+    {
+        $usuario = $this->getRequest()->getAttribute('identity');
+        
+        if (!$usuario) {
+            return false;
+        }
+        
+        // Convertir a int si es necesario
+        $cursoId = (int) $cursoId;
+        
+        // Obtener tabla de inscripciones
+        $inscripcionesTable = $this->fetchTable('Inscripciones');
+        
+        $inscripcion = $inscripcionesTable->find()
+            ->where([
+                'usuario_id' => $usuario->id,
+                'curso_id' => $cursoId,
+                'estado' => 'aprobada'
+            ])
+            ->first();
+        
+        return !empty($inscripcion);
+    }
+
+    /**
+     * Verifica si el usuario está inscrito en el curso que contiene el módulo
+     *
+     * @param int|string $moduloId ID del módulo
+     * @return bool true si está inscrito, false si no
+     */
+    public function verificarInscripcionModulo(int|string $moduloId): bool
+    {
+        $usuario = $this->getRequest()->getAttribute('identity');
+        
+        if (!$usuario) {
+            return false;
+        }
+        
+        // Convertir a int si es necesario
+        $moduloId = (int) $moduloId;
+        
+        // Obtener el módulo con su curso
+        $modulosTable = $this->fetchTable('Modulos');
+        $modulo = $modulosTable->find()
+            ->where(['Modulos.id' => $moduloId])
+            ->select(['Modulos.curso_id'])
+            ->first();
+        
+        if (!$modulo) {
+            return false;
+        }
+        
+        return $this->verificarInscripcion($modulo->curso_id);
+    }
+
+    /**
+     * Verifica si el usuario está inscrito en el curso de una lección
+     *
+     * @param int|string $leccionId ID de la lección
+     * @return bool true si está inscrito, false si no
+     */
+    public function verificarInscripcionLeccion(int|string $leccionId): bool
+    {
+        $usuario = $this->getRequest()->getAttribute('identity');
+        
+        if (!$usuario) {
+            return false;
+        }
+        
+        // Convertir a int si es necesario
+        $leccionId = (int) $leccionId;
+        
+        // Obtener la lección con su módulo y curso
+        $leccionesTable = $this->fetchTable('Lecciones');
+        $leccion = $leccionesTable->find()
+            ->contain(['Modulos'])
+            ->where(['Lecciones.id' => $leccionId])
+            ->first();
+        
+        if (!$leccion || !$leccion->modulo) {
+            return false;
+        }
+        
+        return $this->verificarInscripcion($leccion->modulo->curso_id);
+    }
+
     public function beforeFilter(\Cake\Event\EventInterface $event)
     {
         parent::beforeFilter($event);
+        // Permitir acciones sin autenticación
         $this->Authentication->addUnauthenticatedActions(['login', 'logout']);
     }
 }

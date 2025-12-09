@@ -18,13 +18,16 @@
 <link rel="stylesheet" href="<?= $this->Url->assetUrl('dist/css/adminlte.min.css') ?>">
 
 
-<!-- Carga general de jquery, bootstap -->
+<!-- Carga general de jquery, bootstrap 5 -->
 
 <?= $this->Html->script('https://code.jquery.com/jquery-3.6.0.min.js?v=' . time()) ?>
-<?= $this->Html->script('https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js?v=' . time()) ?>
-<?= $this->Html->css('https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css?v=' . time()) ?>
+<?= $this->Html->script('https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js?v=' . time()) ?>
+<?= $this->Html->css('https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css?v=' . time()) ?>
 <!-- CakePHP custom CSS -->
 <?= $this->fetch('css') ?>
+<!-- Estilos personalizados Domestika -->
+<?= $this->Html->css('domestika-style') ?>
+
 
   
 </head>

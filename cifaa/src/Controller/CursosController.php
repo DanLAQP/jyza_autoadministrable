@@ -33,8 +33,61 @@ class CursosController extends AppController
      */
     public function view($id = null)
     {
-        $curso = $this->Cursos->get($id, contain: ['Users', 'Inscripciones', 'Modulos']);
-        $this->set(compact('curso'));
+        // Cargar curso con todas las relaciones necesarias para vista tipo Domestika
+        $curso = $this->Cursos->get($id, [
+            'contain' => [
+                'Users',
+                'Modulos' => [
+                    'sort' => ['Modulos.posicion' => 'ASC'],
+                    'Lecciones' => [
+                        'sort' => ['Lecciones.posicion' => 'ASC'],
+                        'ContenidosLeccion'
+                    ]
+                ],
+                'Inscripciones' => ['Users']
+            ]
+        ]);
+
+        // Obtener usuario actual
+        $identity = $this->request->getAttribute('identity');
+        $estaAprobado = false;
+        $estaPendiente = false;
+        $estaRechazado = false;
+        $progresoUsuario = 0;
+
+        // Verificar estado de inscripción del usuario actual
+        if ($identity) {
+            foreach ($curso->inscripciones as $insc) {
+                if ($insc->usuario_id == $identity->id) {
+                    if ($insc->estado === 'aprobada') {
+                        $estaAprobado = true;
+                        $progresoUsuario = $insc->progreso;
+                    } elseif ($insc->estado === 'pendiente') {
+                        $estaPendiente = true;
+                    } elseif ($insc->estado === 'rechazada') {
+                        $estaRechazado = true;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Calcular estadísticas del curso
+        $totalLecciones = 0;
+        foreach ($curso->modulos as $m) {
+            $totalLecciones += count($m->lecciones);
+        }
+        $totalEstudiantes = count($curso->inscripciones);
+
+        $this->set(compact(
+            'curso',
+            'estaAprobado',
+            'estaPendiente',
+            'estaRechazado',
+            'progresoUsuario',
+            'totalLecciones',
+            'totalEstudiantes'
+        ));
     }
 
     /**
@@ -44,32 +97,34 @@ class CursosController extends AppController
      */
     public function add()
     {
-        // Solo administradores (rol 1) pueden crear cursos
+        // MODIFICACIÓN: Solo el administrador (rol == 1) puede agregar cursos.
+        // Antes: Se permitía el acceso si el usuario tenía sesión y rol == 1.
+        // Ahora: Se verifica el rol antes de mostrar el formulario. Si el usuario no es admin, se muestra un mensaje de error y se redirige al index.
         $usuario = $this->getRequest()->getAttribute('identity');
-        if (!$usuario || $usuario->rol != 1) {
-            $this->Flash->error(__('No tienes permisos para crear cursos.'));
+        if (!$usuario || $usuario->get('rol') != 1) {
+            $this->Flash->error('No tienes permisos para crear cursos.');
             return $this->redirect(['action' => 'index']);
         }
-        
+
         $curso = $this->Cursos->newEmptyEntity();
         if ($this->request->is('post')) {
             $data = $this->request->getData();
-            
+
             // Manejar la subida de la miniatura
             if (!empty($data['miniatura']) && $data['miniatura']->getSize() > 0) {
                 $miniatura = $data['miniatura'];
                 $uploadPath = WWW_ROOT . 'uploads' . DS . 'cursos' . DS;
-                
+
                 // Crear directorio si no existe
                 if (!is_dir($uploadPath)) {
                     mkdir($uploadPath, 0755, true);
                 }
-                
+
                 // Generar nombre único para la imagen
                 $ext = pathinfo($miniatura->getClientFilename(), PATHINFO_EXTENSION);
                 $fileName = time() . '_' . uniqid() . '.' . $ext;
                 $filePath = $uploadPath . $fileName;
-                
+
                 // Validar tipo de archivo
                 $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
                 if (in_array($miniatura->getClientMediaType(), $allowedMimes)) {
@@ -84,7 +139,7 @@ class CursosController extends AppController
             } else {
                 unset($data['miniatura']);
             }
-            
+
             $curso = $this->Cursos->patchEntity($curso, $data);
             if ($this->Cursos->save($curso)) {
                 $this->Flash->success(__('The curso has been saved.'));

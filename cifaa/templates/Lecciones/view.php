@@ -110,270 +110,280 @@ if (!empty($noInscrito)) {
     <?php
     return;
 }
+
+$modulo = $leccion->modulo;
+$curso = $modulo->curso;
+$identity = $this->getRequest()->getAttribute('identity');
+
+// Contenido principal = primer contenido, si existe
+$principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion[0] : null;
 ?>
 
-<div class="container mt-4 mb-4">
-    <!-- Header de la Lección -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <h2 class="text-info"><i class="fas fa-chalkboard-teacher"></i> <?= h($leccion->titulo) ?></h2>
-                    <p class="text-muted">
-                        <i class="fas fa-layer-group"></i> 
-                        <?= $leccion->hasValue('modulo') ? $this->Html->link($leccion->modulo->titulo, ['controller' => 'Modulos', 'action' => 'view', $leccion->modulo->id]) : 'Sin módulo asignado' ?>
-                    </p>
-                </div>
-                <div class="btn-group" role="group">
-                    <?php if (!empty($usuario) && $usuario->rol == 1): ?>
-                        <?= $this->Html->link(
-                            '<i class="fas fa-edit"></i> Editar',
-                            ['action' => 'edit', $leccion->id],
-                            ['class' => 'btn btn-warning', 'escape' => false]
-                        ) ?>
-                        <?= $this->Form->postLink(
-                            '<i class="fas fa-trash"></i> Eliminar',
-                            ['action' => 'delete', $leccion->id],
-                            ['confirm' => '¿Estás seguro?', 'class' => 'btn btn-danger', 'escape' => false]
-                        ) ?>
-                    <?php endif; ?>
-                    <?= $this->Html->link(
-                        '<i class="fas fa-arrow-left"></i> Volver',
-                        $leccion->hasValue('modulo') ? ['controller' => 'Modulos', 'action' => 'view', $leccion->modulo->id] : ['action' => 'index'],
-                        ['class' => 'btn btn-secondary', 'escape' => false]
-                    ) ?>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Información Principal -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm bg-dark">
-                <div class="card-body">
-                    <h5 class="card-title text-info">Detalles de la Lección</h5>
-                    <table class="table table-borderless table-dark">
-                        <tr>
-                            <th style="width: 30%;">Tipo de Contenido:</th>
-                            <td>
-                                <?php
-                                    $tipoClass = match($leccion->tipo_contenido) {
-                                        'video' => 'primary',
-                                        'texto' => 'info',
-                                        'imagen' => 'success',
-                                        'quiz' => 'warning',
-                                        default => 'secondary'
-                                    };
-                                    $tipoIcon = match($leccion->tipo_contenido) {
-                                        'video' => 'film',
-                                        'texto' => 'file-alt',
-                                        'imagen' => 'image',
-                                        'quiz' => 'question-circle',
-                                        default => 'file'
-                                    };
-                                ?>
-                                <span class="badge bg-<?= $tipoClass ?>">
-                                    <i class="fas fa-<?= $tipoIcon ?>"></i> <?= ucfirst(h($leccion->tipo_contenido)) ?>
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Posición:</th>
-                            <td><span class="badge bg-secondary"><?= $this->Number->format($leccion->posicion) ?></span></td>
-                        </tr>
-                        <tr>
-                            <th>Creado:</th>
-                            <td><?= $leccion->created->format('d/m/Y H:i') ?></td>
-                        </tr>
-                        <tr>
-                            <th>Actualizado:</th>
-                            <td><?= $leccion->modified->format('d/m/Y H:i') ?></td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Contenidos de la Lección -->
+<div class="container py-4">
     <div class="row">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm bg-dark">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-file-upload"></i> Contenidos de la Lección</h5>
+        <!-- ============================================ -->
+        <!-- PLAYER / CONTENIDO PRINCIPAL                 -->
+        <!-- ============================================ -->
+        <div class="col-lg-8 mb-4">
+            <!-- Breadcrumb / Navegación -->
+            <div class="mb-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-dark p-3 rounded">
+                        <li class="breadcrumb-item">
+                            <?= $this->Html->link(
+                                '<i class="fas fa-arrow-left me-1"></i>Volver al curso',
+                                ['controller' => 'Cursos', 'action' => 'view', $curso->id],
+                                ['class' => 'text-info text-decoration-none', 'escape' => false]
+                            ) ?>
+                        </li>
+                        <li class="breadcrumb-item active text-muted" aria-current="page">
+                            Módulo: <?= h($modulo->titulo) ?>
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+
+            <!-- Título de la Lección -->
+            <h2 class="h4 mb-3 text-light">
+                <i class="fas fa-chalkboard-teacher me-2 text-info"></i>
+                <?= h($leccion->titulo) ?>
+            </h2>
+
+            <!-- Player / Contenido Principal -->
+            <div class="card mb-3 bg-dark border-secondary shadow">
+                <div class="card-body p-0">
+                    <?php if ($principal && $principal->archivo): ?>
+                        <?php
+                        $ext = strtolower(pathinfo($principal->archivo, PATHINFO_EXTENSION));
+                        $isImg = in_array($ext, ['jpg','jpeg','png','gif','webp']);
+                        $isVid = in_array($ext, ['mp4','webm']);
+                        $isPdf = $ext === 'pdf';
+                        ?>
+                        <?php if ($isVid): ?>
+                            <video width="100%" controls class="rounded" style="max-height: 500px;">
+                                <source src="<?= $this->Url->assetUrl($principal->archivo) ?>" type="video/<?= $ext ?>">
+                                Tu navegador no soporta video HTML5.
+                            </video>
+                        <?php elseif ($isImg): ?>
+                            <img src="<?= $this->Url->assetUrl($principal->archivo) ?>"
+                                 alt="<?= h($leccion->titulo) ?>"
+                                 class="img-fluid rounded w-100"
+                                 style="max-height: 500px; object-fit: contain; background: #000;">
+                        <?php elseif ($isPdf): ?>
+                            <embed src="<?= $this->Url->assetUrl($principal->archivo) ?>"
+                                   type="application/pdf"
+                                   class="w-100 rounded"
+                                   style="height: 600px;">
+                        <?php else: ?>
+                            <div class="p-5 text-center">
+                                <i class="fas fa-file fa-4x text-muted mb-3"></i>
+                                <p class="text-muted">Recurso principal no compatible para previsualizar.</p>
+                                <a href="<?= $this->Url->assetUrl($principal->archivo) ?>" download class="btn btn-info">
+                                    <i class="fas fa-download me-1"></i>Descargar
+                                </a>
+                            </div>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <div class="p-5 text-center">
+                            <i class="fas fa-video-slash fa-4x text-muted mb-3"></i>
+                            <p class="text-muted">Esta lección aún no tiene contenido principal.</p>
+                            <?php if (!empty($identity) && $identity->rol == 1): ?>
+                                <?= $this->Html->link(
+                                    '<i class="fas fa-plus me-1"></i>Agregar Contenido',
+                                    ['controller' => 'ContenidosLeccion', 'action' => 'add', '?' => ['leccion_id' => $leccion->id]],
+                                    ['class' => 'btn btn-primary', 'escape' => false]
+                                ) ?>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Descripción -->
+            <?php if ($principal && $principal->contenido): ?>
+                <div class="card bg-dark border-secondary">
+                    <div class="card-body">
+                        <h5 class="card-title text-info mb-3">
+                            <i class="fas fa-align-left me-2"></i>Descripción
+                        </h5>
+                        <p class="card-text text-light" style="line-height: 1.8;">
+                            <?= nl2br(h($principal->contenido)) ?>
+                        </p>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Detalles de la Lección -->
+            <div class="card bg-dark border-secondary mt-3">
+                <div class="card-body">
+                    <h6 class="text-info mb-3"><i class="fas fa-info-circle me-2"></i>Detalles</h6>
+                    <div class="row text-muted small">
+                        <div class="col-md-6 mb-2">
+                            <i class="fas fa-list-ol me-2 text-info"></i>
+                            <strong>Posición:</strong> Lección <?= h($leccion->posicion) ?>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <?php
+                                $tipoIcon = match($leccion->tipo_contenido) {
+                                    'video' => 'film',
+                                    'texto' => 'file-alt',
+                                    'imagen' => 'image',
+                                    'quiz' => 'question-circle',
+                                    default => 'file'
+                                };
+                            ?>
+                            <i class="fas fa-<?= $tipoIcon ?> me-2 text-info"></i>
+                            <strong>Tipo:</strong> <?= ucfirst(h($leccion->tipo_contenido)) ?>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <i class="far fa-calendar-plus me-2 text-info"></i>
+                            <strong>Creado:</strong> <?= $leccion->created->format('d/m/Y') ?>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <i class="far fa-calendar-check me-2 text-info"></i>
+                            <strong>Actualizado:</strong> <?= $leccion->modified->format('d/m/Y') ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Admin -->
+            <?php if (!empty($identity) && $identity->rol == 1): ?>
+                <div class="d-flex gap-2 mt-3">
                     <?= $this->Html->link(
-                        '<i class="fas fa-plus"></i> Agregar Contenido',
+                        '<i class="fas fa-edit me-1"></i>Editar Lección',
+                        ['action' => 'edit', $leccion->id],
+                        ['class' => 'btn btn-warning', 'escape' => false]
+                    ) ?>
+                    <?= $this->Html->link(
+                        '<i class="fas fa-plus me-1"></i>Agregar Contenido',
                         ['controller' => 'ContenidosLeccion', 'action' => 'add', '?' => ['leccion_id' => $leccion->id]],
-                        ['class' => 'btn btn-sm btn-primary text-dark fw-bold', 'escape' => false]
+                        ['class' => 'btn btn-success', 'escape' => false]
+                    ) ?>
+                    <?= $this->Form->postLink(
+                        '<i class="fas fa-trash me-1"></i>Eliminar',
+                        ['action' => 'delete', $leccion->id],
+                        ['confirm' => '¿Estás seguro?', 'class' => 'btn btn-danger', 'escape' => false]
                     ) ?>
                 </div>
-                <div class="card-body">
-                    <?php if (!empty($leccion->contenidos_leccion)): ?>
-                        <div class="row g-3">
-                            <?php foreach ($leccion->contenidos_leccion as $contenido): ?>
-                                <div class="col-12 col-lg-6">
-                                    <div class="card border-0 bg-secondary shadow-sm h-100">
-                                        <!-- Header de la Card -->
-                                        <div class="card-header bg-dark border-bottom border-light d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <?php
-                                                    $tipoContentClass = match($contenido->tipo) {
-                                                        'video' => 'primary',
-                                                        'texto' => 'info',
-                                                        'imagen' => 'success',
-                                                        'pdf' => 'danger',
-                                                        'documento' => 'warning',
-                                                        default => 'secondary'
-                                                    };
-                                                    $tipoContentIcon = match($contenido->tipo) {
-                                                        'video' => 'video',
-                                                        'texto' => 'align-left',
-                                                        'imagen' => 'image',
-                                                        'pdf' => 'file-pdf',
-                                                        'documento' => 'file-word',
-                                                        default => 'file'
-                                                    };
-                                                ?>
-                                                <span class="badge bg-<?= $tipoContentClass ?> me-2">
-                                                    <i class="fas fa-<?= $tipoContentIcon ?>"></i> <?= ucfirst(h($contenido->tipo)) ?>
-                                                </span>
-                                                <span class="badge bg-light text-dark">
-                                                    Pos. <?= h($contenido->posicion) ?>
-                                                </span>
-                                            </div>
-                                            <small class="text-muted"><?= $contenido->created->format('d/m/Y') ?></small>
-                                        </div>
+            <?php endif; ?>
+        </div>
 
-                                        <!-- Contenido de la Card -->
-                                        <div class="card-body d-flex flex-column">
-                                            <!-- Texto/Descripción -->
-                                            <?php if ($contenido->contenido): ?>
-                                                <div class="mb-3">
-                                                    <h6 class="card-subtitle text-white mb-2">
-                                                        <i class="fas fa-align-left"></i> Descripción/Contenido
-                                                    </h6>
-                                                    <p class="card-text text-light small" style="line-height: 1.6;">
-                                                        <?= nl2br(h(strlen($contenido->contenido) > 300 ? substr($contenido->contenido, 0, 300) . '...' : $contenido->contenido)) ?>
-                                                    </p>
-                                                </div>
-                                                <hr class="border-light">
-                                            <?php endif; ?>
-
-                                            <!-- Archivo/Video -->
-                                            <?php if ($contenido->archivo): ?>
-                                                <div class="mb-3 flex-grow-1">
-                                                    <h6 class="card-subtitle text-white mb-2">
-                                                        <i class="fas fa-paperclip"></i> Recurso
-                                                    </h6>
-                                                    <?php
-                                                        $extension = strtolower(pathinfo($contenido->archivo, PATHINFO_EXTENSION));
-                                                        $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-                                                        $isVideo = in_array($extension, ['mp4', 'webm']);
-                                                        $isPdf = $extension === 'pdf';
-                                                    ?>
-                                                    
-                                                    <?php if ($isImage): ?>
-                                                        <div class="mb-3">
-                                                            <img src="<?= $this->Url->assetUrl($contenido->archivo) ?>" 
-                                                                 alt="<?= h($contenido->tipo) ?>" 
-                                                                 class="img-fluid rounded border border-light"
-                                                                 style="max-height: 250px; object-fit: cover; width: 100%;">
-                                                        </div>
-                                                    <?php elseif ($isVideo): ?>
-                                                        <div class="mb-3">
-                                                            <video width="100%" height="auto" controls class="rounded border border-light">
-                                                                <source src="<?= $this->Url->assetUrl($contenido->archivo) ?>" type="video/<?= $extension ?>">
-                                                                Tu navegador no soporta la etiqueta de video.
-                                                            </video>
-                                                        </div>
-                                                    <?php elseif ($isPdf): ?>
-                                                        <div class="mb-3">
-                                                            <embed src="<?= $this->Url->assetUrl($contenido->archivo) ?>" 
-                                                                   type="application/pdf" 
-                                                                   class="w-100 rounded border border-light"
-                                                                   style="height: 400px;">
-                                                        </div>
-                                                    <?php else: ?>
-                                                        <div class="d-flex align-items-center p-3 bg-dark rounded border border-light">
-                                                            <?php
-                                                                $icon = match($extension) {
-                                                                    'pdf' => 'file-pdf',
-                                                                    'doc', 'docx' => 'file-word',
-                                                                    'xls', 'xlsx' => 'file-excel',
-                                                                    default => 'file'
-                                                                };
-                                                                $color = match($extension) {
-                                                                    'pdf' => 'danger',
-                                                                    'doc', 'docx' => 'primary',
-                                                                    'xls', 'xlsx' => 'success',
-                                                                    default => 'secondary'
-                                                                };
-                                                            ?>
-                                                            <i class="fas fa-<?= $icon ?> text-<?= $color ?>" style="font-size: 2rem;"></i>
-                                                            <div class="ms-3 flex-grow-1">
-                                                                <small class="text-light d-block text-truncate">
-                                                                    <?= basename($contenido->archivo) ?>
-                                                                </small>
-                                                                <small class="text-muted d-block">
-                                                                    <?php
-                                                                        $filePath = WWW_ROOT . $contenido->archivo;
-                                                                        if (file_exists($filePath)) {
-                                                                            $sizeInBytes = filesize($filePath);
-                                                                            $sizeInKB = $sizeInBytes / 1024;
-                                                                            $sizeInMB = $sizeInKB / 1024;
-                                                                            
-                                                                            if ($sizeInMB > 1) {
-                                                                                echo number_format($sizeInMB, 2) . ' MB';
-                                                                            } else {
-                                                                                echo number_format($sizeInKB, 2) . ' KB';
-                                                                            }
-                                                                        }
-                                                                    ?>
-                                                                </small>
-                                                            </div>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-
-                                        <!-- Footer de la Card con Acciones -->
-                                        <div class="card-footer bg-dark border-top border-light">
-                                            <div class="d-flex gap-2 justify-content-end">
-                                                <?= $this->Html->link(
-                                                    '<i class="fas fa-eye"></i>',
-                                                    ['controller' => 'ContenidosLeccion', 'action' => 'view', $contenido->id],
-                                                    ['class' => 'btn btn-sm btn-info', 'title' => 'Ver detalle', 'escape' => false]
-                                                ) ?>
-                                                <?= $this->Html->link(
-                                                    '<i class="fas fa-edit"></i>',
-                                                    ['controller' => 'ContenidosLeccion', 'action' => 'edit', $contenido->id],
-                                                    ['class' => 'btn btn-sm btn-warning', 'title' => 'Editar', 'escape' => false]
-                                                ) ?>
-                                                <?= $this->Form->postLink(
-                                                    '<i class="fas fa-trash"></i>',
-                                                    ['controller' => 'ContenidosLeccion', 'action' => 'delete', $contenido->id],
-                                                    ['confirm' => '¿Estás seguro?', 'class' => 'btn btn-sm btn-danger', 'title' => 'Eliminar', 'escape' => false]
-                                                ) ?>
-                                                <?php if ($contenido->archivo): ?>
-                                                    <a href="<?= $this->Url->assetUrl($contenido->archivo) ?>" 
-                                                       download 
-                                                       class="btn btn-sm btn-success" 
-                                                       title="Descargar">
-                                                        <i class="fas fa-download"></i>
-                                                    </a>
-                                                <?php endif; ?>
-                                            </div>
+        <!-- ============================================ -->
+        <!-- SIDEBAR: Índice y Recursos                   -->
+        <!-- ============================================ -->
+        <div class="col-lg-4">
+            <!-- Índice de Lecciones del Módulo -->
+            <div class="card mb-3 bg-dark border-secondary shadow">
+                <div class="card-header bg-info text-white">
+                    <strong><i class="fas fa-list me-2"></i>Lecciones del módulo</strong>
+                </div>
+                <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+                    <?php if (!empty($modulo->lecciones)): ?>
+                        <?php foreach ($modulo->lecciones as $lec): ?>
+                            <?php
+                                $isActive = $lec->id === $leccion->id;
+                                $iconLec = match($lec->tipo_contenido) {
+                                    'video' => 'play-circle',
+                                    'texto' => 'file-alt',
+                                    'imagen' => 'image',
+                                    'quiz' => 'question-circle',
+                                    default => 'file'
+                                };
+                            ?>
+                            <div class="list-group-item bg-dark border-secondary <?= $isActive ? 'border-info border-2' : '' ?> d-flex justify-content-between align-items-center py-3">
+                                <div class="d-flex align-items-center flex-grow-1">
+                                    <span class="badge bg-<?= $isActive ? 'info' : 'secondary' ?> me-2">
+                                        <?= $lec->posicion ?>
+                                    </span>
+                                    <div class="flex-grow-1">
+                                        <div class="text-light small">
+                                            <i class="far fa-<?= $iconLec ?> me-1"></i>
+                                            <?= h($lec->titulo) ?>
                                         </div>
                                     </div>
                                 </div>
-                            <?php endforeach; ?>
-                        </div>
+                                <?php if (!$isActive): ?>
+                                    <?= $this->Html->link(
+                                        '<i class="fas fa-play"></i>',
+                                        ['action' => 'view', $lec->id],
+                                        ['class' => 'btn btn-sm btn-outline-info rounded-circle', 'escape' => false, 'title' => 'Ver lección']
+                                    ) ?>
+                                <?php else: ?>
+                                    <i class="fas fa-circle text-info" style="font-size: 0.6rem;"></i>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
                     <?php else: ?>
-                        <div class="alert alert-info text-center mb-0" role="alert">
-                            <i class="fas fa-info-circle"></i> No hay contenidos disponibles. 
-                            <?= $this->Html->link('Agregar el primer contenido', ['controller' => 'ContenidosLeccion', 'action' => 'add', '?' => ['leccion_id' => $leccion->id]], ['class' => 'alert-link']) ?>
+                        <div class="list-group-item bg-dark border-secondary text-muted small">
+                            <i class="fas fa-info-circle me-1"></i>No hay lecciones en este módulo.
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Recursos Descargables -->
+            <div class="card bg-dark border-secondary shadow">
+                <div class="card-header bg-success text-white">
+                    <strong><i class="fas fa-download me-2"></i>Recursos de la lección</strong>
+                </div>
+                <div class="list-group list-group-flush" style="max-height: 350px; overflow-y: auto;">
+                    <?php if (!empty($leccion->contenidos_leccion)): ?>
+                        <?php foreach ($leccion->contenidos_leccion as $cont): ?>
+                            <?php if (!$cont->archivo) continue; ?>
+                            <?php 
+                                $ext = strtolower(pathinfo($cont->archivo, PATHINFO_EXTENSION));
+                                $iconRecurso = match($ext) {
+                                    'pdf' => 'file-pdf',
+                                    'doc', 'docx' => 'file-word',
+                                    'xls', 'xlsx' => 'file-excel',
+                                    'mp4', 'webm' => 'file-video',
+                                    'jpg', 'jpeg', 'png', 'gif', 'webp' => 'file-image',
+                                    default => 'file'
+                                };
+                                $colorRecurso = match($ext) {
+                                    'pdf' => 'danger',
+                                    'doc', 'docx' => 'primary',
+                                    'xls', 'xlsx' => 'success',
+                                    'mp4', 'webm' => 'info',
+                                    'jpg', 'jpeg', 'png', 'gif', 'webp' => 'warning',
+                                    default => 'secondary'
+                                };
+                            ?>
+                            <div class="list-group-item bg-dark border-secondary d-flex justify-content-between align-items-center py-3">
+                                <div class="d-flex align-items-center flex-grow-1 me-2">
+                                    <i class="fas fa-<?= $iconRecurso ?> text-<?= $colorRecurso ?> me-3" style="font-size: 1.5rem;"></i>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <div class="fw-semibold text-light small text-truncate">
+                                            <?= h($cont->contenido ?: basename($cont->archivo)) ?>
+                                        </div>
+                                        <span class="text-muted text-uppercase" style="font-size: 0.7rem;">
+                                            <?= $ext ?>
+                                            <?php
+                                                $filePath = WWW_ROOT . $cont->archivo;
+                                                if (file_exists($filePath)) {
+                                                    $sizeInBytes = filesize($filePath);
+                                                    $sizeInMB = $sizeInBytes / 1024 / 1024;
+                                                    if ($sizeInMB > 1) {
+                                                        echo ' · ' . number_format($sizeInMB, 1) . ' MB';
+                                                    } else {
+                                                        echo ' · ' . number_format($sizeInBytes / 1024, 0) . ' KB';
+                                                    }
+                                                }
+                                            ?>
+                                        </span>
+                                    </div>
+                                </div>
+                                <a href="<?= $this->Url->assetUrl($cont->archivo) ?>" download
+                                   class="btn btn-outline-success btn-sm rounded-circle"
+                                   title="Descargar">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="list-group-item bg-dark border-secondary text-muted small">
+                            <i class="fas fa-info-circle me-1"></i>No hay recursos adjuntos.
                         </div>
                     <?php endif; ?>
                 </div>
@@ -381,4 +391,3 @@ if (!empty($noInscrito)) {
         </div>
     </div>
 </div>
-

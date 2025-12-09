@@ -16,6 +16,10 @@
 
 
 
+
+<!-- Mensajes de error de login -->
+<?= $this->Flash->render('flash', ['params' => ['class' => 'login-error-message']]) ?>
+
 <?= $this->Form->create() ?>
 
 

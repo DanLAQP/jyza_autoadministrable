@@ -156,11 +156,24 @@ class UsersController extends AppController
 
         return $this->redirect(['action' => 'index']);
     }
+
     public function login()
     {
         $this->viewBuilder()->setLayout('login'); // Usar el layout 'login'
         $this->request->allowMethod(['get', 'post']);
         $result = $this->Authentication->getResult();
+
+        if ($this->request->is('post')) {
+            $data = $this->request->getData();
+            $user = $this->Users->find()->where(['username' => $data['username']])->first();
+
+            if (!$user) {
+                $this->Flash->error('El usuario no existe');
+            } elseif ($user && !$result->isValid()) {
+                $this->Flash->error('Contraseña incorrecta');
+            }
+        }
+
         if ($result->isValid()) {
             $user = $this->request->getAttribute('identity');
             if (isset($user) && ($user->get('estado') === 'inactivo' || $user->get('estado') === 'deshabilitado')) {
@@ -171,11 +184,8 @@ class UsersController extends AppController
             // Redirigir al home (dashboard de bienvenida)
             return $this->redirect(['controller' => 'Pages', 'action' => 'display', 'home']);
         }
-        if ($this->request->is('post') && !$result->isValid()) {
-            $this->Flash->error('Usuario o contraseña inválidos');
-        }
+            $result = $this->Authentication->getResult(); // Ensure $result is defined
     }
-
     public function logout()
     {
         $result = $this->Authentication->getResult();

@@ -13,15 +13,24 @@ class InscripcionesController extends AppController
     /**
      * beforeFilter method
      * 
-     * Configuración específica de acceso para InscripcionesController.
+     * CORRECIÓN CRÍTICA: Control de acceso estricto por rol.
      * 
-     * Roles y permisos:
-     * - Estudiantes (role_id = 3): Pueden add (solicitar), view (solo propias), misInscripciones
-     * - Docentes (role_id = 2): Pueden index, view, aprobar, rechazar
-     * - Admins (role_id = 1): Acceso total
+     * Este método sobrescribe el beforeFilter de AppController
+     * para establecer permisos específicos del módulo de inscripciones.
+     * 
+     * Permisos por rol:
+     * - Admin (role_id = 1): Acceso total sin restricciones
+     * - Docente (role_id = 2): index, view, aprobar, rechazar, edit
+     * - Estudiante (role_id = 3): SOLO view (propias) y misInscripciones
+     * 
+     * IMPORTANTE: Los estudiantes NO pueden:
+     * - Acceder a add() (deben solicitar desde la vista del curso)
+     * - Acceder a index() (ver todas las inscripciones)
+     * - Aprobar o rechazar inscripciones
+     * - Editar o eliminar inscripciones
      * 
      * @param \Cake\Event\EventInterface $event El evento beforeFilter
-     * @return void
+     * @return \Cake\Http\Response|null
      */
     public function beforeFilter(\Cake\Event\EventInterface $event)
     {
@@ -29,15 +38,35 @@ class InscripcionesController extends AppController
         
         $user = $this->Authentication->getIdentity();
         
-        if ($user && $user->rol == 3) {
-            // Estudiantes: solo pueden add, view y misInscripciones
-            $allowedActions = ['add', 'view', 'misInscripciones'];
+        if (!$user) {
+            return null; // Usuario no autenticado, dejar que Authentication maneje
+        }
+        
+        $action = $this->request->getParam('action');
+        
+        // PERMISOS POR ROL
+        
+        if ($user->rol == 3) {
+            // ESTUDIANTES: Solo pueden ver sus propias inscripciones
+            $accionesPermitidasEstudiante = ['view', 'misInscripciones'];
             
-            if (!in_array($this->request->getParam('action'), $allowedActions)) {
-                $this->Flash->error(__('No tienes permiso para acceder a esta sección.'));
-                return $this->redirect(['action' => 'misInscripciones']);
+            if (!in_array($action, $accionesPermitidasEstudiante)) {
+                $this->Flash->error(__('No tienes permiso para acceder a esta sección. Las solicitudes de inscripción se realizan desde la vista del curso.'));
+                return $this->redirect(['controller' => 'Cursos', 'action' => 'student']);
+            }
+        } 
+        elseif ($user->rol == 2) {
+            // DOCENTES: Pueden gestionar inscripciones pero no eliminar
+            $accionesPermitidasDocente = ['index', 'view', 'aprobar', 'rechazar', 'edit'];
+            
+            if (!in_array($action, $accionesPermitidasDocente)) {
+                $this->Flash->error(__('No tienes permiso para realizar esta acción.'));
+                return $this->redirect(['action' => 'index']);
             }
         }
+        // Admin (rol = 1): Sin restricciones adicionales
+        
+        return null;
     }
     /**
      * Index method
@@ -105,149 +134,109 @@ class InscripcionesController extends AppController
      *
      * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
      */
+    /**
+     * Add method
+     * 
+     * CAMBIO IMPORTANTE: Este método ahora es SOLO para Admin y Docente.
+     * Los estudiantes solicitan inscripción desde la vista del curso (CursosController::solicitar).
+     * 
+     * Proceso:
+     * 1. Valida que usuario y curso existan
+     * 2. Verifica que no haya inscripción duplicada
+     * 3. Valida rango de progreso (0-100)
+     * 4. Crea la inscripción en el estado especificado
+     *
+     * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
+     */
     public function add()
     {
+        /**
+         * Verificación de permisos: Solo admin y docente pueden crear inscripciones directamente.
+         * Los estudiantes usan el flujo de solicitud desde el curso (beforeFilter ya los bloqueó).
+         */
+        if ($redirect = $this->requiereAdministradorODocente()) {
+            return $redirect;
+        }
+        
         $inscripcione = $this->Inscripciones->newEmptyEntity();
-        $usuarioActual = $this->getRequest()->getAttribute('identity');
-        $cursoId = $this->request->getQuery('curso_id');
         
         if ($this->request->is('post')) {
             $data = $this->request->getData();
-            $esEstudiante = ($usuarioActual->rol == 3);
             
-            if ($esEstudiante) {
-                /**
-                 * Flujo para estudiantes: Solicitud con validaciones estrictas.
-                 * 
-                 * Cambios implementados:
-                 * 1. Forzar valores seguros (no pueden manipular usuario_id, estado, etc.)
-                 * 2. Validar que el curso exista antes de crear la inscripción
-                 * 3. Verificar duplicados de cualquier estado
-                 */
+            // Validar que usuario y curso existan
+            if (empty($data['usuario_id']) || empty($data['curso_id'])) {
+                $this->Flash->error(__('Debe seleccionar usuario y curso.'));
                 
-                // Forzar valores seguros
-                $data['usuario_id'] = $usuarioActual->id;
-                $data['progreso'] = 0;
-                $data['estado'] = 'pendiente';
+                $users = $this->Inscripciones->Users->find('list', [
+                    'conditions' => ['rol' => 3],
+                    'limit' => 200
+                ])->all();
+                $cursos = $this->Inscripciones->Cursos->find('list', ['limit' => 200])->all();
+                $this->set(compact('inscripcione', 'users', 'cursos'));
+                return;
+            }
+            
+            $usuarioExiste = $this->Inscripciones->Users->exists(['id' => $data['usuario_id']]);
+            $cursoExiste = $this->Inscripciones->Cursos->exists(['id' => $data['curso_id']]);
+            
+            if (!$usuarioExiste || !$cursoExiste) {
+                $this->Flash->error(__('Usuario o curso inválido.'));
                 
-                // Validar que el curso exista
-                $cursoIdValue = $cursoId ?? $data['curso_id'] ?? null;
-                if (!$cursoIdValue) {
-                    $this->Flash->error(__('Debe seleccionar un curso.'));
-                    $users = $this->Inscripciones->Users->find('list', limit: 200)->all();
-                    $cursos = $this->Inscripciones->Cursos->find('list', limit: 200)->all();
-                    $this->set(compact('inscripcione', 'users', 'cursos', 'cursoId', 'usuarioActual'));
-                    return;
-                }
+                $users = $this->Inscripciones->Users->find('list', [
+                    'conditions' => ['rol' => 3],
+                    'limit' => 200
+                ])->all();
+                $cursos = $this->Inscripciones->Cursos->find('list', ['limit' => 200])->all();
+                $this->set(compact('inscripcione', 'users', 'cursos'));
+                return;
+            }
+            
+            // Verificar inscripción duplicada
+            $inscripcionExistente = $this->Inscripciones->find()
+                ->where([
+                    'usuario_id' => $data['usuario_id'],
+                    'curso_id' => $data['curso_id']
+                ])
+                ->first();
+            
+            if ($inscripcionExistente) {
+                $this->Flash->error(__('Ya existe una inscripción para este usuario en este curso.'));
                 
-                $curso = $this->Inscripciones->Cursos->find()
-                    ->where(['id' => $cursoIdValue])
-                    ->first();
-                
-                if (!$curso) {
-                    $this->Flash->error(__('El curso seleccionado no existe.'));
-                    return $this->redirect(['controller' => 'Cursos', 'action' => 'student']);
-                }
-                
-                $data['curso_id'] = $cursoIdValue;
-                
-                // Verificar inscripción duplicada (cualquier estado)
-                $solicitudExistente = $this->Inscripciones->find()
-                    ->where([
-                        'usuario_id' => $usuarioActual->id,
-                        'curso_id' => $cursoIdValue
-                    ])
-                    ->first();
-                
-                if ($solicitudExistente) {
-                    if ($solicitudExistente->estado == 'aprobada') {
-                        $this->Flash->error(__('Ya estás inscrito en este curso.'));
-                    } elseif ($solicitudExistente->estado == 'pendiente') {
-                        $this->Flash->error(__('Ya tienes una solicitud pendiente para este curso.'));
-                    } else {
-                        $this->Flash->error(__('Tu solicitud anterior fue rechazada. Contacta al administrador para más información.'));
-                    }
-                    return $this->redirect(['controller' => 'Cursos', 'action' => 'view', $cursoIdValue]);
-                }
-                
+                $users = $this->Inscripciones->Users->find('list', [
+                    'conditions' => ['rol' => 3],
+                    'limit' => 200
+                ])->all();
+                $cursos = $this->Inscripciones->Cursos->find('list', ['limit' => 200])->all();
+                $this->set(compact('inscripcione', 'users', 'cursos'));
+                return;
+            }
+            
+            // Validar progreso (0-100)
+            if (isset($data['progreso'])) {
+                $data['progreso'] = max(0, min(100, (int)$data['progreso']));
             } else {
-                /**
-                 * Flujo para admin/docente: Creación directa con validaciones.
-                 * 
-                 * Cambios implementados:
-                 * 1. Validar existencia de usuario y curso
-                 * 2. Verificar duplicados antes de crear
-                 * 3. Validar rango de progreso (0-100)
-                 */
-                
-                // Validar que usuario y curso existan
-                if (empty($data['usuario_id']) || empty($data['curso_id'])) {
-                    $this->Flash->error(__('Debe seleccionar usuario y curso.'));
-                    $users = $this->Inscripciones->Users->find('list', limit: 200)->all();
-                    $cursos = $this->Inscripciones->Cursos->find('list', limit: 200)->all();
-                    $this->set(compact('inscripcione', 'users', 'cursos', 'cursoId', 'usuarioActual'));
-                    return;
-                }
-                
-                $usuarioExiste = $this->Inscripciones->Users->exists(['id' => $data['usuario_id']]);
-                $cursoExiste = $this->Inscripciones->Cursos->exists(['id' => $data['curso_id']]);
-                
-                if (!$usuarioExiste || !$cursoExiste) {
-                    $this->Flash->error(__('Usuario o curso inválido.'));
-                    $users = $this->Inscripciones->Users->find('list', limit: 200)->all();
-                    $cursos = $this->Inscripciones->Cursos->find('list', limit: 200)->all();
-                    $this->set(compact('inscripcione', 'users', 'cursos', 'cursoId', 'usuarioActual'));
-                    return;
-                }
-                
-                // Verificar duplicados
-                $inscripcionExistente = $this->Inscripciones->find()
-                    ->where([
-                        'usuario_id' => $data['usuario_id'],
-                        'curso_id' => $data['curso_id']
-                    ])
-                    ->first();
-                
-                if ($inscripcionExistente) {
-                    $this->Flash->error(__('Ya existe una inscripción para este usuario en este curso.'));
-                    $users = $this->Inscripciones->Users->find('list', limit: 200)->all();
-                    $cursos = $this->Inscripciones->Cursos->find('list', limit: 200)->all();
-                    $this->set(compact('inscripcione', 'users', 'cursos', 'cursoId', 'usuarioActual'));
-                    return;
-                }
-                
-                // Validar progreso
-                if (isset($data['progreso'])) {
-                    $data['progreso'] = max(0, min(100, (int)$data['progreso']));
-                }
+                $data['progreso'] = 0;
             }
             
             // Guardar la inscripción
             $inscripcione = $this->Inscripciones->patchEntity($inscripcione, $data);
             
             if ($this->Inscripciones->save($inscripcione)) {
-                if ($esEstudiante) {
-                    $this->Flash->success(__('¡Tu solicitud de inscripción ha sido enviada! Espera la aprobación del administrador.'));
-                    return $this->redirect(['action' => 'misInscripciones']);
-                } else {
-                    $this->Flash->success(__('Inscripción creada exitosamente.'));
-                    return $this->redirect(['action' => 'index']);
-                }
+                $this->Flash->success(__('Inscripción creada exitosamente.'));
+                return $this->redirect(['action' => 'index']);
             }
-            $this->Flash->error(__('No se pudo completar la solicitud de inscripción. Por favor, intenta nuevamente.'));
+            
+            $this->Flash->error(__('No se pudo completar la inscripción. Por favor, intenta nuevamente.'));
         }
         
-        // Pre-llenar datos si viene del curso
-        if ($cursoId && $usuarioActual) {
-            $inscripcione->curso_id = $cursoId;
-            $inscripcione->usuario_id = $usuarioActual->id;
-            $inscripcione->progreso = 0;
-            $inscripcione->estado = 'pendiente';
-        }
+        // Preparar datos para el formulario (solo estudiantes activos)
+        $users = $this->Inscripciones->Users->find('list', [
+            'conditions' => ['rol' => 3],
+            'limit' => 200
+        ])->all();
+        $cursos = $this->Inscripciones->Cursos->find('list', ['limit' => 200])->all();
         
-        $users = $this->Inscripciones->Users->find('list', limit: 200)->all();
-        $cursos = $this->Inscripciones->Cursos->find('list', limit: 200)->all();
-        $this->set(compact('inscripcione', 'users', 'cursos', 'cursoId', 'usuarioActual'));
+        $this->set(compact('inscripcione', 'users', 'cursos'));
     }
 
     /**

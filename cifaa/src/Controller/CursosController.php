@@ -277,4 +277,88 @@ class CursosController extends AppController
 
         return $this->redirect(['action' => 'index']);
     }
+
+    /**
+     * Solicitar method
+     * 
+     * NUEVA FUNCIONALIDAD: Solicitud de inscripción con 1 click (solo para estudiantes).
+     * 
+     * Proceso optimizado para estudiantes:
+     * 1. Valida que el usuario esté autenticado y sea estudiante
+     * 2. Verifica que el curso exista
+     * 3. Verifica que no tenga inscripción previa (cualquier estado)
+     * 4. Crea automáticamente la inscripción en estado 'pendiente'
+     * 5. Redirige al dashboard de mis inscripciones
+     * 
+     * Diferencias con el método add():
+     * - No muestra formulario, acción directa
+     * - Solo para estudiantes (admin/docente usan add())
+     * - Siempre crea en estado 'pendiente'
+     * - Validación más estricta de duplicados
+     * 
+     * @param string|null $id Curso id.
+     * @return \Cake\Http\Response|null Redirects
+     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
+     */
+    public function solicitar($id = null)
+    {
+        // Solo estudiantes pueden solicitar inscripción así
+        $usuarioActual = $this->request->getAttribute('identity');
+        
+        if (!$usuarioActual) {
+            $this->Flash->error(__('Debes iniciar sesión para solicitar inscripción.'));
+            return $this->redirect(['controller' => 'Users', 'action' => 'login']);
+        }
+        
+        if ($usuarioActual->rol != 3) {
+            $this->Flash->error(__('Solo los estudiantes pueden solicitar inscripción. Los administradores y docentes deben usar el módulo de inscripciones.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
+        // Validar que el curso exista
+        try {
+            $curso = $this->Cursos->get($id);
+        } catch (\Exception $e) {
+            $this->Flash->error(__('El curso seleccionado no existe.'));
+            return $this->redirect(['action' => 'student']);
+        }
+        
+        // Cargar el modelo de Inscripciones
+        $inscripcionesTable = $this->fetchTable('Inscripciones');
+        
+        // Verificar si ya existe una inscripción (cualquier estado)
+        $inscripcionExistente = $inscripcionesTable->find()
+            ->where([
+                'usuario_id' => $usuarioActual->id,
+                'curso_id' => $id
+            ])
+            ->first();
+        
+        if ($inscripcionExistente) {
+            if ($inscripcionExistente->estado === 'aprobada') {
+                $this->Flash->warning(__('Ya estás inscrito en este curso.'));
+            } elseif ($inscripcionExistente->estado === 'pendiente') {
+                $this->Flash->warning(__('Ya tienes una solicitud pendiente para este curso.'));
+            } else { // rechazada
+                $this->Flash->error(__('Tu solicitud anterior fue rechazada. Contacta al administrador para más información.'));
+            }
+            return $this->redirect(['controller' => 'Inscripciones', 'action' => 'misInscripciones']);
+        }
+        
+        // Crear nueva inscripción
+        $inscripcion = $inscripcionesTable->newEntity([
+            'usuario_id' => $usuarioActual->id,
+            'curso_id' => $id,
+            'progreso' => 0,
+            'estado' => 'pendiente'
+        ]);
+        
+        if ($inscripcionesTable->save($inscripcion)) {
+            $this->Flash->success(__('¡Tu solicitud de inscripción al curso "{0}" ha sido enviada! Espera la aprobación del administrador.', $curso->titulo));
+            return $this->redirect(['controller' => 'Inscripciones', 'action' => 'misInscripciones']);
+        } else {
+            $this->Flash->error(__('No se pudo completar la solicitud. Por favor, intenta nuevamente.'));
+            return $this->redirect(['action' => 'view', $id]);
+        }
+    }
 }

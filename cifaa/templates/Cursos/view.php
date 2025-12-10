@@ -255,11 +255,19 @@ $identity = $this->getRequest()->getAttribute('identity');
                                 Tu solicitud fue rechazada. Contacta al administrador.
                             </p>
                         <?php else: ?>
-                            <?= $this->Html->link(
+                            <?= $this->Form->postLink(
                                 '<i class="fas fa-plus-circle me-1"></i> Solicitar Inscripción',
-                                ['controller' => 'Inscripciones', 'action' => 'add', '?' => ['curso_id' => $curso->id]],
-                                ['class' => 'btn btn-primary w-100 mb-3', 'escape' => false]
+                                ['controller' => 'Cursos', 'action' => 'solicitar', $curso->id],
+                                [
+                                    'class' => 'btn btn-primary w-100 mb-3', 
+                                    'escape' => false,
+                                    'confirm' => '¿Estás seguro de que deseas solicitar inscripción al curso "' . h($curso->titulo) . '"?'
+                                ]
                             ) ?>
+                            <p class="small text-muted mb-0">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Tu solicitud será enviada al administrador para aprobación.
+                            </p>
                         <?php endif; ?>
                     <?php else: ?>
                         <p class="small text-muted mb-2">

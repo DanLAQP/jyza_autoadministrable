@@ -17,6 +17,17 @@ class InscripcionesController extends AppController
      */
     public function index()
     {
+        /**
+         * Nueva implementación con control de acceso:
+         * Utiliza el método requiereAdministradorODocente() del trait ControlAccesoRoles.
+         * Solo los administradores y docentes pueden visualizar y gestionar el listado
+         * de inscripciones. Los estudiantes solo pueden solicitar inscripciones pero
+         * no tienen acceso a este listado completo.
+         */
+        if ($redirect = $this->requiereAdministradorODocente()) {
+            return $redirect;
+        }
+        
         $query = $this->Inscripciones->find()
             ->contain(['Users', 'Cursos']);
         
@@ -43,7 +54,23 @@ class InscripcionesController extends AppController
      */
     public function view($id = null)
     {
+        /**
+         * Nueva implementación con control de acceso:
+         * Permite que administradores y docentes vean cualquier inscripción.
+         * Los estudiantes solo pueden ver sus propias inscripciones.
+         * Esto protege la privacidad de los datos de inscripción.
+         */
         $inscripcione = $this->Inscripciones->get($id, contain: ['Users', 'Cursos']);
+        $usuarioActual = $this->obtenerUsuarioActual();
+        
+        // Verificar permisos: admin/docente pueden ver todo, estudiante solo lo suyo
+        if (!$this->esAdministrador() && !$this->esDocente()) {
+            if ($inscripcione->usuario_id != $usuarioActual->id) {
+                $this->Flash->error(__('No tiene permiso para visualizar esta inscripción.'));
+                return $this->redirect(['controller' => 'Cursos', 'action' => 'student']);
+            }
+        }
+        
         $this->set(compact('inscripcione'));
     }
 
@@ -123,6 +150,16 @@ class InscripcionesController extends AppController
      */
     public function edit($id = null)
     {
+        /**
+         * Nueva implementación con control de acceso:
+         * Utiliza el método requiereAdministradorODocente() del trait ControlAccesoRoles.
+         * Solo los administradores y docentes pueden modificar inscripciones existentes.
+         * Esto incluye cambiar estados, progreso y demás campos de la inscripción.
+         */
+        if ($redirect = $this->requiereAdministradorODocente()) {
+            return $redirect;
+        }
+        
         $inscripcione = $this->Inscripciones->get($id, contain: []);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $inscripcione = $this->Inscripciones->patchEntity($inscripcione, $this->request->getData());
@@ -147,6 +184,16 @@ class InscripcionesController extends AppController
      */
     public function delete($id = null)
     {
+        /**
+         * Nueva implementación con control de acceso:
+         * Utiliza el método requiereAdministrador() del trait ControlAccesoRoles.
+         * Solo los administradores pueden eliminar inscripciones del sistema.
+         * Esta es una acción crítica que requiere los máximos privilegios.
+         */
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
+        }
+        
         $this->request->allowMethod(['post', 'delete']);
         $inscripcione = $this->Inscripciones->get($id);
         if ($this->Inscripciones->delete($inscripcione)) {
@@ -166,6 +213,16 @@ class InscripcionesController extends AppController
      */
     public function aprobar($id = null)
     {
+        /**
+         * Nueva implementación con control de acceso:
+         * Utiliza el método requiereAdministradorODocente() del trait ControlAccesoRoles.
+         * Solo los administradores y docentes pueden aprobar solicitudes de inscripción.
+         * Esto garantiza que solo personal autorizado gestione el acceso a los cursos.
+         */
+        if ($redirect = $this->requiereAdministradorODocente()) {
+            return $redirect;
+        }
+        
         $this->request->allowMethod(['post']);
         $inscripcione = $this->Inscripciones->get($id, contain: ['Users', 'Cursos']);
         
@@ -188,6 +245,16 @@ class InscripcionesController extends AppController
      */
     public function rechazar($id = null)
     {
+        /**
+         * Nueva implementación con control de acceso:
+         * Utiliza el método requiereAdministradorODocente() del trait ControlAccesoRoles.
+         * Solo los administradores y docentes pueden rechazar solicitudes de inscripción.
+         * Esto garantiza un control adecuado sobre quién puede denegar accesos a cursos.
+         */
+        if ($redirect = $this->requiereAdministradorODocente()) {
+            return $redirect;
+        }
+        
         $this->request->allowMethod(['post']);
         $inscripcione = $this->Inscripciones->get($id, contain: ['Users', 'Cursos']);
         

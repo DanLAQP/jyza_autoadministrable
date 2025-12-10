@@ -97,13 +97,22 @@ class CursosController extends AppController
      */
     public function add()
     {
-        // MODIFICACIÓN: Solo el administrador (rol == 1) puede agregar cursos.
-        // Antes: Se permitía el acceso si el usuario tenía sesión y rol == 1.
-        // Ahora: Se verifica el rol antes de mostrar el formulario. Si el usuario no es admin, se muestra un mensaje de error y se redirige al index.
-        $usuario = $this->getRequest()->getAttribute('identity');
-        if (!$usuario || $usuario->get('rol') != 1) {
-            $this->Flash->error('No tienes permisos para crear cursos.');
-            return $this->redirect(['action' => 'index']);
+        /**
+         * Versión anterior (comentada para referencia):
+         * $usuario = $this->getRequest()->getAttribute('identity');
+         * if (!$usuario || $usuario->get('rol') != 1) {
+         *     $this->Flash->error('No tienes permisos para crear cursos.');
+         *     return $this->redirect(['action' => 'index']);
+         * }
+         * 
+         * Nueva implementación:
+         * Utiliza el método requiereAdministrador() del trait ControlAccesoRoles.
+         * Solo los administradores pueden crear nuevos cursos en el sistema.
+         * Esto centraliza la validación de permisos y mantiene consistencia
+         * con los demás controladores.
+         */
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
         }
 
         $curso = $this->Cursos->newEmptyEntity();
@@ -161,11 +170,21 @@ class CursosController extends AppController
      */
     public function edit($id = null)
     {
-        // Solo administradores (rol 1) pueden editar cursos
-        $usuario = $this->getRequest()->getAttribute('identity');
-        if (!$usuario || $usuario->rol != 1) {
-            $this->Flash->error(__('No tienes permisos para editar cursos.'));
-            return $this->redirect(['action' => 'index']);
+        /**
+         * Versión anterior (comentada para referencia):
+         * $usuario = $this->getRequest()->getAttribute('identity');
+         * if (!$usuario || $usuario->rol != 1) {
+         *     $this->Flash->error(__('No tienes permisos para editar cursos.'));
+         *     return $this->redirect(['action' => 'index']);
+         * }
+         * 
+         * Nueva implementación:
+         * Utiliza el método requiereAdministrador() del trait ControlAccesoRoles.
+         * Solo los administradores pueden editar cursos existentes.
+         * Esto incluye modificación de contenido, miniatura y demás propiedades.
+         */
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
         }
         
         $curso = $this->Cursos->get($id, contain: []);
@@ -231,11 +250,21 @@ class CursosController extends AppController
      */
     public function delete($id = null)
     {
-        // Solo administradores (rol 1) pueden eliminar cursos
-        $usuario = $this->getRequest()->getAttribute('identity');
-        if (!$usuario || $usuario->rol != 1) {
-            $this->Flash->error(__('No tienes permisos para eliminar cursos.'));
-            return $this->redirect(['action' => 'index']);
+        /**
+         * Versión anterior (comentada para referencia):
+         * $usuario = $this->getRequest()->getAttribute('identity');
+         * if (!$usuario || $usuario->rol != 1) {
+         *     $this->Flash->error(__('No tienes permisos para eliminar cursos.'));
+         *     return $this->redirect(['action' => 'index']);
+         * }
+         * 
+         * Nueva implementación:
+         * Utiliza el método requiereAdministrador() del trait ControlAccesoRoles.
+         * Solo los administradores pueden eliminar cursos del sistema.
+         * Esta es una acción crítica que afecta a múltiples entidades relacionadas.
+         */
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
         }
         
         $this->request->allowMethod(['post', 'delete']);

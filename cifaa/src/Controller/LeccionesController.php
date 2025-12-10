@@ -92,11 +92,20 @@ class LeccionesController extends AppController
      */
     public function add()
     {
-        // Only administrators (rol 1) can create lessons
-        $usuario = $this->getRequest()->getAttribute('identity');
-        if (!$usuario || $usuario->rol != 1) {
-            $this->Flash->error(__('No tienes permisos para crear lecciones.'));
-            return $this->redirect(['action' => 'index']);
+        /**
+         * Versión anterior (comentada para referencia):
+         * $usuario = $this->getRequest()->getAttribute('identity');
+         * if (!$usuario || $usuario->rol != 1) {
+         *     $this->Flash->error(__('No tienes permisos para crear lecciones.'));
+         *     return $this->redirect(['action' => 'index']);
+         * }
+         * 
+         * Nueva implementación:
+         * Utiliza el método requiereAdministrador() del trait ControlAccesoRoles.
+         * Solo los administradores pueden crear lecciones dentro de los módulos.
+         */
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
         }
         
         $leccione = $this->Lecciones->newEmptyEntity();
@@ -132,11 +141,20 @@ class LeccionesController extends AppController
      */
     public function edit($id = null)
     {
-        // Only administrators (rol 1) can edit lessons
-        $usuario = $this->getRequest()->getAttribute('identity');
-        if (!$usuario || $usuario->rol != 1) {
-            $this->Flash->error(__('No tienes permisos para editar lecciones.'));
-            return $this->redirect(['action' => 'index']);
+        /**
+         * Versión anterior (comentada para referencia):
+         * $usuario = $this->getRequest()->getAttribute('identity');
+         * if (!$usuario || $usuario->rol != 1) {
+         *     $this->Flash->error(__('No tienes permisos para editar lecciones.'));
+         *     return $this->redirect(['action' => 'index']);
+         * }
+         * 
+         * Nueva implementación:
+         * Utiliza el método requiereAdministrador() del trait ControlAccesoRoles.
+         * Solo los administradores pueden editar lecciones existentes.
+         */
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
         }
         
         $leccione = $this->Lecciones->get($id, contain: []);
@@ -168,11 +186,20 @@ class LeccionesController extends AppController
      */
     public function delete($id = null)
     {
-        // Only administrators (rol 1) can delete lessons
-        $usuario = $this->getRequest()->getAttribute('identity');
-        if (!$usuario || $usuario->rol != 1) {
-            $this->Flash->error(__('No tienes permisos para eliminar lecciones.'));
-            return $this->redirect(['action' => 'index']);
+        /**
+         * Versión anterior (comentada para referencia):
+         * $usuario = $this->getRequest()->getAttribute('identity');
+         * if (!$usuario || $usuario->rol != 1) {
+         *     $this->Flash->error(__('No tienes permisos para eliminar lecciones.'));
+         *     return $this->redirect(['action' => 'index']);
+         * }
+         * 
+         * Nueva implementación:
+         * Utiliza el método requiereAdministrador() del trait ControlAccesoRoles.
+         * Solo los administradores pueden eliminar lecciones del sistema.
+         */
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
         }
         
         $this->request->allowMethod(['post', 'delete']);

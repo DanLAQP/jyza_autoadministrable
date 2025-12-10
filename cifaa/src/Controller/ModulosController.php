@@ -78,12 +78,22 @@ class ModulosController extends AppController
      */
     public function add()
     {
-        // Solo administradores (rol 1) pueden crear módulos
-        $usuario = $this->getRequest()->getAttribute('identity');
-        if (!$usuario || $usuario->rol != 1) {
-            $this->Flash->error(__('No tienes permisos para crear módulos.'));
-            return $this->redirect(['action' => 'index']);
+        /**
+         * Versión anterior (comentada para referencia):
+         * $usuario = $this->getRequest()->getAttribute('identity');
+         * if (!$usuario || $usuario->rol != 1) {
+         *     $this->Flash->error(__('No tienes permisos para crear módulos.'));
+         *     return $this->redirect(['action' => 'index']);
+         * }
+         * 
+         * Nueva implementación:
+         * Utiliza el método requiereAdministrador() del trait ControlAccesoRoles.
+         * Solo los administradores pueden crear módulos dentro de los cursos.
+         */
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
         }
+        
         $modulo = $this->Modulos->newEmptyEntity();
         if ($this->request->is('post')) {
             $modulo = $this->Modulos->patchEntity($modulo, $this->request->getData());
@@ -119,11 +129,20 @@ class ModulosController extends AppController
      */
     public function edit($id = null)
     {
-        // Solo administradores (rol 1) pueden editar módulos
-        $usuario = $this->getRequest()->getAttribute('identity');
-        if (!$usuario || $usuario->rol != 1) {
-            $this->Flash->error(__('No tienes permisos para editar módulos.'));
-            return $this->redirect(['action' => 'index']);
+        /**
+         * Versión anterior (comentada para referencia):
+         * $usuario = $this->getRequest()->getAttribute('identity');
+         * if (!$usuario || $usuario->rol != 1) {
+         *     $this->Flash->error(__('No tienes permisos para editar módulos.'));
+         *     return $this->redirect(['action' => 'index']);
+         * }
+         * 
+         * Nueva implementación:
+         * Utiliza el método requiereAdministrador() del trait ControlAccesoRoles.
+         * Solo los administradores pueden editar módulos existentes.
+         */
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
         }
         
         $modulo = $this->Modulos->get($id, contain: []);
@@ -149,11 +168,20 @@ class ModulosController extends AppController
      */
     public function delete($id = null)
     {
-        // Only administrators (rol 1) can delete modules
-        $usuario = $this->getRequest()->getAttribute('identity');
-        if (!$usuario || $usuario->rol != 1) {
-            $this->Flash->error(__('No tienes permisos para eliminar módulos.'));
-            return $this->redirect(['action' => 'index']);
+        /**
+         * Versión anterior (comentada para referencia):
+         * $usuario = $this->getRequest()->getAttribute('identity');
+         * if (!$usuario || $usuario->rol != 1) {
+         *     $this->Flash->error(__('No tienes permisos para eliminar módulos.'));
+         *     return $this->redirect(['action' => 'index']);
+         * }
+         * 
+         * Nueva implementación:
+         * Utiliza el método requiereAdministrador() del trait ControlAccesoRoles.
+         * Solo los administradores pueden eliminar módulos del sistema.
+         */
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
         }
         
         $this->request->allowMethod(['post', 'delete']);

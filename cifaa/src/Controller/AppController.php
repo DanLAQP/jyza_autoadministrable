@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use Cake\Controller\Controller;
+use App\Controller\Trait\ControlAccesoRoles;
 
 /**
  * Application Controller
@@ -28,6 +29,14 @@ use Cake\Controller\Controller;
  */
 class AppController extends Controller
 {
+    /**
+     * Importación del trait ControlAccesoRoles
+     * 
+     * Descripción: Permite utilizar los métodos de control de acceso por roles
+     * en todos los controladores que hereden de AppController. Esto centraliza
+     * la lógica de autorización y facilita su mantenimiento.
+     */
+    use ControlAccesoRoles;
     /**
      * Initialization hook method.
      *

@@ -11,6 +11,35 @@ namespace App\Controller;
 class InscripcionesController extends AppController
 {
     /**
+     * beforeFilter method
+     * 
+     * Configuración específica de acceso para InscripcionesController.
+     * 
+     * Roles y permisos:
+     * - Estudiantes (role_id = 3): Pueden add (solicitar), view (solo propias), misInscripciones
+     * - Docentes (role_id = 2): Pueden index, view, aprobar, rechazar
+     * - Admins (role_id = 1): Acceso total
+     * 
+     * @param \Cake\Event\EventInterface $event El evento beforeFilter
+     * @return void
+     */
+    public function beforeFilter(\Cake\Event\EventInterface $event)
+    {
+        parent::beforeFilter($event);
+        
+        $user = $this->Authentication->getIdentity();
+        
+        if ($user && $user->rol == 3) {
+            // Estudiantes: solo pueden add, view y misInscripciones
+            $allowedActions = ['add', 'view', 'misInscripciones'];
+            
+            if (!in_array($this->request->getParam('action'), $allowedActions)) {
+                $this->Flash->error(__('No tienes permiso para acceder a esta sección.'));
+                return $this->redirect(['action' => 'misInscripciones']);
+            }
+        }
+    }
+    /**
      * Index method
      *
      * @return \Cake\Http\Response|null|void Renders view
@@ -18,15 +47,12 @@ class InscripcionesController extends AppController
     public function index()
     {
         /**
-         * Nueva implementación con control de acceso:
-         * Utiliza el método requiereAdministradorODocente() del trait ControlAccesoRoles.
-         * Solo los administradores y docentes pueden visualizar y gestionar el listado
-         * de inscripciones. Los estudiantes solo pueden solicitar inscripciones pero
-         * no tienen acceso a este listado completo.
+         * Listado de inscripciones para administradores y docentes.
+         * 
+         * El control de acceso se maneja en beforeFilter(), por lo que
+         * este método solo es accesible para admin y docentes.
+         * Los estudiantes son redirigidos automáticamente a misInscripciones().
          */
-        if ($redirect = $this->requiereAdministradorODocente()) {
-            return $redirect;
-        }
         
         $query = $this->Inscripciones->find()
             ->contain(['Users', 'Cursos']);
@@ -87,43 +113,126 @@ class InscripcionesController extends AppController
         
         if ($this->request->is('post')) {
             $data = $this->request->getData();
+            $esEstudiante = ($usuarioActual->rol == 3);
             
-            // Si viene de inscripción rápida desde el curso
-            if ($cursoId && $usuarioActual) {
-                $data['curso_id'] = $cursoId;
+            if ($esEstudiante) {
+                /**
+                 * Flujo para estudiantes: Solicitud con validaciones estrictas.
+                 * 
+                 * Cambios implementados:
+                 * 1. Forzar valores seguros (no pueden manipular usuario_id, estado, etc.)
+                 * 2. Validar que el curso exista antes de crear la inscripción
+                 * 3. Verificar duplicados de cualquier estado
+                 */
+                
+                // Forzar valores seguros
                 $data['usuario_id'] = $usuarioActual->id;
                 $data['progreso'] = 0;
-                $data['estado'] = 'pendiente'; // Por defecto en estado pendiente
+                $data['estado'] = 'pendiente';
                 
-                // Verificar si ya existe una solicitud no aprobada
+                // Validar que el curso exista
+                $cursoIdValue = $cursoId ?? $data['curso_id'] ?? null;
+                if (!$cursoIdValue) {
+                    $this->Flash->error(__('Debe seleccionar un curso.'));
+                    $users = $this->Inscripciones->Users->find('list', limit: 200)->all();
+                    $cursos = $this->Inscripciones->Cursos->find('list', limit: 200)->all();
+                    $this->set(compact('inscripcione', 'users', 'cursos', 'cursoId', 'usuarioActual'));
+                    return;
+                }
+                
+                $curso = $this->Inscripciones->Cursos->find()
+                    ->where(['id' => $cursoIdValue])
+                    ->first();
+                
+                if (!$curso) {
+                    $this->Flash->error(__('El curso seleccionado no existe.'));
+                    return $this->redirect(['controller' => 'Cursos', 'action' => 'student']);
+                }
+                
+                $data['curso_id'] = $cursoIdValue;
+                
+                // Verificar inscripción duplicada (cualquier estado)
                 $solicitudExistente = $this->Inscripciones->find()
                     ->where([
                         'usuario_id' => $usuarioActual->id,
-                        'curso_id' => $cursoId,
-                        'estado !=' => 'aprobada'
+                        'curso_id' => $cursoIdValue
                     ])
                     ->first();
                 
                 if ($solicitudExistente) {
-                    $this->Flash->error(__('Ya tienes una solicitud pendiente o rechazada para este curso. No puedes crear otra.'));
-                    
-                    // Redirigir al curso
-                    if ($cursoId) {
-                        return $this->redirect(['controller' => 'Cursos', 'action' => 'view', $cursoId]);
+                    if ($solicitudExistente->estado == 'aprobada') {
+                        $this->Flash->error(__('Ya estás inscrito en este curso.'));
+                    } elseif ($solicitudExistente->estado == 'pendiente') {
+                        $this->Flash->error(__('Ya tienes una solicitud pendiente para este curso.'));
+                    } else {
+                        $this->Flash->error(__('Tu solicitud anterior fue rechazada. Contacta al administrador para más información.'));
                     }
-                    return $this->redirect(['action' => 'index']);
+                    return $this->redirect(['controller' => 'Cursos', 'action' => 'view', $cursoIdValue]);
+                }
+                
+            } else {
+                /**
+                 * Flujo para admin/docente: Creación directa con validaciones.
+                 * 
+                 * Cambios implementados:
+                 * 1. Validar existencia de usuario y curso
+                 * 2. Verificar duplicados antes de crear
+                 * 3. Validar rango de progreso (0-100)
+                 */
+                
+                // Validar que usuario y curso existan
+                if (empty($data['usuario_id']) || empty($data['curso_id'])) {
+                    $this->Flash->error(__('Debe seleccionar usuario y curso.'));
+                    $users = $this->Inscripciones->Users->find('list', limit: 200)->all();
+                    $cursos = $this->Inscripciones->Cursos->find('list', limit: 200)->all();
+                    $this->set(compact('inscripcione', 'users', 'cursos', 'cursoId', 'usuarioActual'));
+                    return;
+                }
+                
+                $usuarioExiste = $this->Inscripciones->Users->exists(['id' => $data['usuario_id']]);
+                $cursoExiste = $this->Inscripciones->Cursos->exists(['id' => $data['curso_id']]);
+                
+                if (!$usuarioExiste || !$cursoExiste) {
+                    $this->Flash->error(__('Usuario o curso inválido.'));
+                    $users = $this->Inscripciones->Users->find('list', limit: 200)->all();
+                    $cursos = $this->Inscripciones->Cursos->find('list', limit: 200)->all();
+                    $this->set(compact('inscripcione', 'users', 'cursos', 'cursoId', 'usuarioActual'));
+                    return;
+                }
+                
+                // Verificar duplicados
+                $inscripcionExistente = $this->Inscripciones->find()
+                    ->where([
+                        'usuario_id' => $data['usuario_id'],
+                        'curso_id' => $data['curso_id']
+                    ])
+                    ->first();
+                
+                if ($inscripcionExistente) {
+                    $this->Flash->error(__('Ya existe una inscripción para este usuario en este curso.'));
+                    $users = $this->Inscripciones->Users->find('list', limit: 200)->all();
+                    $cursos = $this->Inscripciones->Cursos->find('list', limit: 200)->all();
+                    $this->set(compact('inscripcione', 'users', 'cursos', 'cursoId', 'usuarioActual'));
+                    return;
+                }
+                
+                // Validar progreso
+                if (isset($data['progreso'])) {
+                    $data['progreso'] = max(0, min(100, (int)$data['progreso']));
                 }
             }
             
+            // Guardar la inscripción
             $inscripcione = $this->Inscripciones->patchEntity($inscripcione, $data);
+            
             if ($this->Inscripciones->save($inscripcione)) {
-                $this->Flash->success(__('¡Tu solicitud de inscripción ha sido enviada! Por favor espera a que un administrador la apruebe.'));
-
-                // Redirigir al curso si viene de allí
-                if ($cursoId) {
-                    return $this->redirect(['controller' => 'Cursos', 'action' => 'view', $cursoId]);
+                if ($esEstudiante) {
+                    $this->Flash->success(__('¡Tu solicitud de inscripción ha sido enviada! Espera la aprobación del administrador.'));
+                    return $this->redirect(['action' => 'misInscripciones']);
+                } else {
+                    $this->Flash->success(__('Inscripción creada exitosamente.'));
+                    return $this->redirect(['action' => 'index']);
                 }
-                return $this->redirect(['action' => 'index']);
             }
             $this->Flash->error(__('No se pudo completar la solicitud de inscripción. Por favor, intenta nuevamente.'));
         }
@@ -214,22 +323,41 @@ class InscripcionesController extends AppController
     public function aprobar($id = null)
     {
         /**
-         * Nueva implementación con control de acceso:
-         * Utiliza el método requiereAdministradorODocente() del trait ControlAccesoRoles.
-         * Solo los administradores y docentes pueden aprobar solicitudes de inscripción.
-         * Esto garantiza que solo personal autorizado gestione el acceso a los cursos.
+         * Método mejorado con validaciones completas:
+         * 
+         * 1. Valida que la inscripción exista
+         * 2. Verifica que esté en estado 'pendiente' antes de aprobar
+         * 3. Inicializa el progreso en 0%
+         * 4. Proporciona feedback detallado con nombres de usuario y curso
+         * 5. Control de acceso mediante trait ControlAccesoRoles
          */
         if ($redirect = $this->requiereAdministradorODocente()) {
             return $redirect;
         }
         
         $this->request->allowMethod(['post']);
-        $inscripcione = $this->Inscripciones->get($id, contain: ['Users', 'Cursos']);
+        
+        try {
+            $inscripcione = $this->Inscripciones->get($id, contain: ['Users', 'Cursos']);
+        } catch (\Cake\Datasource\Exception\RecordNotFoundException $e) {
+            $this->Flash->error(__('La inscripción no existe.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
+        // Validar que esté en estado pendiente
+        if ($inscripcione->estado !== 'pendiente') {
+            $estadoActual = ucfirst($inscripcione->estado);
+            $this->Flash->warning(__('Esta inscripción ya fue procesada. Estado actual: {0}', $estadoActual));
+            return $this->redirect(['action' => 'view', $id]);
+        }
         
         $inscripcione->estado = 'aprobada';
+        $inscripcione->progreso = 0; // Iniciar en 0%
         
         if ($this->Inscripciones->save($inscripcione)) {
-            $this->Flash->success(__('Inscripción aprobada. El usuario ahora puede acceder al curso.'));
+            $nombreEstudiante = $inscripcione->user->nombre;
+            $nombreCurso = $inscripcione->curso->titulo;
+            $this->Flash->success(__('Inscripción aprobada. {0} ahora puede acceder al curso "{1}".', $nombreEstudiante, $nombreCurso));
         } else {
             $this->Flash->error(__('No se pudo aprobar la inscripción. Por favor, intenta nuevamente.'));
         }
@@ -256,16 +384,94 @@ class InscripcionesController extends AppController
         }
         
         $this->request->allowMethod(['post']);
-        $inscripcione = $this->Inscripciones->get($id, contain: ['Users', 'Cursos']);
+        
+        try {
+            $inscripcione = $this->Inscripciones->get($id, contain: ['Users', 'Cursos']);
+        } catch (\Cake\Datasource\Exception\RecordNotFoundException $e) {
+            $this->Flash->error(__('La inscripción no existe.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
+        // Validar que esté en estado pendiente
+        if ($inscripcione->estado !== 'pendiente') {
+            $estadoActual = ucfirst($inscripcione->estado);
+            $this->Flash->warning(__('Esta inscripción ya fue procesada. Estado actual: {0}', $estadoActual));
+            return $this->redirect(['action' => 'view', $id]);
+        }
         
         $inscripcione->estado = 'rechazada';
         
         if ($this->Inscripciones->save($inscripcione)) {
-            $this->Flash->success(__('Inscripción rechazada.'));
+            $nombreEstudiante = $inscripcione->user->nombre;
+            $nombreCurso = $inscripcione->curso->titulo;
+            $this->Flash->success(__('Inscripción de {0} al curso "{1}" ha sido rechazada.', $nombreEstudiante, $nombreCurso));
         } else {
             $this->Flash->error(__('No se pudo rechazar la inscripción. Por favor, intenta nuevamente.'));
         }
         
         return $this->redirect(['action' => 'index']);
+    }
+
+    /**
+     * Mis Inscripciones - Vista para estudiantes
+     * 
+     * Método específico para que estudiantes vean únicamente sus propias
+     * inscripciones con información relevante de su progreso académico.
+     * 
+     * Características:
+     * - Muestra solo inscripciones del usuario actual
+     * - Incluye estadísticas personales (total, aprobadas, pendientes, progreso)
+     * - Permite filtrar por estado
+     * - Acceso exclusivo para estudiantes (admin/docente redirigen a index)
+     * 
+     * @return \Cake\Http\Response|null|void
+     */
+    public function misInscripciones()
+    {
+        $usuarioActual = $this->obtenerUsuarioActual();
+        
+        // Admin y docentes deben usar index()
+        if ($this->esAdministrador() || $this->esDocente()) {
+            return $this->redirect(['action' => 'index']);
+        }
+        
+        $query = $this->Inscripciones->find()
+            ->where(['Inscripciones.usuario_id' => $usuarioActual->id])
+            ->contain(['Cursos' => ['Modulos']])
+            ->orderBy(['Inscripciones.created' => 'DESC']);
+        
+        // Filtrar por estado si se solicita
+        $estado = $this->request->getQuery('estado');
+        if ($estado && in_array($estado, ['pendiente', 'aprobada', 'rechazada'])) {
+            $query->where(['Inscripciones.estado' => $estado]);
+        }
+        
+        $inscripciones = $this->paginate($query);
+        
+        // Calcular estadísticas del estudiante
+        $estadisticas = [
+            'total' => $this->Inscripciones->find()
+                ->where(['usuario_id' => $usuarioActual->id])
+                ->count(),
+            'aprobadas' => $this->Inscripciones->find()
+                ->where(['usuario_id' => $usuarioActual->id, 'estado' => 'aprobada'])
+                ->count(),
+            'pendientes' => $this->Inscripciones->find()
+                ->where(['usuario_id' => $usuarioActual->id, 'estado' => 'pendiente'])
+                ->count(),
+            'rechazadas' => $this->Inscripciones->find()
+                ->where(['usuario_id' => $usuarioActual->id, 'estado' => 'rechazada'])
+                ->count()
+        ];
+        
+        // Calcular progreso promedio solo de cursos aprobados
+        $progresoPromedio = $this->Inscripciones->find()
+            ->where(['usuario_id' => $usuarioActual->id, 'estado' => 'aprobada'])
+            ->select(['promedio' => $query->func()->avg('progreso')])
+            ->first();
+        
+        $estadisticas['progreso_promedio'] = $progresoPromedio ? round($progresoPromedio->promedio, 2) : 0;
+        
+        $this->set(compact('inscripciones', 'estadisticas', 'estado'));
     }
 }

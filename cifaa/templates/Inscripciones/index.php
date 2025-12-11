@@ -7,7 +7,16 @@
 <div class="container mt-4 mb-4">
     <div class="row mb-4">
         <div class="col-12">
-            <h2 class="text-info"><i class="fas fa-clipboard-list"></i> Solicitudes de Inscripción</h2>
+            <h2 class="text-info d-inline-block">
+                <i class="fas fa-clipboard-list"></i> Solicitudes de Inscripción
+            </h2>
+            
+            <?php if (isset($pendientesCount) && $pendientesCount > 0): ?>
+                <span class="badge bg-warning text-dark ms-2" style="font-size: 1rem; vertical-align: middle;">
+                    <i class="fas fa-clock"></i> <?= $pendientesCount ?> Pendiente<?= $pendientesCount > 1 ? 's' : '' ?>
+                </span>
+            <?php endif; ?>
+            
             <p class="text-muted">Aprueba o rechaza las solicitudes de inscripción a los cursos</p>
         </div>
     </div>

@@ -422,4 +422,20 @@ return [
         'ignoreAuthorization' => env('DEBUG_KIT_IGNORE_AUTHORIZATION', false)
     ],
     
+    /**
+     * Configuración personalizada de CIFA
+     * 
+     * WHATSAPP INTEGRATION:
+     * Número de WhatsApp del administrador para soporte a estudiantes.
+     * Formato: Código de país + número sin espacios ni símbolos.
+     * Ejemplo: '51999999999' para Perú (+51) 999-999-999
+     * 
+     * IMPORTANTE: Cambiar este número por el número real del administrador.
+     */
+    'Cifa' => [
+        'whatsapp_admin' => '51999999999', // CAMBIAR por número real
+        'whatsapp_mensaje_solicitud' => 'Hola, solicité inscripción a un curso. ¿Podrían revisarla?',
+        'tiempo_respuesta_solicitud' => 48, // horas
+    ],
+    
 ];

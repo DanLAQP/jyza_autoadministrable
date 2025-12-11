@@ -78,6 +78,9 @@ class InscripcionesController extends AppController
         /**
          * Listado de inscripciones para administradores y docentes.
          * 
+         * MEJORA: Ordenamiento inteligente - pendientes primero.
+         * MEJORA: Contador de pendientes para badge de notificación.
+         * 
          * El control de acceso se maneja en beforeFilter(), por lo que
          * este método solo es accesible para admin y docentes.
          * Los estudiantes son redirigidos automáticamente a misInscripciones().
@@ -92,12 +95,24 @@ class InscripcionesController extends AppController
             $query = $query->where(['Inscripciones.estado' => $estado]);
         }
         
-        // Ordenar por más recientes primero
-        $query = $query->orderBy(['Inscripciones.created' => 'DESC']);
+        // MEJORA: Ordenar pendientes primero, luego por fecha
+        $query = $query->orderBy([
+            'CASE 
+                WHEN Inscripciones.estado = "pendiente" THEN 1 
+                WHEN Inscripciones.estado = "aprobada" THEN 2 
+                ELSE 3 
+            END' => 'ASC',
+            'Inscripciones.created' => 'DESC'
+        ]);
+        
+        // MEJORA: Contar pendientes para badge
+        $pendientesCount = $this->Inscripciones->find()
+            ->where(['estado' => 'pendiente'])
+            ->count();
         
         $inscripciones = $this->paginate($query);
 
-        $this->set(compact('inscripciones'));
+        $this->set(compact('inscripciones', 'estado', 'pendientesCount'));
     }
 
     /**

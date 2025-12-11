@@ -30,7 +30,7 @@
         </label>
         <?= $this->Form->control('usuario_id', [
             'options' => $users,
-            'class' => 'form-control',
+            'class' => 'form-select', // ✅ Cambio: form-select para dropdowns (Bootstrap 5)
             'label' => false,
             'required' => true,
             'empty' => '-- Seleccione un estudiante --'
@@ -45,7 +45,7 @@
         </label>
         <?= $this->Form->control('curso_id', [
             'options' => $cursos,
-            'class' => 'form-control',
+            'class' => 'form-select', // ✅ Cambio: form-select para dropdowns (Bootstrap 5)
             'label' => false,
             'required' => true,
             'empty' => '-- Seleccione un curso --'
@@ -63,7 +63,7 @@
                 'aprobada' => 'Aprobada',
                 'rechazada' => 'Rechazada'
             ],
-            'class' => 'form-control',
+            'class' => 'form-select', // ✅ Cambio: form-select para dropdowns (Bootstrap 5)
             'label' => false,
             'default' => 'pendiente'
         ]) ?>
@@ -89,10 +89,13 @@
     <!-- Botones de acción -->
     <div class="col-12 mt-4">
         <div class="d-flex gap-2">
-            <?= $this->Form->button(__('Guardar Inscripción'), [
-                'class' => 'btn btn-primary',
-                'escape' => false
-            ]) ?>
+            <?= $this->Form->button(
+                '<i class="fas fa-save"></i> ' . __('Guardar Inscripción'), // ✅ Agregado: Ícono para consistencia
+                [
+                    'class' => 'btn btn-primary',
+                    'escape' => false
+                ]
+            ) ?>
             <?= $this->Html->link(
                 '<i class="fas fa-times"></i> ' . __('Cancelar'),
                 ['action' => 'index'],

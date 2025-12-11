@@ -163,4 +163,111 @@ class AppController extends Controller
         // Permitir acciones sin autenticación
         $this->Authentication->addUnauthenticatedActions(['login', 'logout']);
     }
+
+    // =========================================================================
+    // MÉTODOS HELPER OPTIMIZADOS
+    // =========================================================================
+    
+    /**
+     * Obtiene el rol del usuario actual
+     * 
+     * Descripción: Método helper que simplifica la obtención del rol del usuario
+     * autenticado. Evita repetir la lógica de autenticación en cada controlador.
+     * 
+     * Uso:
+     * $role = $this->getUserRole();
+     * if ($role === 3) { // Estudiante
+     *     // Lógica específica para estudiantes
+     * }
+     * 
+     * @return int|null ID del rol (1=Admin, 2=Docente, 3=Estudiante) o null si no está autenticado
+     */
+    protected function getUserRole(): ?int
+    {
+        $user = $this->Authentication->getIdentity();
+        return $user ? $user->role_id : null;
+    }
+
+    /**
+     * Verifica si la acción actual está en la lista de acciones permitidas
+     * 
+     * Descripción: Simplifica la validación de permisos en beforeFilter.
+     * Evita repetir la lógica de in_array() y getParam() en cada controlador.
+     * 
+     * Uso:
+     * if ($this->isAllowedAction(['index', 'view'])) {
+     *     // La acción está permitida
+     * }
+     * 
+     * @param array $allowedActions Lista de acciones permitidas
+     * @return bool true si la acción actual está permitida, false si no
+     */
+    protected function isAllowedAction(array $allowedActions): bool
+    {
+        $action = $this->request->getParam('action');
+        return in_array($action, $allowedActions);
+    }
+
+    /**
+     * Redirige al dashboard según el rol del usuario
+     * 
+     * Descripción: Centraliza la lógica de redirección post-login o cuando
+     * un usuario intenta acceder a una sección no permitida. Cada rol tiene
+     * su dashboard predeterminado.
+     * 
+     * Uso:
+     * return $this->redirectByRole();
+     * 
+     * @return \Cake\Http\Response
+     */
+    protected function redirectByRole()
+    {
+        $role = $this->getUserRole();
+        
+        // Mapa de roles a sus dashboards correspondientes
+        $redirects = [
+            1 => ['controller' => 'Users', 'action' => 'index'],    // Admin → Gestión de usuarios
+            2 => ['controller' => 'Cursos', 'action' => 'index'],   // Docente → Gestión de cursos
+            3 => ['controller' => 'Cursos', 'action' => 'student']  // Estudiante → Catálogo de cursos
+        ];
+        
+        // Si no hay rol o es desconocido, redirigir a login
+        return $this->redirect($redirects[$role] ?? ['controller' => 'Users', 'action' => 'login']);
+    }
+
+    /**
+     * Maneja la respuesta de acceso no autorizado
+     * 
+     * Descripción: Estandariza el manejo de accesos no autorizados en todo el sistema.
+     * Muestra un mensaje de error y redirige al usuario según su rol o a una ruta específica.
+     * 
+     * Uso:
+     * // Con mensaje y redirección personalizados
+     * return $this->unauthorized(
+     *     'No puedes editar este recurso',
+     *     ['controller' => 'Cursos', 'action' => 'index']
+     * );
+     * 
+     * // Solo con mensaje (redirige según rol)
+     * return $this->unauthorized('Acceso denegado');
+     * 
+     * // Sin parámetros (mensaje genérico, redirige según rol)
+     * return $this->unauthorized();
+     * 
+     * @param string|null $message Mensaje personalizado de error. Si es null, usa mensaje genérico
+     * @param array|null $redirect Ruta de redirección personalizada. Si es null, usa redirectByRole()
+     * @return \Cake\Http\Response
+     */
+    protected function unauthorized(?string $message = null, ?array $redirect = null)
+    {
+        // Mostrar mensaje de error (personalizado o genérico)
+        $this->Flash->error($message ?? __('No tienes permiso para acceder a esta sección.'));
+        
+        // Redirigir a ruta específica o según el rol del usuario
+        if ($redirect) {
+            return $this->redirect($redirect);
+        }
+        
+        return $this->redirectByRole();
+    }
 }

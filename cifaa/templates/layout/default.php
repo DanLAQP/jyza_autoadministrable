@@ -131,6 +131,20 @@
                         <p>Cursos</p>
                     </a>
                 </li>
+
+                <!-- Calculadoras estadísticas - Visible para todos los roles -->
+                <li class="nav-item">
+                    <a href="<?= $this->Url->build(['controller' => 'Statistics', 'action' => 'sampleSize']) ?>" class="nav-link">
+                        <i class="fas fa-calculator nav-icon"></i>
+                        <p>Calculadora Tamaño de Muestra</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?= $this->Url->build(['controller' => 'Statistics', 'action' => 'marginOfError']) ?>" class="nav-link">
+                        <i class="fas fa-percent nav-icon"></i>
+                        <p>Calculadora Margen de Error</p>
+                    </a>
+                </li>
                 
                 <?php if (in_array($usuario->rol, [1])): ?>
                 <li class="nav-item">

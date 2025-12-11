@@ -380,7 +380,7 @@ class CursosController extends AppController
         // Solo para estudiantes autenticados
         $usuarioActual = $this->Authentication->getIdentity();
         
-        if (!$usuarioActual || $usuarioActual->role_id != 3) {
+        if (!$usuarioActual || $usuarioActual->rol != 3) {
             $this->Flash->error(__('Esta sección es solo para estudiantes.'));
             return $this->redirect(['action' => 'index']);
         }
@@ -422,7 +422,7 @@ class CursosController extends AppController
      * directamente en este método cuando se necesita acceder a la tabla de inscripciones.
      * 
      * Proceso optimizado para estudiantes:
-     * 1. Valida que el usuario esté autenticado y sea estudiante (role_id = 3)
+    * 1. Valida que el usuario esté autenticado y sea estudiante (rol = 3)
      * 2. Verifica que el curso exista en la base de datos
      * 3. Verifica que no tenga inscripción previa (cualquier estado: pendiente/aprobada/rechazada)
      * 4. Crea automáticamente la inscripción en estado 'pendiente' con progreso 0
@@ -452,8 +452,8 @@ class CursosController extends AppController
             return $this->redirect(['controller' => 'Users', 'action' => 'login']);
         }
         
-        // VALIDACIÓN 2: Solo estudiantes (role_id = 3)
-        if ($usuarioActual->role_id != 3) {
+        // VALIDACIÓN 2: Solo estudiantes (rol = 3)
+        if ($usuarioActual->rol != 3) {
             $this->Flash->error(__('Solo los estudiantes pueden solicitar inscripción.'));
             return $this->redirect(['action' => 'student']);
         }
@@ -506,52 +506,17 @@ class CursosController extends AppController
             $this->Flash->success(__('¡Solicitud enviada! Tu inscripción a "{0}" está pendiente de aprobación.', $curso->titulo), [
                 'params' => ['class' => 'alert-success']
             ]);
-                // VALIDACIÓN 4: No tiene inscripción previa
-                $inscripcionesTable = $this->fetchTable('Inscripciones');
-                $this->log('Intentando inscripción: usuario_id=' . $usuarioActual->id . ', curso_id=' . $id, 'info');
-                $inscripcionExistente = $inscripcionesTable->find()
-                    ->where([
-                        'Inscripciones.usuario_id' => $usuarioActual->id,
-                        'Inscripciones.curso_id' => $id
-                    ])
-                    ->first();
-                if ($inscripcionExistente) {
-                    $this->log('Ya existe inscripción previa. Estado: ' . $inscripcionExistente->estado, 'info');
-                    // Ya existe inscripción
-                    if ($inscripcionExistente->estado === 'aprobada') {
-                        $this->Flash->warning(__('Ya estás inscrito en este curso.'));
-                    } elseif ($inscripcionExistente->estado === 'pendiente') {
-                        $this->Flash->warning(__('Ya tienes una solicitud pendiente para este curso.'));
-                    } else {
-                        $this->Flash->error(__('Tu solicitud fue rechazada. Contacta al administrador.'));
-                    }
-                    return $this->redirect(['action' => 'view', $id]);
-                }
+        } else {
+            $errores = $inscripcion->getErrors();
+            $mensajeError = 'No se pudo guardar la inscripción.';
+            if (!empty($errores)) {
+                $mensajeError .= ' Errores: ' . json_encode($errores);
+            }
+            $this->log($mensajeError, 'error');
+            $this->Flash->error(__('No se pudo completar la solicitud. Inténtalo nuevamente.'));
+        }
+        return $this->redirect(['action' => 'view', $id]);
 
-                // CREAR INSCRIPCIÓN
-                $inscripcion = $inscripcionesTable->newEntity([
-                    'usuario_id' => $usuarioActual->id,
-                    'curso_id' => $id,
-                    'progreso' => 0,
-                    'estado' => 'pendiente'
-                ]);
+    } // <-- cierre del método solicitar
 
-                $this->log('Datos de inscripción: ' . json_encode($inscripcion->toArray()), 'info');
-                // GUARDAR
-                if ($inscripcionesTable->save($inscripcion)) {
-                    $this->log('Inscripción guardada correctamente.', 'info');
-                    $this->Flash->success(__('¡Solicitud enviada! Tu inscripción a "{0}" está pendiente de aprobación.', $curso->titulo), [
-                        'params' => ['class' => 'alert-success']
-                    ]);
-                } else {
-                    // Error al guardar - mostrar detalles
-                    $errores = $inscripcion->getErrors();
-                    $mensajeError = 'No se pudo guardar la inscripción.';
-                    if (!empty($errores)) {
-                        $mensajeError .= ' Errores: ' . json_encode($errores);
-                    }
-                    $this->log($mensajeError, 'error');
-                    $this->Flash->error(__('No se pudo completar la solicitud. Inténtalo nuevamente.'));
-                }
-
-                return $this->redirect(['action' => 'view', $id]);
+} // <-- cierre de la clase CursosController

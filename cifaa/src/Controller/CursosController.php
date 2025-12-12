@@ -127,19 +127,24 @@ class CursosController extends AppController
         $estaRechazado = false;
         $progresoUsuario = 0;
 
-        // Verificar estado de inscripción del usuario actual
+        // Verificar estado de inscripción del usuario actual de forma explícita
         if ($identity) {
-            foreach ($curso->inscripciones as $insc) {
-                if ($insc->usuario_id == $identity->id) {
-                    if ($insc->estado === 'aprobada') {
-                        $estaAprobado = true;
-                        $progresoUsuario = $insc->progreso;
-                    } elseif ($insc->estado === 'pendiente') {
-                        $estaPendiente = true;
-                    } elseif ($insc->estado === 'rechazada') {
-                        $estaRechazado = true;
-                    }
-                    break;
+            $inscripcionesTable = $this->fetchTable('Inscripciones');
+            $inscripcion = $inscripcionesTable->find()
+                ->where([
+                    'usuario_id' => $identity->id,
+                    'curso_id' => $id
+                ])
+                ->first();
+
+            if ($inscripcion) {
+                if ($inscripcion->estado === 'aprobada') {
+                    $estaAprobado = true;
+                    $progresoUsuario = $inscripcion->progreso;
+                } elseif ($inscripcion->estado === 'pendiente') {
+                    $estaPendiente = true;
+                } elseif ($inscripcion->estado === 'rechazada') {
+                    $estaRechazado = true;
                 }
             }
         }
@@ -452,10 +457,10 @@ class CursosController extends AppController
             return $this->redirect(['controller' => 'Users', 'action' => 'login']);
         }
         
-        // VALIDACIÓN 2: Solo estudiantes (rol = 3)
-        if ($usuarioActual->rol != 3) {
-            $this->Flash->error(__('Solo los estudiantes pueden solicitar inscripción.'));
-            return $this->redirect(['action' => 'student']);
+        // VALIDACIÓN 2: Permitir a todos los roles autenticados (Estudiantes, Docentes, Admins)
+        // Se ha removido la restricción de solo estudiantes para permitir que docentes y admins también se inscriban.
+        if (!$usuarioActual) {
+             return $this->redirect(['controller' => 'Users', 'action' => 'login']);
         }
         
         // VALIDACIÓN 3: Curso existe y está publicado
@@ -490,7 +495,7 @@ class CursosController extends AppController
             } else {
                 $this->Flash->error(__('Tu solicitud fue rechazada. Contacta al administrador.'));
             }
-            return $this->redirect(['action' => 'student']);
+            return $this->redirect(['action' => 'view', $id]);
         }
         
         // CREAR INSCRIPCIÓN

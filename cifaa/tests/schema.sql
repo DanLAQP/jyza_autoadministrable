@@ -4,6 +4,7 @@ CREATE TABLE `users` (
   `username` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `rol` int(11) NOT NULL,
+  `dni` varchar(20) DEFAULT NULL,
   `created` datetime NOT NULL,
   `modified` datetime NOT NULL,
   `estado` varchar(50) NOT NULL DEFAULT 'activo'

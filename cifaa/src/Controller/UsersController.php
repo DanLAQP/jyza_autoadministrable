@@ -37,6 +37,13 @@ class UsersController extends AppController
         }
         
         $query = $this->Users->find();
+
+        // Filtro por DNI
+        $dni = $this->request->getQuery('dni');
+        if (!empty($dni)) {
+            $query->where(['Users.dni LIKE' => '%' . $dni . '%']);
+        }
+        
         $users = $this->paginate($query);
 
         $this->set(compact('users'));

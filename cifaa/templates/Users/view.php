@@ -34,6 +34,16 @@
             </div>
         </div>
 
+        <!-- Campo: DNI -->
+        <div class="row mb-3">
+            <div class="col-3">
+                <p class="label-text"><?= __('DNI:') ?></p>
+            </div>
+            <div class="col-9">
+                <div class="data-box"><?= h($user->dni) ?></div>
+            </div>
+        </div>
+
         <!-- Campo: Rol -->
         <div class="row mb-3">
             <div class="col-3">

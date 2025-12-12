@@ -20,6 +20,7 @@ class UsersFixture extends TestFixture
         'username' => ['type' => 'string', 'length' => 255, 'null' => false, 'default' => null, 'comment' => ''],
         'password' => ['type' => 'string', 'length' => 255, 'null' => false, 'default' => null, 'comment' => ''],
         'rol' => ['type' => 'integer', 'length' => null, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
+        'dni' => ['type' => 'string', 'length' => 20, 'null' => true, 'default' => null, 'comment' => ''],
         'created' => ['type' => 'datetime', 'length' => null, 'precision' => null, 'null' => false, 'default' => null, 'comment' => ''],
         'modified' => ['type' => 'datetime', 'length' => null, 'precision' => null, 'null' => false, 'default' => null, 'comment' => ''],
         'estado' => ['type' => 'string', 'length' => 50, 'null' => false, 'default' => 'activo', 'comment' => ''],
@@ -41,6 +42,7 @@ class UsersFixture extends TestFixture
                 'username' => 'admin',
                 'password' => 'password', // admin
                 'rol' => 1,
+                'dni' => '12345678',
                 'created' => '2025-02-05 05:16:33',
                 'modified' => '2025-02-05 05:16:33',
             ],
@@ -49,6 +51,7 @@ class UsersFixture extends TestFixture
                 'username' => 'student',
                 'password' => 'password', // student
                 'rol' => 3,
+                'dni' => '87654321',
                 'created' => '2025-02-05 05:16:33',
                 'modified' => '2025-02-05 05:16:33',
             ],
@@ -57,6 +60,7 @@ class UsersFixture extends TestFixture
                 'username' => 'teacher',
                 'password' => 'password', // teacher
                 'rol' => 2,
+                'dni' => '11223344',
                 'created' => '2025-02-05 05:16:33',
                 'modified' => '2025-02-05 05:16:33',
             ],

@@ -28,6 +28,15 @@
             ]) ?>
         </div>
 
+        <!-- Campo: DNI -->
+        <div class="col-md-6 mb-3">
+            <?= $this->Form->control('dni', [
+                'label' => 'DNI',
+                'class' => 'form-control',
+                'placeholder' => 'Ingrese DNI'
+            ]) ?>
+        </div>
+
         <!-- Campo: Password -->
         <div class="col-md-6 mb-3">
             <?= $this->Form->control('password', [

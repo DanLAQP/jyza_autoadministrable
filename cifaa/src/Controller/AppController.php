@@ -185,7 +185,7 @@ class AppController extends Controller
     protected function getUserRole(): ?int
     {
         $user = $this->Authentication->getIdentity();
-        return $user ? $user->role_id : null;
+        return $user ? $user->rol : null;
     }
 
     /**

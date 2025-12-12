@@ -83,6 +83,11 @@ class UsersTable extends Table
             ->notEmptyString('estado')
             ->inList('estado', ['activo', 'inactivo']);
 
+        $validator
+            ->scalar('dni')
+            ->maxLength('dni', 20)
+            ->allowEmptyString('dni'); // Optional for legacy users, arguably could be requirePresence('dni', 'create') if we enforce it
+
         return $validator;
     }
 
@@ -96,6 +101,7 @@ class UsersTable extends Table
     public function buildRules(RulesChecker $rules): RulesChecker
     {
         $rules->add($rules->isUnique(['username']), ['errorField' => 'username']);
+        $rules->add($rules->isUnique(['dni'], ['allowMultipleNulls' => true]), ['errorField' => 'dni', 'message' => 'Este DNI ya está registrado.']);
 
         return $rules;
     }

@@ -89,6 +89,12 @@ class CursosController extends AppController
      */
     public function index()
     {
+        // Si es estudiante, redirigir a vista de estudiante
+        $identity = $this->Authentication->getIdentity();
+        if ($identity && $identity->rol == 3) {
+            return $this->redirect(['action' => 'student']);
+        }
+
         $query = $this->Cursos->find()
             ->contain(['Users']);
         $cursos = $this->paginate($query);
@@ -382,7 +388,6 @@ class CursosController extends AppController
      */
     public function student()
     {
-        // Solo para estudiantes autenticados
         $usuarioActual = $this->Authentication->getIdentity();
         
         if (!$usuarioActual || $usuarioActual->rol != 3) {
@@ -390,31 +395,51 @@ class CursosController extends AppController
             return $this->redirect(['action' => 'index']);
         }
         
-        // Obtener ID del usuario actual
         $usuarioId = $usuarioActual->id;
-        
-        // PASO 1: Cargar SOLO cursos activos (sin inscripciones)
-        $cursosQuery = $this->Cursos->find()
-            ->where(['Cursos.estado' => 'activo'])
-            ->contain(['Users', 'Modulos'])
-            ->orderBy(['Cursos.created' => 'DESC']);
-        
-        // Paginar resultados (9 cursos por página para grid 3x3)
-        $cursos = $this->paginate($cursosQuery, [
-            'limit' => 9
-        ]);
-        
-        // PASO 2: Buscar TODAS las inscripciones del usuario en query separado
         $inscripcionesTable = $this->fetchTable('Inscripciones');
-        
-        $inscripcionesDelUsuario = $inscripcionesTable->find()
+
+        // 1. Obtener todas las inscripciones del usuario con los datos del curso
+        $todasInscripciones = $inscripcionesTable->find()
             ->where(['Inscripciones.usuario_id' => $usuarioId])
-            ->all()
-            ->indexBy('curso_id') // Indexar por curso_id para acceso O(1)
-            ->toArray();
+            ->contain([
+                'Cursos' => ['Users'], // Necesitamos el autor del curso
+                'Users' 
+            ])
+            ->all();
+
+        // 2. Segmentar inscripciones en memoria
+        $matriculados = [];
+        $pendientes = [];
+        $cursosInteractuadosIds = [];
+
+        foreach ($todasInscripciones as $inscripcion) {
+            $cursosInteractuadosIds[] = $inscripcion->curso_id;
+            
+            if ($inscripcion->estado === 'aprobada') {
+                $matriculados[] = $inscripcion;
+            } elseif ($inscripcion->estado === 'pendiente') {
+                $pendientes[] = $inscripcion;
+            }
+            // Las rechazadas se ignoran para las listas visibles, pero se guardan sus IDs
+            // para no mostrarlas de nuevo en "Disponibles" (o dependerá de la lógica de negocio).
+            // Si queremos permitir solicitar de nuevo un rechazado, no lo agregamos a $cursosInteractuadosIds.
+            // Asumimos que rechazado = no disponible para solicitar de nuevo inmediatamente.
+        }
+
+        // 3. Buscar cursos disponibles (Activos y NO inscritos/pendientes)
+        $queryDisponibles = $this->Cursos->find()
+            ->where(['Cursos.estado' => 'activo']);
+            
+        if (!empty($cursosInteractuadosIds)) {
+            $queryDisponibles->where(['Cursos.id NOT IN' => $cursosInteractuadosIds]);
+        }
         
-        // PASO 3: Pasar ambas variables a la vista
-        $this->set(compact('cursos', 'inscripcionesDelUsuario'));
+        $queryDisponibles->contain(['Users'])
+            ->orderBy(['Cursos.created' => 'DESC']);
+
+        $disponibles = $this->paginate($queryDisponibles, ['limit' => 9]);
+
+        $this->set(compact('matriculados', 'pendientes', 'disponibles'));
     }
 
     /**

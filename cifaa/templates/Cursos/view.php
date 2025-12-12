@@ -28,7 +28,7 @@ $identity = $this->getRequest()->getAttribute('identity');
             <!-- Cover / Miniatura Grande -->
             <div class="mb-3 position-relative">
                 <?php if (!empty($curso->miniatura)): ?>
-                    <img src="<?= $this->Url->assetUrl($curso->miniatura) ?>"
+                    <img src="<?= (strpos($curso->miniatura, 'http') === 0) ? $curso->miniatura : $this->Url->image($curso->miniatura) ?>"
                          alt="<?= h($curso->titulo) ?>"
                          class="img-fluid rounded-3 w-100"
                          style="max-height: 420px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
@@ -345,7 +345,7 @@ $identity = $this->getRequest()->getAttribute('identity');
             <div class="d-grid">
                 <?= $this->Html->link(
                     '<i class="fas fa-arrow-left me-1"></i> Volver a Cursos',
-                    ['action' => 'index'],
+                    ['action' => ($identity && $identity->rol == 3) ? 'student' : 'index'],
                     ['class' => 'btn btn-secondary', 'escape' => false]
                 ) ?>
             </div>

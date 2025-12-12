@@ -62,3 +62,14 @@ CREATE TABLE `contenidos_leccion` (
   `created` datetime NOT NULL,
   `modified` datetime NOT NULL
 );
+
+CREATE TABLE `certificados` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+    `user_id` int(11) NOT NULL,
+    `curso_id` int(11) NOT NULL,
+    `horas` int(11) NOT NULL,
+    `fecha_emision` date NOT NULL,
+    `codigo` varchar(50) NOT NULL,
+    `created` datetime NOT NULL,
+    `modified` datetime NOT NULL
+);

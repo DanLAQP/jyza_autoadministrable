@@ -15,11 +15,13 @@ class AddDniToUsers extends AbstractMigration
     public function change(): void
     {
         $table = $this->table('users');
-        $table->addColumn('dni', 'string', [
-            'default' => null,
-            'limit' => 20,
-            'null' => false,
-        ]);
-        $table->update();
+        if (!$table->hasColumn('dni')) {
+            $table->addColumn('dni', 'string', [
+                'default' => null,
+                'limit' => 20,
+                'null' => false,
+            ]);
+            $table->update();
+        }
     }
 }

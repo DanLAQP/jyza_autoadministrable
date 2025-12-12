@@ -146,7 +146,16 @@
                     </a>
                 </li>
                 
-                <?php if (in_array($usuario->rol, [1])): ?>
+                <!-- Mis Certificados - Visible solo para estudiantes (Rol 3) -->
+                <?php if (isset($usuario) && $usuario->rol == 3): ?>
+                <li class="nav-item">
+                    <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'misCertificados']) ?>" class="nav-link">
+                        <i class="fas fa-certificate nav-icon"></i>
+                        <p>Mis Certificados</p>
+                    </a>
+                </li>
+                <?php endif; ?>
+                <?php if (isset($usuario) && $usuario->rol == 1): ?>
                 <li class="nav-item">
                     <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'index']) ?>" class="nav-link">
                         <i class="fas fa-users-cog nav-icon"></i>
@@ -169,6 +178,12 @@
                     <a href="<?= $this->Url->build(['controller' => 'ContenidosLeccion', 'action' => 'index']) ?>" class="nav-link">
                         <i class="fas fa-file-alt nav-icon"></i>
                         <p>Contenidos Lección</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'index']) ?>" class="nav-link">
+                        <i class="fas fa-certificate nav-icon"></i>
+                        <p>Certificados</p>
                     </a>
                 </li>
                 <li class="nav-item">

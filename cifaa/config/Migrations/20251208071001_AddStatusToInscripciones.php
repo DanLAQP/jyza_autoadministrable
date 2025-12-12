@@ -14,12 +14,16 @@ class AddStatusToInscripciones extends AbstractMigration
      */
     public function change(): void
     {
+        /*
         $table = $this->table('inscripciones');
-        $table->addColumn('estado', 'enum', [
-            'values' => ['pendiente', 'aprobada', 'rechazada'],
-            'default' => 'pendiente',
-            'comment' => 'Estado de la inscripción: pendiente, aprobada, rechazada'
-        ]);
-        $table->update();
+        if (!$table->hasColumn('estado')) {
+            $table->addColumn('estado', 'string', [
+                'limit' => 20,
+                'default' => 'pendiente',
+                'comment' => 'Estado de la inscripción: pendiente, aprobada, rechazada'
+            ]);
+            $table->update();
+        }
+        */
     }
 }

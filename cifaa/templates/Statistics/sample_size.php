@@ -91,15 +91,15 @@
             <div class="mb-3">
                 <label for="margin_error" class="calc-label">Margen de error permitido (e):</label>
                 <div class="input-group">
-                    <input type="number" step="0.1" min="0.1" id="margin_error" class="form-control" required>
+                    <input type="number" step="0.1" min="0.1" id="margin_error" class="form-control" required autocomplete="off">
                     <span class="input-group-text">%</span>
                 </div>
             </div>
             <div class="mb-3">
                 <label for="population" class="calc-label">Tamaño de población (N):</label>
-                <input type="number" min="0" id="population" class="form-control" required>
+                <input type="number" min="0" id="population" class="form-control" autocomplete="off">
             </div>
-            <button type="submit" class="calc-btn w-100">Calcular</button>
+            <button type="button" id="calcBtn" class="calc-btn w-100">Calcular</button>
         </form>
         <div class="calc-result" id="sampleSizeResult" style="display:flex;">
             <div id="sampleSizeNumber" class="calc-number" style="display:none;"></div>
@@ -111,30 +111,33 @@
     </div>
 </div>
 <script>
-    document.getElementById('sampleSizeForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+    document.getElementById('calcBtn').addEventListener('click', function() {
         const ePercent = parseFloat(document.getElementById('margin_error').value);
-        const N = parseInt(document.getElementById('population').value);
+        const Nval = document.getElementById('population').value;
+        const N = Nval === '' ? 0 : parseInt(Nval);
         const z = 1.96, p = 0.5, q = 0.5;
         const e = ePercent / 100.0;
         let result = '';
         let number = '';
-        if (e <= 0) {
+        const numberDiv = document.getElementById('sampleSizeNumber');
+        const textDiv = document.getElementById('sampleSizeText');
+        if (isNaN(e) || e <= 0) {
             result = '<span style="color:#c82333;font-weight:600;">El margen de error debe ser mayor que 0.</span>';
-            document.getElementById('sampleSizeNumber').style.display = 'none';
+            numberDiv.style.display = 'none';
+            numberDiv.textContent = '';
         } else {
             const n0 = (Math.pow(z,2) * p * q) / Math.pow(e,2);
             let n;
-            if (N > 0 && N <= 100000) {
+            if (!isNaN(N) && N > 0 && N <= 100000) {
                 n = (N * n0) / ((N - 1) + n0);
             } else {
                 n = n0;
             }
             number = Math.ceil(n);
+            numberDiv.textContent = number;
+            numberDiv.style.display = 'block';
             result = 'personas';
-            document.getElementById('sampleSizeNumber').textContent = number;
-            document.getElementById('sampleSizeNumber').style.display = 'block';
         }
-        document.getElementById('sampleSizeText').innerHTML = result;
+        textDiv.innerHTML = result;
     });
 </script>

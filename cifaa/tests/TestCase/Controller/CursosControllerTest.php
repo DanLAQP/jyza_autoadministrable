@@ -16,11 +16,6 @@ class CursosControllerTest extends TestCase
 {
     use IntegrationTestTrait;
 
-    /**
-     * Fixtures
-     *
-     * @var list<string>
-     */
     protected array $fixtures = [
         'app.Cursos',
         'app.Users',
@@ -28,58 +23,108 @@ class CursosControllerTest extends TestCase
         'app.Modulos',
     ];
 
-    /**
-     * Test index method
-     *
-     * @return void
-     * @uses \App\Controller\CursosController::index()
-     */
-    public function testIndex(): void
+    public function testViewUnauthenticated(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/cursos/view/1');
+        $this->assertResponseCode(302); // Redirects to login
+        // $this->assertRedirectcontains('/users/login');
     }
 
-    /**
-     * Test view method
-     *
-     * @return void
-     * @uses \App\Controller\CursosController::view()
-     */
-    public function testView(): void
+    public function testViewAuthenticatedStudent(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        // Mock authentication
+        $this->session([
+            'Auth' => [
+                'id' => 3,
+                'username' => 'student',
+                'rol' => 3
+            ]
+        ]);
+
+        $this->get('/cursos/view/1');
+        $this->assertResponseOk();
+        $this->assertResponseContains('Solicitar Inscripción');
     }
 
-    /**
-     * Test add method
-     *
-     * @return void
-     * @uses \App\Controller\CursosController::add()
-     */
-    public function testAdd(): void
+    public function testSolicitarStudentSuccess(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableCsrfToken();
+        
+        $this->session([
+            'Auth' => [
+                'id' => 3,
+                'username' => 'student',
+                'rol' => 3
+            ]
+        ]);
+
+        $this->post('/cursos/solicitar/1');
+        
+        // Should redirect to view
+        $this->assertRedirect(['controller' => 'Cursos', 'action' => 'view', 1]);
+        
+        // Check flash message (partially)
+        // $this->assertSessionHas('Flash.flash.0.message'); 
+        
+        // Assert record created
+        $inscripciones = $this->getTableLocator()->get('Inscripciones');
+        $query = $inscripciones->find()->where(['usuario_id' => 3, 'curso_id' => 1]);
+        $this->assertEquals(1, $query->count());
+        $inscripcion = $query->first();
+        $this->assertEquals('pendiente', $inscripcion->estado);
     }
 
-    /**
-     * Test edit method
-     *
-     * @return void
-     * @uses \App\Controller\CursosController::edit()
-     */
-    public function testEdit(): void
+    public function testSolicitarAdminSuccess(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableCsrfToken();
+        
+        $this->session([
+            'Auth' => [
+                'id' => 1,
+                'username' => 'admin',
+                'rol' => 1
+            ]
+        ]);
+
+        $this->post('/cursos/solicitar/1');
+        
+        // Should redirect to view, NOT index or student
+        $this->assertRedirect(['controller' => 'Cursos', 'action' => 'view', 1]);
+        
+        $inscripciones = $this->getTableLocator()->get('Inscripciones');
+        $count = $inscripciones->find()->where(['usuario_id' => 1, 'curso_id' => 1])->count();
+        $this->assertEquals(1, $count);
     }
 
-    /**
-     * Test delete method
-     *
-     * @return void
-     * @uses \App\Controller\CursosController::delete()
-     */
-    public function testDelete(): void
+    public function testSolicitarDuplicate(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->enableCsrfToken();
+        
+        // First enrollment
+        $inscripciones = $this->getTableLocator()->get('Inscripciones');
+        $inscripcion = $inscripciones->newEntity([
+            'usuario_id' => 3,
+            'curso_id' => 1,
+            'estado' => 'pendiente',
+            'progreso' => 0
+        ]);
+        $inscripciones->save($inscripcion);
+
+        $this->session([
+            'Auth' => [
+                'id' => 3,
+                'username' => 'student',
+                'rol' => 3
+            ]
+        ]);
+
+        $this->post('/cursos/solicitar/1');
+        
+        // Should redirect to view with warning
+        $this->assertRedirect(['controller' => 'Cursos', 'action' => 'view', 1]);
+        
+        // Count should still be 1
+        $count = $inscripciones->find()->where(['usuario_id' => 3, 'curso_id' => 1])->count();
+        $this->assertEquals(1, $count);
     }
 }

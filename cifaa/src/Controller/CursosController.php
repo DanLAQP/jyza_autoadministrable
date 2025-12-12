@@ -457,23 +457,17 @@ class CursosController extends AppController
             return $this->redirect(['controller' => 'Users', 'action' => 'login']);
         }
         
-        // VALIDACIÓN 2: Permitir a todos los roles autenticados (Estudiantes, Docentes, Admins)
-        // Se ha removido la restricción de solo estudiantes para permitir que docentes y admins también se inscriban.
-        if (!$usuarioActual) {
-             return $this->redirect(['controller' => 'Users', 'action' => 'login']);
-        }
-        
         // VALIDACIÓN 3: Curso existe y está publicado
         try {
             $curso = $this->Cursos->get($id);
             
             if ($curso->estado !== 'activo') {
                 $this->Flash->error(__('Este curso no está disponible para inscripciones.'));
-                return $this->redirect(['action' => 'student']);
+                return $this->redirect(['action' => 'index']);
             }
         } catch (\Exception $e) {
             $this->Flash->error(__('El curso seleccionado no existe.'));
-            return $this->redirect(['action' => 'student']);
+            return $this->redirect(['action' => 'index']);
         }
         
         // VALIDACIÓN 4: No tiene inscripción previa

@@ -37,5 +37,7 @@ class AppView extends View
      */
     public function initialize(): void
     {
+        // Cargar helper personalizado para manejo de assets
+        $this->loadHelper('Asset');
     }
 }

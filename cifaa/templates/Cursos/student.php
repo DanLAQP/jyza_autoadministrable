@@ -35,14 +35,14 @@ $whatsappAdmin = Configure::read('Cifa.whatsapp_admin', '51999999999');
                         <div class="card h-100 shadow-sm border-0 course-card">
                             <a href="<?= $this->Url->build(['action' => 'view', $curso->id]) ?>" class="text-decoration-none">
                                 <div class="mb-3 position-relative">
-                                    <?php if (!empty($curso->miniatura)): ?>
-                                        <img src="<?= (strpos($curso->miniatura, 'http') === 0) ? $curso->miniatura : $this->Url->image($curso->miniatura) ?>"
+                                    <?php if ($this->Asset->exists($curso->miniatura)): ?>
+                                        <img src="<?= h($this->Asset->url($curso->miniatura)) ?>"
                                              alt="<?= h($curso->titulo) ?>"
                                              class="img-fluid rounded-3 w-100"
                                              style="max-height: 200px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
                                     <?php else: ?>
                                         <div class="bg-secondary rounded-3 d-flex align-items-center justify-content-center"
-                                             style="height: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                                             style="height: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
                                             <i class="fas fa-image fa-4x text-muted"></i>
                                         </div>
                                     <?php endif; ?>
@@ -81,8 +81,8 @@ $whatsappAdmin = Configure::read('Cifa.whatsapp_admin', '51999999999');
                     <div class="col-lg-4 col-md-6 col-sm-12">
                         <div class="card h-100 shadow-sm border-warning course-card">
                             <div class="mb-3 position-relative">
-                                <?php if (!empty($curso->miniatura)): ?>
-                                    <img src="<?= (strpos($curso->miniatura, 'http') === 0) ? $curso->miniatura : $this->Url->image($curso->miniatura) ?>"
+                                <?php if ($this->Asset->exists($curso->miniatura)): ?>
+                                    <img src="<?= h($this->Asset->url($curso->miniatura)) ?>"
                                          alt="<?= h($curso->titulo) ?>"
                                          class="img-fluid rounded-3 w-100 opacity-75"
                                          style="max-height: 200px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
@@ -130,8 +130,8 @@ $whatsappAdmin = Configure::read('Cifa.whatsapp_admin', '51999999999');
                         <div class="card h-100 shadow-sm border-0 course-card">
                             <a href="<?= $this->Url->build(['action' => 'view', $curso->id]) ?>" class="text-decoration-none">
                                 <div class="mb-3 position-relative">
-                                    <?php if (!empty($curso->miniatura)): ?>
-                                        <img src="<?= (strpos($curso->miniatura, 'http') === 0) ? $curso->miniatura : $this->Url->image($curso->miniatura) ?>"
+                                    <?php if ($this->Asset->exists($curso->miniatura)): ?>
+                                        <img src="<?= h($this->Asset->url($curso->miniatura)) ?>"
                                              alt="<?= h($curso->titulo) ?>"
                                              class="img-fluid rounded-3 w-100"
                                              style="max-height: 200px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">

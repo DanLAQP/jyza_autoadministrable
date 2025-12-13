@@ -198,12 +198,12 @@ INSERT INTO `sessions` (`id`, `data`, `expires`) VALUES
 --
 -- Estructura de tabla para la tabla `users`
 --
-
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `rol` int(11) NOT NULL,
+  `dni` varchar(20) NOT NULL DEFAULT '00000000',
   `created` datetime NOT NULL,
   `modified` datetime NOT NULL,
   `estado` varchar(50) NOT NULL DEFAULT 'activo'
@@ -213,14 +213,12 @@ CREATE TABLE `users` (
 -- Volcado de datos para la tabla `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`, `rol`, `created`, `modified`, `estado`) VALUES
-(1, 'admin', '$2y$10$OqwGqOf0MsTsVZFsg9KPF.rW9nWbW7IOnOt4c9QyE117iKrlkWv9S', 1, '2025-11-27 01:16:52', '2025-11-27 01:17:23', 'activo'),
-(2, 'usuario', '$2y$10$a.dafU5XV3UqCq9vP.81X.r/5LvWAin/KYPV3qKAWcTM90K9gSLWi', 2, '2025-11-27 01:17:39', '2025-11-27 01:58:55', 'activo'),
-(3, 'user', '$2y$10$3W.D0VA.zVSAqSaQqRREdO6IZbDntdMcQNe6jxJQ3ykmyjSlVG6Lu', 2, '2025-11-27 01:57:25', '2025-12-08 01:59:17', 'activo');
-
---
--- Índices para tablas volcadas
---
+INSERT INTO `users` (`id`, `username`, `password`, `rol`, `dni`, `created`, `modified`, `estado`) VALUES
+(1, 'admin', '$2y$10$OqwGqOf0MsTsVZFsg9KPF.rW9nWbW7IOnOt4c9QyE117iKrlkWv9S', 1, '00000000', '2025-11-27 01:16:52', '2025-11-27 01:17:23', 'activo'),
+(2, 'usuario', '$2y$10$a.dafU5XV3UqCq9vP.81X.r/5LvWAin/KYPV3qKAWcTM90K9gSLWi', 2, '00000000', '2025-11-27 01:17:39', '2025-11-27 01:58:55', 'activo'),
+(3, 'user', '$2y$10$3W.D0VA.zVSAqSaQqRREdO6IZbDntdMcQNe6jxJQ3ykmyjSlVG6Lu', 3, '00000000', '2025-11-27 01:57:25', '2025-12-08 01:59:17', 'activo'),
+(4, 'docente', '$2y$10$jO2pjnEJXjpvVcXh4A3jAOe6UZvGv3YxK6m8pL5wQ9r2sT1uV0X9y', 2, '00000000', '2025-12-09 10:05:00', '2025-12-09 10:05:00', 'activo'),
+(5, 'estudiante', '$2y$10$gK1R9lT8m7N5o6Q2p3S4u5V6w7X8y9Z0a1B2c3D4e5F6g7H8i9J0k', 3, '00000000', '2025-12-09 10:10:00', '2025-12-09 10:10:00', 'activo');
 
 --
 -- Indices de la tabla `contenidos_leccion`
@@ -314,7 +312,7 @@ ALTER TABLE `modulos`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Restricciones para tablas volcadas

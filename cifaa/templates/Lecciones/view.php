@@ -180,7 +180,7 @@ $principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion
                                 <p class="text-muted">Recurso principal no compatible para previsualizar.</p>
                                 <a href="<?= $this->Url->assetUrl($principal->archivo) ?>" download class="btn btn-info">
                                     <i class="fas fa-download me-1"></i>Descargar
-                                </a>
+                                </a>    
                             </div>
                         <?php endif; ?>
                     <?php else: ?>
@@ -374,11 +374,22 @@ $principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion
                                         </span>
                                     </div>
                                 </div>
-                                <a href="<?= $this->Url->assetUrl($cont->archivo) ?>" download
-                                   class="btn btn-outline-success btn-sm rounded-circle"
-                                   title="Descargar">
-                                    <i class="fas fa-download"></i>
-                                </a>
+                                
+                                <!-- Restricción: Solo Admin (rol 1) y Docente (rol 2) pueden descargar -->
+                                <?php if (!empty($identity) && in_array($identity->rol, [1, 2])): ?>
+                                    <a href="<?= $this->Url->assetUrl($cont->archivo) ?>" download
+                                       class="btn btn-outline-success btn-sm rounded-circle"
+                                       title="Descargar archivo">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                <?php else: ?>
+                                    <!-- Botón deshabilitado para estudiantes -->
+                                    <button class="btn btn-outline-secondary btn-sm rounded-circle" 
+                                            disabled 
+                                            title="Descarga no disponible para estudiantes">
+                                        <i class="fas fa-lock"></i>
+                                    </button>
+                                <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>

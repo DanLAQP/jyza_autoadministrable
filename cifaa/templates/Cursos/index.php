@@ -127,15 +127,40 @@
 
     <!-- Paginación -->
     <?php if (!empty($cursos)): ?>
-        <nav aria-label="Page navigation" class="mt-5">
-            <ul class="pagination justify-content-center">
-                <?= $this->Paginator->first('<i class="fas fa-chevron-left"></i><i class="fas fa-chevron-left"></i>', ['escape' => false]) ?>
-                <?= $this->Paginator->prev('<i class="fas fa-chevron-left"></i>', ['escape' => false]) ?>
-                <?= $this->Paginator->numbers(['separator' => '']) ?>
-                <?= $this->Paginator->next('<i class="fas fa-chevron-right"></i>', ['escape' => false]) ?>
-                <?= $this->Paginator->last('<i class="fas fa-chevron-right"></i><i class="fas fa-chevron-right"></i>', ['escape' => false]) ?>
-            </ul>
-        </nav>
+        <div class="mt-5">
+            <nav aria-label="Paginación de cursos">
+                <ul class="pagination justify-content-center pagination-lg">
+                    <?php
+                    echo $this->Paginator->first(
+                        '<i class="fas fa-angle-double-left"></i> Primera', 
+                        ['escape' => false, 'class' => 'btn btn-outline-primary']
+                    );
+                    echo $this->Paginator->prev(
+                        '<i class="fas fa-chevron-left"></i> Anterior', 
+                        ['escape' => false, 'class' => 'btn btn-outline-primary']
+                    );
+                    echo $this->Paginator->numbers([
+                        'modulus' => 4,
+                        'first' => 2,
+                        'last' => 2,
+                        'class' => 'btn btn-outline-primary'
+                    ]);
+                    echo $this->Paginator->next(
+                        'Siguiente <i class="fas fa-chevron-right"></i>', 
+                        ['escape' => false, 'class' => 'btn btn-outline-primary']
+                    );
+                    echo $this->Paginator->last(
+                        'Última <i class="fas fa-angle-double-right"></i>', 
+                        ['escape' => false, 'class' => 'btn btn-outline-primary']
+                    );
+                    ?>
+                </ul>
+            </nav>
+            <p class="text-center text-muted mt-2">
+                <i class="fas fa-info-circle"></i> 
+                <?= $this->Paginator->counter('Página {{page}} de {{pages}}, mostrando {{current}} curso(s) de {{count}} totales') ?>
+            </p>
+        </div>
     <?php endif; ?>
 </div>
 

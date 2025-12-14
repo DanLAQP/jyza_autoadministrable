@@ -46,7 +46,14 @@ class UsersController extends AppController
         
         $users = $this->paginate($query);
 
-        $this->set(compact('users'));
+        // Definir los roles para la vista
+        $roles = [
+            1 => 'Administrador',
+            2 => 'Docente',
+            3 => 'Estudiante'
+        ];
+
+        $this->set(compact('users', 'roles'));
     }
 
     /**

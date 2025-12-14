@@ -1,0 +1,420 @@
+================================================================================
+                    RESUMEN: cifaa_optimizado.sql
+================================================================================
+Archivo:        cifaa_optimizado.sql
+Tamaño:         31.8 KB (315 líneas)
+Fecha Export:   2025-12-13 22:19:21
+Origen:         Docker MySQL 8.0.44
+Destino:        XAMPP MySQL 5.7+ / MariaDB 10.3+
+Codificación:   UTF-8 (utf8mb4_unicode_ci)
+
+================================================================================
+                        ESTRUCTURA DE TABLAS
+================================================================================
+
+1. CERTIFICADOS
+   - Motor: InnoDB
+   - Collation: utf8mb4_general_ci
+   - Campos:
+     * id (INT, PK, AUTO_INCREMENT)
+     * user_id (INT, FK -> users.id)
+     * curso_id (INT, FK -> cursos.id)
+     * horas (INT, DEFAULT 0)
+     * fecha_emision (DATE)
+     * codigo (VARCHAR(50), UNIQUE)
+     * archivo_pdf (VARCHAR(255), NULL) - Ruta relativa del PDF
+     * estado (ENUM: 'activo','anulado', DEFAULT 'activo')
+     * created (DATETIME)
+     * modified (DATETIME)
+   - Índices:
+     * idx_certificados_codigo (UNIQUE)
+     * idx_certificados_user_id
+     * idx_certificados_curso_id
+     * idx_certificados_estado
+   - Relaciones:
+     * ON DELETE CASCADE con users y cursos
+   - Datos: 1 registro
+
+2. CONTENIDOS_LECCION
+   - Motor: InnoDB
+   - Collation: utf8mb4_general_ci
+   - Campos:
+     * id (INT, PK, AUTO_INCREMENT)
+     * leccion_id (INT, FK -> lecciones.id)
+     * tipo (VARCHAR(50)) - texto/video/pdf/imagen/documento
+     * contenido (TEXT, NULL)
+     * archivo (VARCHAR(255), NULL) - Ruta relativa de archivo
+     * posicion (INT, DEFAULT 0)
+     * created (DATETIME)
+     * modified (DATETIME)
+   - Relaciones:
+     * ON DELETE CASCADE con lecciones
+   - Datos: 26 registros
+     * 24 contenidos con HTML (Python, HTML/CSS, Java, MySQL)
+     * 2 contenidos con imágenes (uploads/contenidos_leccion/*.png)
+
+3. CURSOS
+   - Motor: InnoDB
+   - Collation: utf8mb4_general_ci
+   - Campos:
+     * id (INT, PK, AUTO_INCREMENT)
+     * usuario_id (INT, FK -> users.id) - ID del docente creador
+     * titulo (VARCHAR(255))
+     * descripcion (TEXT, NULL)
+     * miniatura (VARCHAR(255), NULL) - Ruta relativa de imagen
+     * nivel (VARCHAR(50), NULL) - basico/intermedio/avanzado
+     * categoria (VARCHAR(100), NULL)
+     * estado (VARCHAR(50), DEFAULT 'borrador') - borrador/publicado/activo
+     * created (DATETIME)
+     * modified (DATETIME)
+   - Relaciones:
+     * ON DELETE CASCADE con users
+   - Datos: 5 cursos
+     1. Python desde Cero (básico)
+     2. Desarrollo Web: HTML & CSS (básico)
+     3. Java: Programación Orientada a Objetos (intermedio)
+     4. Bases de Datos: MySQL Avanzado (intermedio)
+     5. c++ expertos (intermedio)
+
+4. INSCRIPCIONES
+   - Motor: InnoDB
+   - Collation: utf8mb4_general_ci
+   - Campos:
+     * id (INT, PK, AUTO_INCREMENT)
+     * usuario_id (INT, FK -> users.id)
+     * curso_id (INT, FK -> cursos.id)
+     * progreso (INT, DEFAULT 0) - Porcentaje 0-100
+     * created (DATETIME)
+     * modified (DATETIME)
+     * estado (VARCHAR(20), DEFAULT 'pendiente') - pendiente/aprobada/rechazada
+   - Relaciones:
+     * ON DELETE CASCADE con users y cursos
+   - Datos: 4 inscripciones
+     * Usuario 'estudiante' inscrito en 4 cursos
+     * 1 curso con progreso 100% (Python)
+
+5. LECCIONES
+   - Motor: InnoDB
+   - Collation: utf8mb4_general_ci
+   - Campos:
+     * id (INT, PK, AUTO_INCREMENT)
+     * modulo_id (INT, FK -> modulos.id)
+     * titulo (VARCHAR(255))
+     * tipo_contenido (VARCHAR(50), DEFAULT 'texto') - texto/video/pdf
+     * posicion (INT, DEFAULT 0)
+     * created (DATETIME)
+     * modified (DATETIME)
+   - Relaciones:
+     * ON DELETE CASCADE con modulos
+   - Datos: 26 lecciones
+     * Python: 8 lecciones (incluye nuevas de módulo 3)
+     * HTML/CSS: 6 lecciones
+     * Java: 6 lecciones
+     * MySQL: 6 lecciones
+
+6. MODULOS
+   - Motor: InnoDB
+   - Collation: utf8mb4_general_ci
+   - Campos:
+     * id (INT, PK, AUTO_INCREMENT)
+     * curso_id (INT, FK -> cursos.id)
+     * titulo (VARCHAR(255))
+     * posicion (INT, DEFAULT 0)
+     * created (DATETIME)
+     * modified (DATETIME)
+   - Relaciones:
+     * ON DELETE CASCADE con cursos
+   - Datos: 9 módulos
+     * Python: 3 módulos (incluye "módulo 3: python nivel medio")
+     * HTML/CSS: 2 módulos
+     * Java: 2 módulos
+     * MySQL: 2 módulos
+
+7. PHINXLOG (Migraciones)
+   - Motor: InnoDB
+   - Collation: utf8mb4_unicode_ci
+   - Campos:
+     * version (BIGINT, PK)
+     * migration_name (VARCHAR(100), NULL)
+     * start_time (TIMESTAMP, NULL)
+     * end_time (TIMESTAMP, NULL)
+     * breakpoint (TINYINT(1), DEFAULT 0)
+   - Datos: 4 migraciones
+     1. AddStatusToInscripciones
+     2. AddDniToUsers
+     3. CreateCertificados
+     4. AddArchivoPdfToCertificados
+
+8. SESSIONS
+   - Motor: InnoDB
+   - Collation: utf8mb4_general_ci
+   - Campos:
+     * id (VARCHAR(255), PK)
+     * data (TEXT, NULL)
+     * expires (INT, NULL)
+   - Datos: 2 sesiones activas
+     * Sesión de admin
+     * Sesión de estudiante
+
+9. USERS
+   - Motor: InnoDB
+   - Collation: utf8mb4_general_ci
+   - Campos:
+     * id (INT, PK, AUTO_INCREMENT)
+     * username (VARCHAR(255), UNIQUE)
+     * password (VARCHAR(255)) - Hash bcrypt $2y$10$...
+     * rol (INT) - 1=admin, 2=docente, 3=estudiante
+     * dni (VARCHAR(20), DEFAULT '00000000')
+     * created (DATETIME)
+     * modified (DATETIME)
+     * estado (VARCHAR(50), DEFAULT 'activo') - activo/inactivo
+   - Datos: 7 usuarios
+     1. admin (rol=1, dni=12345678)
+     2. docente (rol=2, dni=87654321)
+     3. estudiante (rol=3, dni=11223344)
+     4. juan_perez (rol=3, dni=12345678) ⚠️ PASSWORD TRUNCADO
+     5. maria_lopez (rol=3, dni=87654321) ⚠️ PASSWORD TRUNCADO
+     6. carlos_ruiz (rol=3, dni=45678901) ⚠️ PASSWORD TRUNCADO
+     7. ana_garcia (rol=3, dni=23456789) ⚠️ PASSWORD TRUNCADO
+
+================================================================================
+                        CONTENIDO DE DATOS
+================================================================================
+
+USUARIOS (7 registros):
+  - 1 Administrador: admin
+  - 1 Docente: docente
+  - 5 Estudiantes: estudiante, juan_perez, maria_lopez, carlos_ruiz, ana_garcia
+
+CURSOS (5 registros):
+  1. Python desde Cero (básico, Programación)
+  2. Desarrollo Web: HTML & CSS (básico, Desarrollo Web)
+  3. Java: POO (intermedio, Programación)
+  4. Bases de Datos: MySQL Avanzado (intermedio, Bases de Datos)
+  5. c++ expertos (intermedio, curso c++ bajo nivel)
+
+MÓDULOS (9 registros):
+  Curso 1 (Python): 3 módulos
+  Curso 2 (HTML/CSS): 2 módulos
+  Curso 3 (Java): 2 módulos
+  Curso 4 (MySQL): 2 módulos
+  Curso 5 (C++): 0 módulos
+
+LECCIONES (26 registros):
+  - Todas las lecciones tienen contenido HTML estructurado
+  - Incluyen ejemplos de código
+  - Organizadas por posición
+  - Tipos: texto (todas)
+
+CONTENIDOS (26 registros):
+  - 24 contenidos tipo 'texto' con HTML
+  - 2 contenidos tipo 'imagen' con archivos PNG
+  - Incluyen: tutoriales, ejemplos de código, explicaciones
+
+INSCRIPCIONES (4 registros):
+  - Usuario 'estudiante' inscrito en:
+    * Python (progreso: 100%, estado: aprobada)
+    * HTML/CSS (progreso: 0%, estado: aprobada)
+    * Java (progreso: 0%, estado: aprobada)
+    * MySQL (progreso: 0%, estado: aprobada)
+
+CERTIFICADOS (1 registro):
+  - Usuario 'estudiante' - Curso MySQL (40 horas)
+  - Código: CER-2025-0003-0004-E1FDDE
+  - PDF: uploads\certificados\certificado_CER-2025-0003-0004-E1FDDE.pdf
+  - Estado: activo
+
+================================================================================
+                    COMPATIBILIDAD CON XAMPP MYSQL
+================================================================================
+
+✅ COMPATIBLE:
+  - MySQL 5.7 o superior
+  - MariaDB 10.3 o superior
+  - Codificación UTF-8 (utf8mb4)
+  - Collations ajustadas para XAMPP
+  - Foreign Keys con ON DELETE CASCADE
+  - InnoDB engine en todas las tablas
+  - Auto-increment correcto
+  - Índices optimizados
+
+⚠️ ADVERTENCIAS:
+  1. Caracteres especiales con problemas:
+     - '??' en lugar de 'ó', 'í', 'á', 'ñ', '¿'
+     - Visible en: descripciones de cursos, contenidos de lecciones
+     - Causa: Problema de codificación en export/import
+     
+  2. Passwords truncados (usuarios 4-7):
+     - Usuarios: juan_perez, maria_lopez, carlos_ruiz, ana_garcia
+     - Password actual: '\\./9VAeoAv7Oi0dgnAWlEPFS.zR9o9zPe'
+     - Falta: '$2y$10$oAAQ' al inicio
+     - Solución: Estos usuarios NO podrán hacer login
+     - Recomendación: Resetear passwords después de importar
+
+  3. Versiones de SQL:
+     - Exportado desde: MySQL 8.0.44
+     - Compatible con: MySQL 5.7+
+     - Algunas funciones avanzadas podrían no funcionar en versiones antiguas
+
+================================================================================
+                    PASOS PARA IMPORTAR EN XAMPP
+================================================================================
+
+1. PREPARACIÓN:
+   - Inicia XAMPP
+   - Abre Apache y MySQL
+   - Verifica que MySQL esté corriendo en puerto 3306
+
+2. ACCEDER A phpMyAdmin:
+   - URL: http://localhost/phpmyadmin
+   - Usuario: root
+   - Password: (vacío en XAMPP por defecto)
+
+3. CREAR BASE DE DATOS:
+   - Click en "Nueva" (New)
+   - Nombre: cifaa
+   - Cotejamiento: utf8mb4_unicode_ci
+   - Click "Crear"
+
+4. IMPORTAR ARCHIVO:
+   - Selecciona BD "cifaa"
+   - Click pestaña "Importar"
+   - Click "Seleccionar archivo"
+   - Busca: cifaa_optimizado.sql
+   - Formato: SQL
+   - Codificación: utf-8
+   - Click "Continuar"
+
+5. VERIFICAR IMPORTACIÓN:
+   - Revisa que aparezcan las 9 tablas
+   - Verifica conteo de registros:
+     * users: 7
+     * cursos: 5
+     * modulos: 9
+     * lecciones: 26
+     * contenidos_leccion: 26
+     * inscripciones: 4
+     * certificados: 1
+
+6. CORRECCIONES POST-IMPORTACIÓN:
+
+   A. Arreglar caracteres especiales:
+      UPDATE contenidos_leccion 
+      SET contenido = REPLACE(contenido, '??', 'ó');
+      
+      -- Repetir para: í, á, é, ú, ñ, ¿, ¡
+
+   B. Resetear passwords de usuarios nuevos:
+      -- Para juan_perez, maria_lopez, carlos_ruiz, ana_garcia
+      UPDATE users 
+      SET password = '$2y$10$oAAQDI6qdwbbFvQSKCuH3./9VAeoAv7Oi0dgnAWlEPFS.zR9o9zPe'
+      WHERE id IN (4, 5, 6, 7);
+      -- Password será el mismo que 'estudiante': 123456
+
+================================================================================
+                    ESTRUCTURA DE RELACIONES
+================================================================================
+
+users (1) ──────┬─── cursos (N)
+                │
+                └─── inscripciones (N)
+                │
+                └─── certificados (N)
+
+cursos (1) ─────┬─── modulos (N)
+                │
+                └─── inscripciones (N)
+                │
+                └─── certificados (N)
+
+modulos (1) ────┬─── lecciones (N)
+
+lecciones (1) ──┬─── contenidos_leccion (N)
+
+================================================================================
+                    ARCHIVOS REFERENCIADOS
+================================================================================
+
+IMÁGENES DE CURSOS:
+  - uploads/cursos/python.jpg
+  - uploads/cursos/html.png
+  - uploads/cursos/java.png
+  - uploads/cursos/1765676802_693e170221ce7.png (MySQL)
+  - uploads/cursos/1765680776_693e268820533.png (C++)
+
+CONTENIDOS DE LECCIONES:
+  - uploads/contenidos_leccion/1765680472_693e255872958.png
+  - uploads/contenidos_leccion/1765680706_693e264267e20.png
+
+CERTIFICADOS:
+  - uploads\certificados\certificado_CER-2025-0003-0004-E1FDDE.pdf
+
+NOTA: Estos archivos NO están incluidos en el SQL. Deben copiarse manualmente
+      desde Docker o el servidor de origen.
+
+================================================================================
+                    CREDENCIALES DE USUARIOS
+================================================================================
+
+ADMIN:
+  Username: admin
+  Password: admin123
+  Rol: 1 (Administrador)
+  DNI: 12345678
+
+DOCENTE:
+  Username: docente
+  Password: docente123
+  Rol: 2 (Docente)
+  DNI: 87654321
+
+ESTUDIANTE:
+  Username: estudiante
+  Password: 123456
+  Rol: 3 (Estudiante)
+  DNI: 11223344
+
+ESTUDIANTES ADICIONALES (PASSWORDS CORRUPTOS):
+  Username: juan_perez / maria_lopez / carlos_ruiz / ana_garcia
+  Password: ⚠️ CORRUPTO - Necesita reset
+  Rol: 3 (Estudiante)
+
+================================================================================
+                    RESUMEN FINAL
+================================================================================
+
+✅ BASE DE DATOS COMPLETA:
+  - 9 tablas con estructura correcta
+  - 70+ registros de datos
+  - Relaciones funcionales
+  - Índices optimizados
+  - Motor InnoDB
+  - UTF-8 (utf8mb4)
+
+⚠️ CORRECCIONES NECESARIAS:
+  1. Caracteres especiales (???)
+  2. Passwords truncados (usuarios 4-7)
+  3. Copiar archivos uploads/ manualmente
+
+✅ COMPATIBLE CON:
+  - XAMPP MySQL 5.7+
+  - MariaDB 10.3+
+  - phpMyAdmin
+  - CakePHP 4.x
+
+📊 ESTADÍSTICAS:
+  - Tamaño: 31.8 KB
+  - Usuarios: 7
+  - Cursos: 5 (con contenido completo)
+  - Módulos: 9
+  - Lecciones: 26
+  - Contenidos: 26
+  - Inscripciones: 4
+  - Certificados: 1
+
+================================================================================
+                    FIN DEL RESUMEN
+================================================================================
+Generado: 2025-12-13
+Archivo: cifaa_optimizado.sql
+Versión: 1.0

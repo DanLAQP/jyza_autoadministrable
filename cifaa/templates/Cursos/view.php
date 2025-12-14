@@ -25,28 +25,6 @@ $identity = $this->getRequest()->getAttribute('identity');
         <!-- COLUMNA PRINCIPAL (Contenido del curso)      -->
         <!-- ============================================ -->
         <div class="col-lg-8 mb-4">
-            <!-- Cover / Miniatura Grande -->
-            <div class="mb-3 position-relative">
-                <?php if (!empty($curso->miniatura)): ?>
-                    <img src="<?= (strpos($curso->miniatura, 'http') === 0) ? $curso->miniatura : $this->Url->image($curso->miniatura) ?>"
-                         alt="<?= h($curso->titulo) ?>"
-                         class="img-fluid rounded-3 w-100"
-                         style="max-height: 420px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-                    <?php if ($estaAprobado): ?>
-                        <div class="position-absolute top-50 start-50 translate-middle">
-                            <button class="btn btn-light rounded-circle shadow-lg" style="width: 70px; height: 70px;">
-                                <i class="fas fa-play fa-2x text-info"></i>
-                            </button>
-                        </div>
-                    <?php endif; ?>
-                <?php else: ?>
-                    <div class="bg-secondary rounded-3 d-flex align-items-center justify-content-center"
-                         style="height: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-                        <i class="fas fa-image fa-4x text-muted"></i>
-                    </div>
-                <?php endif; ?>
-            </div>
-
             <!-- Título + Autor -->
             <h1 class="h3 mb-1 text-light"><?= h($curso->titulo) ?></h1>
             <p class="text-muted mb-2">
@@ -65,6 +43,32 @@ $identity = $this->getRequest()->getAttribute('identity');
                     <span><i class="fas fa-tag me-1"></i><?= h($curso->categoria) ?></span>
                 <?php endif; ?>
             </div>
+
+            <!-- Barra de Acciones de Edición (Solo Admin) -->
+            <?php if (!empty($identity) && $identity->rol == 1): ?>
+            <div class="btn-group w-100 mb-3" role="group">
+                <?= $this->Html->link(
+                    '<i class="fas fa-edit me-1"></i> Editar Curso',
+                    ['action' => 'edit', $curso->id],
+                    ['class' => 'btn btn-warning', 'escape' => false]
+                ) ?>
+                <?= $this->Html->link(
+                    '<i class="fas fa-folder me-1"></i> Editar Módulos',
+                    ['controller' => 'Modulos', 'action' => 'index', '?' => ['curso_id' => $curso->id]],
+                    ['class' => 'btn btn-primary', 'escape' => false]
+                ) ?>
+                <?= $this->Html->link(
+                    '<i class="fas fa-list me-1"></i> Editar Lecciones',
+                    ['controller' => 'Lecciones', 'action' => 'index', '?' => ['curso_id' => $curso->id]],
+                    ['class' => 'btn btn-info', 'escape' => false]
+                ) ?>
+                <?= $this->Html->link(
+                    '<i class="fas fa-file-alt me-1"></i> Editar Contenidos',
+                    ['controller' => 'ContenidosLeccion', 'action' => 'index', '?' => ['curso_id' => $curso->id]],
+                    ['class' => 'btn btn-success', 'escape' => false]
+                ) ?>
+            </div>
+            <?php endif; ?>
 
             <!-- Tabs Presentación / Contenido -->
             <ul class="nav nav-tabs mt-3" id="cursoTabs" role="tablist">
@@ -151,7 +155,8 @@ $identity = $this->getRequest()->getAttribute('identity');
                                                                 default => 'file'
                                                             };
 
-                                                            $bloqueado = !$estaAprobado; // Si no está aprobado, bloqueamos
+                                                            // Admin (rol=1) puede ver todo, otros necesitan inscripción aprobada
+                                                            $bloqueado = (!empty($identity) && $identity->rol == 1) ? false : !$estaAprobado;
                                                         ?>
                                                         <li class="list-group-item bg-dark border-secondary d-flex align-items-center justify-content-between py-3">
                                                             <div class="d-flex align-items-center flex-grow-1">
@@ -255,28 +260,30 @@ $identity = $this->getRequest()->getAttribute('identity');
                                 Tu solicitud fue rechazada. Contacta al administrador.
                             </p>
                         <?php else: ?>
-                            <?php if ($curso->estado === 'activo'): ?>
-                                <?= $this->Form->postLink(
-                                    '<i class="fas fa-plus-circle me-1"></i> Solicitar Inscripción',
-                                    ['controller' => 'Cursos', 'action' => 'solicitar', $curso->id],
-                                    [
-                                        'class' => 'btn btn-primary w-100 mb-3', 
-                                        'escape' => false,
-                                        'confirm' => '¿Estás seguro de que deseas solicitar inscripción al curso "' . h($curso->titulo) . '"?'
-                                    ]
-                                ) ?>
-                                <p class="small text-muted mb-0">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Tu solicitud será enviada al administrador para aprobación.
-                                </p>
-                            <?php elseif ($curso->estado === 'desactivado'): ?>
-                                <button class="btn btn-secondary w-100 mb-3" disabled>
-                                    <i class="fas fa-ban me-1"></i> Inscripción no disponible
-                                </button>
-                                <p class="small text-muted mb-0">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Este curso está desactivado y no permite inscripciones.
-                                </p>
+                            <?php if ($identity->rol != 1): // Solo mostrar para no-admin ?>
+                                <?php if ($curso->estado === 'activo'): ?>
+                                    <?= $this->Form->postLink(
+                                        '<i class="fas fa-plus-circle me-1"></i> Solicitar Inscripción',
+                                        ['controller' => 'Cursos', 'action' => 'solicitar', $curso->id],
+                                        [
+                                            'class' => 'btn btn-primary w-100 mb-3', 
+                                            'escape' => false,
+                                            'confirm' => '¿Estás seguro de que deseas solicitar inscripción al curso "' . h($curso->titulo) . '"?'
+                                        ]
+                                    ) ?>
+                                    <p class="small text-muted mb-0">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Tu solicitud será enviada al administrador para aprobación.
+                                    </p>
+                                <?php elseif ($curso->estado === 'desactivado'): ?>
+                                    <button class="btn btn-secondary w-100 mb-3" disabled>
+                                        <i class="fas fa-ban me-1"></i> Inscripción no disponible
+                                    </button>
+                                    <p class="small text-muted mb-0">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Este curso está desactivado y no permite inscripciones.
+                                    </p>
+                                <?php endif; ?>
                             <?php endif; ?>
                         <?php endif; ?>
                     <?php else: ?>
@@ -322,6 +329,11 @@ $identity = $this->getRequest()->getAttribute('identity');
                         <hr class="border-secondary">
                         <div class="d-grid gap-2">
                             <?= $this->Html->link(
+                                '<i class="fas fa-users-cog me-1"></i> Administrar Inscripciones',
+                                ['controller' => 'Inscripciones', 'action' => 'administrarCurso', $curso->id],
+                                ['class' => 'btn btn-sm btn-info', 'escape' => false]
+                            ) ?>
+                            <?= $this->Html->link(
                                 '<i class="fas fa-edit me-1"></i> Editar Curso',
                                 ['action' => 'edit', $curso->id],
                                 ['class' => 'btn btn-sm btn-warning', 'escape' => false]
@@ -352,7 +364,7 @@ $identity = $this->getRequest()->getAttribute('identity');
         </div>
     </div>
 
-    <!-- Inscripciones (Solo para Administradores) -->
+    <!-- Alumnos Inscritos (Solo para Administradores) -->
     <?php if (!empty($identity) && $identity->rol == 1 && !empty($curso->inscripciones)): ?>
     <div class="row mt-4">
         <div class="col-12">
@@ -360,7 +372,7 @@ $identity = $this->getRequest()->getAttribute('identity');
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0">
                         <i class="fas fa-user-check me-2"></i>
-                        Inscripciones (<?= count($curso->inscripciones) ?>)
+                        Alumnos Inscritos (<?= count($curso->inscripciones) ?>)
                     </h5>
                 </div>
                 <div class="card-body">
@@ -414,12 +426,23 @@ $identity = $this->getRequest()->getAttribute('identity');
                                                 <?= $this->Html->link(
                                                     '<i class="fas fa-eye"></i>',
                                                     ['controller' => 'Inscripciones', 'action' => 'view', $inscripcion->id],
-                                                    ['class' => 'btn btn-info', 'title' => 'Ver', 'escape' => false]
+                                                    ['class' => 'btn btn-info', 'title' => 'Ver', 'escape' => false, 'data-bs-toggle' => 'tooltip']
                                                 ) ?>
                                                 <?= $this->Html->link(
-                                                    '<i class="fas fa-edit"></i>',
+                                                    '<i class="fas fa-chart-line"></i>',
                                                     ['controller' => 'Inscripciones', 'action' => 'edit', $inscripcion->id],
-                                                    ['class' => 'btn btn-warning', 'title' => 'Editar', 'escape' => false]
+                                                    ['class' => 'btn btn-warning', 'title' => 'Editar progreso', 'escape' => false, 'data-bs-toggle' => 'tooltip']
+                                                ) ?>
+                                                <?= $this->Form->postLink(
+                                                    '<i class="fas fa-user-times"></i>',
+                                                    ['controller' => 'Inscripciones', 'action' => 'delete', $inscripcion->id],
+                                                    [
+                                                        'confirm' => '¿Desmatricular a ' . ($inscripcion->hasValue('user') ? $inscripcion->user->username : 'este alumno') . ' del curso?',
+                                                        'class' => 'btn btn-danger',
+                                                        'title' => 'Desmatricular',
+                                                        'escape' => false,
+                                                        'data-bs-toggle' => 'tooltip'
+                                                    ]
                                                 ) ?>
                                             </div>
                                         </td>
@@ -434,3 +457,13 @@ $identity = $this->getRequest()->getAttribute('identity');
     </div>
     <?php endif; ?>
 </div>
+
+<script>
+// Activar tooltips de Bootstrap
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>

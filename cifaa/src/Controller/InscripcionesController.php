@@ -56,7 +56,7 @@ class InscripcionesController extends AppController
             }
         } 
         elseif ($user->rol == 2) {
-            // DOCENTES: Pueden gestionar inscripciones pero no eliminar
+            // DOCENTES: Pueden gestionar inscripciones pero no eliminar ni matricular
             $accionesPermitidasDocente = ['index', 'view', 'aprobar', 'rechazar', 'edit'];
             
             if (!in_array($action, $accionesPermitidasDocente)) {
@@ -64,7 +64,7 @@ class InscripcionesController extends AppController
                 return $this->redirect(['action' => 'index']);
             }
         }
-        // Admin (rol = 1): Sin restricciones adicionales
+        // Admin (rol = 1): Sin restricciones adicionales (incluyendo matricular y busquedas AJAX)
         
         return null;
     }
@@ -149,6 +149,202 @@ class InscripcionesController extends AppController
      *
      * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
      */
+    /**
+     * Matricular method
+     * 
+     * NUEVO METODO: Permite al administrador matricular alumnos directamente.
+     * La inscripcion se crea automaticamente en estado 'aprobada' con progreso 0%.
+     * 
+     * Flujo simplificado:
+     * 1. Admin selecciona alumno (rol=3) y curso
+     * 2. Valida que no exista inscripcion previa
+     * 3. Crea inscripcion directamente aprobada
+     * 4. Redirige al listado de inscripciones
+     * 
+     * Diferencia con add():
+     * - add() permite configurar estado y progreso manualmente
+     * - matricular() siempre crea inscripciones aprobadas listas para usar
+     *
+     * @return \Cake\Http\Response|null|void
+     */
+    public function matricular()
+    {
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
+        }
+        
+        $inscripcione = $this->Inscripciones->newEmptyEntity();
+        
+        if ($this->request->is('post')) {
+            $data = $this->request->getData();
+            
+            // VALIDACION 1: Verificar que se selecciono alumno y curso
+            if (empty($data['usuario_id']) || empty($data['curso_id'])) {
+                $this->Flash->error(__('Debe seleccionar un alumno y un curso.'));
+            } else {
+                // VALIDACION 2: Verificar que el usuario sea alumno (rol=3)
+                $usuario = $this->Inscripciones->Users->find()
+                    ->where(['id' => $data['usuario_id'], 'rol' => 3])
+                    ->first();
+                    
+                if (!$usuario) {
+                    $this->Flash->error(__('El usuario seleccionado no es un alumno valido.'));
+                } else {
+                    // VALIDACION 3: Verificar que el curso exista
+                    $curso = $this->Inscripciones->Cursos->find()
+                        ->where(['id' => $data['curso_id']])
+                        ->first();
+                        
+                    if (!$curso) {
+                        $this->Flash->error(__('El curso seleccionado no existe.'));
+                    } else {
+                        // VALIDACION 4: Verificar inscripcion duplicada
+                        $inscripcionExistente = $this->Inscripciones->find()
+                            ->where([
+                                'usuario_id' => $data['usuario_id'],
+                                'curso_id' => $data['curso_id']
+                            ])
+                            ->first();
+                        
+                        if ($inscripcionExistente) {
+                            $estadoTexto = $inscripcionExistente->estado;
+                            $this->Flash->warning(__('El alumno {0} ya esta inscrito en el curso {1}. Estado actual: {2}', 
+                                $usuario->username, $curso->titulo, $estadoTexto));
+                        } else {
+                            // PASO 5: Crear inscripcion aprobada directamente
+                            $inscripcionData = [
+                                'usuario_id' => $data['usuario_id'],
+                                'curso_id' => $data['curso_id'],
+                                'progreso' => 0,
+                                'estado' => 'aprobada' // Directamente aprobada
+                            ];
+                            
+                            $inscripcione = $this->Inscripciones->patchEntity($inscripcione, $inscripcionData);
+                            
+                            if ($this->Inscripciones->save($inscripcione)) {
+                                $this->log("Matricula directa: Admin matriculo a {$usuario->username} en {$curso->titulo}", 'info');
+                                $this->Flash->success(__('El alumno {0} ha sido matriculado exitosamente en {1}.', 
+                                    $usuario->username, $curso->titulo));
+                                return $this->redirect(['action' => 'index']);
+                            }
+                            
+                            $this->Flash->error(__('Error al guardar la matricula. Intente nuevamente.'));
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Cargar listas para el formulario
+        // Solo alumnos activos (rol=2)
+        $users = $this->Inscripciones->Users->find('list', [
+            'keyField' => 'id',
+            'valueField' => function ($user) {
+                $email = !empty($user->email) ? ' - ' . $user->email : '';
+                $dni = !empty($user->dni) ? ' (DNI: ' . $user->dni . ')' : '';
+                return $user->username . $email . $dni;
+            }
+        ])->where(['rol' => 2])
+          ->order(['username' => 'ASC'])
+          ->all();
+          
+        $cursos = $this->Inscripciones->Cursos->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'titulo'
+        ])->order(['titulo' => 'ASC'])
+          ->all();
+
+        $this->set(compact('inscripcione', 'users', 'cursos'));
+    }
+
+    /**
+     * Administrar Curso method
+     * 
+     * NUEVO METODO: Permite gestionar todas las inscripciones de un curso específico.
+     * Funcionalidades:
+     * - Ver lista completa de alumnos inscritos en el curso
+     * - Matricular nuevos alumnos (búsqueda dinámica, curso fijo)
+     * - Editar progreso de inscripciones existentes
+     * - Desmatricular alumnos del curso
+     * 
+     * @param string|null $cursoId ID del curso
+     * @return \Cake\Http\Response|null|void
+     */
+    public function administrarCurso($cursoId = null)
+    {
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
+        }
+
+        // Verificar que el curso existe
+        $curso = $this->Inscripciones->Cursos->find()
+            ->where(['id' => $cursoId])
+            ->first();
+            
+        if (!$curso) {
+            $this->Flash->error(__('El curso especificado no existe.'));
+            return $this->redirect(['controller' => 'Cursos', 'action' => 'index']);
+        }
+
+        // Obtener todas las inscripciones del curso
+        $inscripciones = $this->Inscripciones->find()
+            ->where(['Inscripciones.curso_id' => $cursoId])
+            ->contain(['Users'])
+            ->orderBy(['Inscripciones.created' => 'DESC'])
+            ->all();
+
+        // Manejar matriculación desde esta vista
+        if ($this->request->is('post') && $this->request->getData('action') === 'matricular') {
+            $data = $this->request->getData();
+            $userId = $data['usuario_id'] ?? null;
+
+            if (empty($userId)) {
+                $this->Flash->error(__('Debe seleccionar un alumno.'));
+            } else {
+                // Verificar que el usuario sea alumno (rol=3)
+                $usuario = $this->Inscripciones->Users->find()
+                    ->where(['id' => $userId, 'rol' => 3])
+                    ->first();
+                    
+                if (!$usuario) {
+                    $this->Flash->error(__('El usuario seleccionado no es un alumno válido.'));
+                } else {
+                    // Verificar inscripción duplicada
+                    $inscripcionExistente = $this->Inscripciones->find()
+                        ->where([
+                            'usuario_id' => $userId,
+                            'curso_id' => $cursoId
+                        ])
+                        ->first();
+                    
+                    if ($inscripcionExistente) {
+                        $this->Flash->warning(__('El alumno {0} ya está inscrito en este curso.', $usuario->username));
+                    } else {
+                        // Crear inscripción aprobada
+                        $inscripcionData = [
+                            'usuario_id' => $userId,
+                            'curso_id' => $cursoId,
+                            'progreso' => 0,
+                            'estado' => 'aprobada'
+                        ];
+                        
+                        $inscripcione = $this->Inscripciones->newEmptyEntity();
+                        $inscripcione = $this->Inscripciones->patchEntity($inscripcione, $inscripcionData);
+                        
+                        if ($this->Inscripciones->save($inscripcione)) {
+                            $this->Flash->success(__('El alumno {0} ha sido matriculado exitosamente.', $usuario->username));
+                            return $this->redirect(['action' => 'administrarCurso', $cursoId]);
+                        }
+                        
+                        $this->Flash->error(__('Error al matricular el alumno. Intente nuevamente.'));
+                    }
+                }
+            }
+        }
+
+        $this->set(compact('curso', 'inscripciones'));
+    }
+
     /**
      * Add method
      * 
@@ -477,5 +673,97 @@ class InscripcionesController extends AppController
         $estadisticas['progreso_promedio'] = $progresoPromedio ? round($progresoPromedio->promedio, 2) : 0;
         
         $this->set(compact('inscripciones', 'estadisticas', 'estado'));
+    }
+
+    /**
+     * Buscar alumnos por DNI (AJAX)
+     * Metodo para busqueda dinamica en el formulario de matricular
+     * 
+     * @return \Cake\Http\Response JSON con resultados
+     */
+    public function buscarAlumnos()
+    {
+        $this->request->allowMethod(['get']);
+        $this->viewBuilder()->setLayout('ajax');
+        
+        $dni = $this->request->getQuery('dni');
+        $resultados = [];
+        
+        if (!empty($dni) && strlen($dni) >= 3) { // Reducido a 3 para mejor experiencia
+            $usersTable = $this->fetchTable('Users');
+            $resultados = $usersTable->find()
+                ->select(['id', 'username', 'dni'])
+                ->where([
+                    'rol' => 3, // 3 = Estudiante (NO docente)
+                    'estado' => 'activo',
+                    'OR' => [
+                        'dni LIKE' => '%' . $dni . '%',
+                        'username LIKE' => '%' . $dni . '%'
+                    ]
+                ])
+                ->order(['username' => 'ASC'])
+                ->limit(10) // Aumentado de 5 a 10
+                ->toArray();
+        }
+        
+        $this->set('resultados', $resultados);
+        $this->viewBuilder()->setOption('serialize', ['resultados']);
+        $this->response = $this->response->withType('application/json')
+            ->withStringBody(json_encode($resultados, JSON_UNESCAPED_UNICODE));
+        
+        return $this->response;
+    }
+    
+    /**
+     * Buscar cursos por nombre (AJAX)
+     * Metodo para busqueda dinamica en el formulario de matricular
+     * Busqueda case-insensitive (sin distincion mayusculas/minusculas)
+     * 
+     * @return \Cake\Http\Response JSON con resultados
+     */
+    public function buscarCursos()
+    {
+        $this->request->allowMethod(['get']);
+        $this->viewBuilder()->setLayout('ajax');
+        
+        $nombre = $this->request->getQuery('nombre');
+        $resultados = [];
+        
+        if (!empty($nombre) && strlen($nombre) >= 2) { // Mínimo 2 caracteres
+            $cursosTable = $this->fetchTable('Cursos');
+            $resultados = $cursosTable->find()
+                ->select(['id', 'titulo', 'nivel', 'categoria'])
+                ->where([
+                    'estado IN' => ['activo', 'publicado'],
+                    'titulo LIKE' => '%' . $nombre . '%'
+                ])
+                ->order(['titulo' => 'ASC'])
+                ->limit(10)
+                ->toArray();
+        }
+        
+        $this->set('resultados', $resultados);
+        $this->viewBuilder()->setOption('serialize', ['resultados']);
+        $this->response = $this->response->withType('application/json')
+            ->withStringBody(json_encode($resultados, JSON_UNESCAPED_UNICODE));
+        
+        return $this->response;
+    }
+
+    /**
+     * Metodo auxiliar: Verificar si el usuario actual es administrador
+     * 
+     * @return \Cake\Http\Response|null Redireccion si no es admin, null si es admin
+     */
+    protected function requiereAdministrador()
+    {
+        $user = $this->Authentication->getIdentity();
+        
+        if (!$user || $user->rol != 1) {
+            $this->Flash->error(__('No tienes permiso para acceder a esta seccion. Solo administradores.'));
+            return $this->redirect(['controller' => 'Pages', 'action' => 'home']);
+        }
+        
+        return null;
     }
 }

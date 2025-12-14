@@ -18,10 +18,23 @@ class LeccionesController extends AppController
     public function index()
     {
         $query = $this->Lecciones->find()
-            ->contain(['Modulos']);
+            ->contain(['Modulos' => ['Cursos']]);
+        
+        // Filtrar por curso si se proporciona el parámetro
+        $cursoId = $this->request->getQuery('curso_id');
+        if ($cursoId) {
+            $query->matching('Modulos', function ($q) use ($cursoId) {
+                return $q->where(['Modulos.curso_id' => $cursoId]);
+            });
+            
+            // Obtener datos del curso para mostrar en la vista
+            $curso = $this->fetchTable('Cursos')->get($cursoId);
+            $this->set('curso', $curso);
+        }
+        
         $lecciones = $this->paginate($query);
 
-        $this->set(compact('lecciones'));
+        $this->set(compact('lecciones', 'cursoId'));
     }
 
     /**
@@ -116,8 +129,11 @@ class LeccionesController extends AppController
             if ($this->Lecciones->save($leccione)) {
                 $this->Flash->success(__('The leccione has been saved.'));
 
-                if ($moduloId) {
-                    return $this->redirect(['controller' => 'Modulos', 'action' => 'view', $moduloId]);
+                // Obtener curso_id del request
+                $cursoId = $this->request->getQuery('curso_id');
+                
+                if ($cursoId) {
+                    return $this->redirect(['action' => 'index', '?' => ['curso_id' => $cursoId]]);
                 }
                 return $this->redirect(['action' => 'index']);
             }
@@ -126,10 +142,30 @@ class LeccionesController extends AppController
         
         if ($moduloId) {
             $leccione->modulo_id = $moduloId;
+            
+            // Obtener lecciones existentes del módulo
+            $leccionesExistentes = $this->Lecciones->find()
+                ->where(['modulo_id' => $moduloId])
+                ->order(['posicion' => 'ASC'])
+                ->all();
+            
+            // Sugerir siguiente posición
+            $siguientePosicion = $leccionesExistentes->count() + 1;
+            $leccione->posicion = $siguientePosicion;
+            
+            $this->set(compact('leccionesExistentes', 'siguientePosicion'));
         }
         
-        $modulos = $this->Lecciones->Modulos->find('list', limit: 200)->all();
-        $this->set(compact('leccione', 'modulos'));
+        // Filtrar módulos por curso si viene el parámetro
+        $cursoId = $this->request->getQuery('curso_id');
+        $modulos = $this->Lecciones->Modulos->find('list', limit: 200);
+        
+        if ($cursoId) {
+            $modulos->where(['Modulos.curso_id' => $cursoId]);
+        }
+        
+        $modulos = $modulos->all();
+        $this->set(compact('leccione', 'modulos', 'moduloId', 'cursoId'));
     }
 
     /**
@@ -211,5 +247,43 @@ class LeccionesController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+
+    /**
+     * Obtener lecciones por módulo (AJAX)
+     *
+     * @return \Cake\Http\Response|null JSON response
+     */
+    public function obtenerPorModulo()
+    {
+        $this->request->allowMethod(['get', 'post']);
+        $this->autoRender = false;
+        
+        $moduloId = $this->request->getQuery('modulo_id');
+        
+        $lecciones = [];
+        if ($moduloId) {
+            $leccionesExistentes = $this->Lecciones->find()
+                ->where(['modulo_id' => $moduloId])
+                ->order(['posicion' => 'ASC'])
+                ->all();
+            
+            foreach ($leccionesExistentes as $leccion) {
+                $lecciones[] = [
+                    'id' => $leccion->id,
+                    'titulo' => $leccion->titulo,
+                    'tipo' => $leccion->tipo_contenido,
+                    'posicion' => $leccion->posicion
+                ];
+            }
+        }
+        
+        $response = $this->response->withType('application/json')
+            ->withStringBody(json_encode([
+                'lecciones' => $lecciones,
+                'siguientePosicion' => count($lecciones) + 1
+            ]));
+        
+        return $response;
     }
 }

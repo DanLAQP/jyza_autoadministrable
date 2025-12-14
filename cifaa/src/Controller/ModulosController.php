@@ -19,9 +19,20 @@ class ModulosController extends AppController
     {
         $query = $this->Modulos->find()
             ->contain(['Cursos']);
+        
+        // Filtrar por curso si se proporciona el parámetro
+        $cursoId = $this->request->getQuery('curso_id');
+        if ($cursoId) {
+            $query->where(['Modulos.curso_id' => $cursoId]);
+            
+            // Obtener datos del curso para mostrar en la vista
+            $curso = $this->Modulos->Cursos->get($cursoId);
+            $this->set('curso', $curso);
+        }
+        
         $modulos = $this->paginate($query);
 
-        $this->set(compact('modulos'));
+        $this->set(compact('modulos', 'cursoId'));
     }
 
     /**
@@ -100,10 +111,10 @@ class ModulosController extends AppController
             if ($this->Modulos->save($modulo)) {
                 $this->Flash->success(__('The modulo has been saved.'));
                 
-                // Si vino de un curso, redirigir al curso
+                // Si vino de un curso, mantener el contexto
                 $cursoId = $this->request->getQuery('curso_id');
                 if ($cursoId) {
-                    return $this->redirect(['controller' => 'Cursos', 'action' => 'view', $cursoId]);
+                    return $this->redirect(['action' => 'index', '?' => ['curso_id' => $cursoId]]);
                 }
                 return $this->redirect(['action' => 'index']);
             }
@@ -115,9 +126,21 @@ class ModulosController extends AppController
         $cursoId = $this->request->getQuery('curso_id');
         if ($cursoId) {
             $modulo->curso_id = $cursoId;
+            
+            // Obtener módulos existentes del curso
+            $modulosExistentes = $this->Modulos->find()
+                ->where(['curso_id' => $cursoId])
+                ->order(['posicion' => 'ASC'])
+                ->all();
+            
+            // Sugerir siguiente posición
+            $siguientePosicion = $modulosExistentes->count() + 1;
+            $modulo->posicion = $siguientePosicion;
+            
+            $this->set(compact('modulosExistentes', 'siguientePosicion'));
         }
         
-        $this->set(compact('modulo', 'cursos'));
+        $this->set(compact('modulo', 'cursos', 'cursoId'));
     }
 
     /**

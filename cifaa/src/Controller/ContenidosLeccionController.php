@@ -18,10 +18,23 @@ class ContenidosLeccionController extends AppController
     public function index()
     {
         $query = $this->ContenidosLeccion->find()
-            ->contain(['Lecciones']);
+            ->contain(['Lecciones' => ['Modulos' => ['Cursos']]]);
+        
+        // Filtrar por curso si se proporciona el parámetro
+        $cursoId = $this->request->getQuery('curso_id');
+        if ($cursoId) {
+            $query->matching('Lecciones.Modulos', function ($q) use ($cursoId) {
+                return $q->where(['Modulos.curso_id' => $cursoId]);
+            });
+            
+            // Obtener datos del curso para mostrar en la vista
+            $curso = $this->fetchTable('Cursos')->get($cursoId);
+            $this->set('curso', $curso);
+        }
+        
         $contenidosLeccion = $this->paginate($query);
 
-        $this->set(compact('contenidosLeccion'));
+        $this->set(compact('contenidosLeccion', 'cursoId'));
     }
 
     /**
@@ -35,12 +48,19 @@ class ContenidosLeccionController extends AppController
     {
         $contenidosLeccion = $this->ContenidosLeccion->get($id, contain: ['Lecciones' => ['Modulos' => ['Cursos']]]);
         
-        // Verificar inscripción al curso
+        // Obtener usuario actual
+        $usuario = $this->getRequest()->getAttribute('identity');
+        
+        // ADMIN puede ver todo sin restricciones
+        if ($usuario && $usuario->rol == 1) {
+            $this->set(compact('contenidosLeccion'));
+            return;
+        }
+        
+        // Para otros roles, verificar inscripción al curso
         $inscrito = $this->verificarInscripcionLeccion($contenidosLeccion->leccion_id);
         
         if (!$inscrito) {
-            // Obtener usuario actual
-            $usuario = $this->getRequest()->getAttribute('identity');
             $tieneSolicitud = false;
             
             // Verificar si ya existe una solicitud pendiente o rechazada
@@ -149,8 +169,11 @@ class ContenidosLeccionController extends AppController
             if ($this->ContenidosLeccion->save($contenidosLeccion)) {
                 $this->Flash->success(__('El contenido ha sido guardado.'));
 
-                if ($leccionId) {
-                    return $this->redirect(['controller' => 'Lecciones', 'action' => 'view', $leccionId]);
+                // Obtener curso_id del request
+                $cursoIdParam = $this->request->getQuery('curso_id');
+                
+                if ($cursoIdParam) {
+                    return $this->redirect(['action' => 'index', '?' => ['curso_id' => $cursoIdParam]]);
                 }
                 return $this->redirect(['action' => 'index']);
             }
@@ -159,10 +182,32 @@ class ContenidosLeccionController extends AppController
         
         if ($leccionId) {
             $contenidosLeccion->leccion_id = $leccionId;
+            
+            // Obtener contenidos existentes de la lección
+            $contenidosExistentes = $this->ContenidosLeccion->find()
+                ->where(['leccion_id' => $leccionId])
+                ->order(['posicion' => 'ASC'])
+                ->all();
+            
+            // Sugerir siguiente posición
+            $siguientePosicion = $contenidosExistentes->count() + 1;
+            $contenidosLeccion->posicion = $siguientePosicion;
+            
+            $this->set(compact('contenidosExistentes', 'siguientePosicion'));
         }
         
-        $lecciones = $this->ContenidosLeccion->Lecciones->find('list', limit: 200)->all();
-        $this->set(compact('contenidosLeccion', 'lecciones', 'leccionId'));
+        // Filtrar lecciones por curso si viene el parámetro
+        $cursoId = $this->request->getQuery('curso_id');
+        $leccionesQuery = $this->ContenidosLeccion->Lecciones->find('list', limit: 200);
+        
+        if ($cursoId) {
+            $leccionesQuery->innerJoinWith('Modulos', function ($q) use ($cursoId) {
+                return $q->where(['Modulos.curso_id' => $cursoId]);
+            });
+        }
+        
+        $lecciones = $leccionesQuery->all();
+        $this->set(compact('contenidosLeccion', 'lecciones', 'leccionId', 'cursoId'));
     }
 
     /**
@@ -251,8 +296,11 @@ class ContenidosLeccionController extends AppController
             if ($this->ContenidosLeccion->save($contenidosLeccion)) {
                 $this->Flash->success(__('El contenido ha sido guardado.'));
 
-                if ($leccionId) {
-                    return $this->redirect(['controller' => 'Lecciones', 'action' => 'view', $leccionId]);
+                // Obtener curso_id del request
+                $cursoIdParam = $this->request->getQuery('curso_id');
+                
+                if ($cursoIdParam) {
+                    return $this->redirect(['action' => 'index', '?' => ['curso_id' => $cursoIdParam]]);
                 }
                 return $this->redirect(['action' => 'index']);
             }
@@ -297,5 +345,43 @@ class ContenidosLeccionController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+
+    /**
+     * Obtener contenidos por lección (AJAX)
+     *
+     * @return \Cake\Http\Response|null JSON response
+     */
+    public function obtenerPorLeccion()
+    {
+        $this->request->allowMethod(['get', 'post']);
+        $this->autoRender = false;
+        
+        $leccionId = $this->request->getQuery('leccion_id');
+        
+        $contenidos = [];
+        if ($leccionId) {
+            $contenidosExistentes = $this->ContenidosLeccion->find()
+                ->where(['leccion_id' => $leccionId])
+                ->order(['posicion' => 'ASC'])
+                ->all();
+            
+            foreach ($contenidosExistentes as $contenido) {
+                $contenidos[] = [
+                    'id' => $contenido->id,
+                    'tipo' => $contenido->tipo,
+                    'archivo' => $contenido->archivo,
+                    'posicion' => $contenido->posicion
+                ];
+            }
+        }
+        
+        $response = $this->response->withType('application/json')
+            ->withStringBody(json_encode([
+                'contenidos' => $contenidos,
+                'siguientePosicion' => count($contenidos) + 1
+            ]));
+        
+        return $response;
     }
 }

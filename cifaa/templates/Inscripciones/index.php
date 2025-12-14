@@ -6,7 +6,7 @@
 ?>
 <div class="container mt-4 mb-4">
     <div class="row mb-4">
-        <div class="col-12">
+        <div class="col-md-8">
             <h2 class="text-info d-inline-block">
                 <i class="fas fa-clipboard-list"></i> Solicitudes de Inscripción
             </h2>
@@ -18,6 +18,15 @@
             <?php endif; ?>
             
             <p class="text-muted">Aprueba o rechaza las solicitudes de inscripción a los cursos</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <?php if ($usuario['rol'] == 1): ?>
+                <?= $this->Html->link(
+                    '<i class="fas fa-user-plus"></i> Matricular Alumno',
+                    ['action' => 'matricular'],
+                    ['class' => 'btn btn-success btn-lg', 'escape' => false]
+                ) ?>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -124,43 +133,66 @@
                                     </small>
                                 </td>
                                 <td class="text-center">
-                                    <?php if ($inscripcione->estado === 'pendiente'): ?>
-                                        <!-- Botones de aprobación/rechazo para pendientes -->
-                                        <?= $this->Form->postLink(
-                                            '<i class="fas fa-check"></i> Aprobar',
-                                            ['action' => 'aprobar', $inscripcione->id],
-                                            [
-                                                'class' => 'btn btn-sm btn-success',
-                                                'escape' => false,
-                                                'confirm' => '¿Aprobar esta inscripción?'
-                                            ]
-                                        ) ?>
-                                        <?= $this->Form->postLink(
-                                            '<i class="fas fa-times"></i> Rechazar',
-                                            ['action' => 'rechazar', $inscripcione->id],
-                                            [
-                                                'class' => 'btn btn-sm btn-danger',
-                                                'escape' => false,
-                                                'confirm' => '¿Rechazar esta inscripción?'
-                                            ]
-                                        ) ?>
-                                    <?php else: ?>
-                                        <!-- Vista solo para aprobadas/rechazadas -->
-                                        <?= $this->Html->link(
-                                            '<i class="fas fa-eye"></i> Ver',
-                                            ['action' => 'view', $inscripcione->id],
-                                            ['class' => 'btn btn-sm btn-info', 'escape' => false]
-                                        ) ?>
-                                        <?= $this->Form->postLink(
-                                            '<i class="fas fa-trash"></i> Eliminar',
-                                            ['action' => 'delete', $inscripcione->id],
-                                            [
-                                                'class' => 'btn btn-sm btn-danger',
-                                                'escape' => false,
-                                                'confirm' => '¿Eliminar esta inscripción?'
-                                            ]
-                                        ) ?>
-                                    <?php endif; ?>
+                                    <div class="btn-group" role="group">
+                                        <?php if ($inscripcione->estado === 'pendiente'): ?>
+                                            <!-- Botones de aprobación/rechazo para pendientes -->
+                                            <?= $this->Form->postLink(
+                                                '<i class="fas fa-check"></i>',
+                                                ['action' => 'aprobar', $inscripcione->id],
+                                                [
+                                                    'class' => 'btn btn-sm btn-success',
+                                                    'escape' => false,
+                                                    'confirm' => '¿Aprobar esta inscripción?',
+                                                    'title' => 'Aprobar',
+                                                    'data-bs-toggle' => 'tooltip'
+                                                ]
+                                            ) ?>
+                                            <?= $this->Form->postLink(
+                                                '<i class="fas fa-times"></i>',
+                                                ['action' => 'rechazar', $inscripcione->id],
+                                                [
+                                                    'class' => 'btn btn-sm btn-danger',
+                                                    'escape' => false,
+                                                    'confirm' => '¿Rechazar esta inscripción?',
+                                                    'title' => 'Rechazar',
+                                                    'data-bs-toggle' => 'tooltip'
+                                                ]
+                                            ) ?>
+                                        <?php else: ?>
+                                            <!-- Acciones para aprobadas/rechazadas -->
+                                            <?= $this->Html->link(
+                                                '<i class="fas fa-chart-line"></i>',
+                                                ['action' => 'edit', $inscripcione->id],
+                                                [
+                                                    'class' => 'btn btn-sm btn-warning',
+                                                    'escape' => false,
+                                                    'title' => 'Editar progreso',
+                                                    'data-bs-toggle' => 'tooltip'
+                                                ]
+                                            ) ?>
+                                            <?= $this->Html->link(
+                                                '<i class="fas fa-eye"></i>',
+                                                ['action' => 'view', $inscripcione->id],
+                                                [
+                                                    'class' => 'btn btn-sm btn-info',
+                                                    'escape' => false,
+                                                    'title' => 'Ver detalles',
+                                                    'data-bs-toggle' => 'tooltip'
+                                                ]
+                                            ) ?>
+                                            <?= $this->Form->postLink(
+                                                '<i class="fas fa-user-times"></i>',
+                                                ['action' => 'delete', $inscripcione->id],
+                                                [
+                                                    'class' => 'btn btn-sm btn-danger',
+                                                    'escape' => false,
+                                                    'confirm' => '¿Desmatricular a ' . $inscripcione->user->username . ' del curso?',
+                                                    'title' => 'Desmatricular',
+                                                    'data-bs-toggle' => 'tooltip'
+                                                ]
+                                            ) ?>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -189,3 +221,13 @@
         </div>
     </div>
 </div>
+
+<script>
+// Activar tooltips de Bootstrap
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>

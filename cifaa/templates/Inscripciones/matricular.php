@@ -1,23 +1,25 @@
 <?php
 /**
  * @var \App\View\AppView $this
- * @var \App\Model\Entity\Certificado $certificado
+ * @var \App\Model\Entity\Inscripcione $inscripcione
+ * @var \Cake\Collection\CollectionInterface|string[] $users
+ * @var \Cake\Collection\CollectionInterface|string[] $cursos
  */
-$this->assign('title', 'Generar Certificado');
+$this->assign('title', 'Matricular Alumno');
 ?>
 
 <div class="container-fluid mt-4">
     <div class="card shadow-sm">
-        <div class="card-header bg-info text-white">
+        <div class="card-header bg-success text-white">
             <h3 class="card-title mb-0">
-                <i class="fas fa-file-signature"></i> Generar Certificado
+                <i class="fas fa-user-plus"></i> Matricular Alumno
             </h3>
             <p class="mb-0 mt-2 small">
-                <i class="fas fa-info-circle"></i> Complete los datos para generar un certificado de finalización de curso.
+                <i class="fas fa-info-circle"></i> Matriculacion directa: El alumno quedara inscrito inmediatamente con estado <strong>APROBADA</strong> y podra acceder al curso.
             </p>
         </div>
         <div class="card-body">
-            <?= $this->Form->create($certificado, ['class' => 'needs-validation', 'novalidate' => true]) ?>
+            <?= $this->Form->create($inscripcione, ['class' => 'needs-validation', 'novalidate' => true]) ?>
             
             <div class="row g-4">
                 <!-- Busqueda de Alumno por DNI -->
@@ -41,7 +43,7 @@ $this->assign('title', 'Generar Certificado');
                         <div id="resultados-alumnos" class="list-group mt-2" style="display: none; max-height: 250px; overflow-y: auto;"></div>
                         
                         <!-- Campo oculto para almacenar el ID seleccionado -->
-                        <?= $this->Form->control('user_id', [
+                        <?= $this->Form->control('usuario_id', [
                             'type' => 'hidden',
                             'id' => 'usuario-id',
                             'required' => true
@@ -91,45 +93,87 @@ $this->assign('title', 'Generar Certificado');
                 </div>
             </div>
 
-            <!-- Datos adicionales del certificado -->
-            <div class="row mt-4 g-3">
-                <div class="col-md-6">
-                    <?= $this->Form->control('horas', [
-                        'class' => 'form-control form-control-lg', 
-                        'label' => ['text' => '<i class="fas fa-clock"></i> Horas Académicas', 'escape' => false],
-                        'min' => 1,
-                        'required' => true
-                    ]) ?>
-                </div>
-                <div class="col-md-6">
-                    <?= $this->Form->control('fecha_emision', [
-                        'type' => 'date', 
-                        'class' => 'form-control form-control-lg', 
-                        'label' => ['text' => '<i class="fas fa-calendar"></i> Fecha de Emisión', 'escape' => false],
-                        'value' => date('Y-m-d'),
-                        'required' => true
-                    ]) ?>
+            <!-- Informacion de Estado -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="alert alert-info d-flex align-items-center" role="alert">
+                        <i class="fas fa-info-circle fa-2x me-3"></i>
+                        <div>
+                            <h5 class="alert-heading mb-1">Configuracion Automatica</h5>
+                            <p class="mb-0">
+                                Al matricular, la inscripcion se creara con los siguientes valores:
+                            </p>
+                            <ul class="mb-0 mt-2">
+                                <li><strong>Estado:</strong> Aprobada (acceso inmediato)</li>
+                                <li><strong>Progreso:</strong> 0% (inicio del curso)</li>
+                                <li><strong>Fecha:</strong> <?= date('d/m/Y H:i') ?> (ahora)</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Botones -->
-            <div class="mt-4 text-center">
-                <button type="submit" class="btn btn-primary btn-lg">
-                    <i class="fas fa-file-signature"></i> Generar Certificado
-                </button>
-                <?= $this->Html->link('<i class="fas fa-times"></i> Cancelar', ['action' => 'index'], [
-                    'class' => 'btn btn-secondary btn-lg ms-2',
-                    'escape' => false
-                ]) ?>
+            <!-- Botones de Accion -->
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <div class="btn-group btn-group-lg" role="group">
+                        <button type="submit" class="btn btn-success px-5" id="btn-matricular">
+                            <i class="fas fa-check-circle"></i> Matricular Alumno
+                        </button>
+                        <?= $this->Html->link(
+                            '<i class="fas fa-times-circle"></i> Cancelar',
+                            ['action' => 'index'],
+                            [
+                                'class' => 'btn btn-secondary px-5',
+                                'escape' => false
+                            ]
+                        ) ?>
+                    </div>
+                </div>
             </div>
-            
+
             <?= $this->Form->end() ?>
+        </div>
+    </div>
+
+    <!-- Tarjeta de Ayuda -->
+    <div class="card shadow-sm mt-4 border-primary">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-question-circle"></i> Diferencia: Matricular como Admin vs Solicitar como Estudiante</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-success"><i class="fas fa-user-shield"></i> Matricular como Administrador</h6>
+                    <ul>
+                        <li><strong>Quien:</strong> Solo administradores</li>
+                        <li><strong>Proceso:</strong> Directo, sin aprobacion previa</li>
+                        <li><strong>Estado:</strong> Inscripcion aprobada inmediatamente</li>
+                        <li><strong>Acceso:</strong> El alumno puede entrar al curso de inmediato</li>
+                        <li><strong>Uso:</strong> Matriculas masivas o casos especiales</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-info"><i class="fas fa-user-graduate"></i> Solicitar como Estudiante</h6>
+                    <ul>
+                        <li><strong>Quien:</strong> Cualquier estudiante registrado</li>
+                        <li><strong>Proceso:</strong> Solicitud que debe ser aprobada por admin</li>
+                        <li><strong>Estado:</strong> Pendiente hasta que admin apruebe</li>
+                        <li><strong>Acceso:</strong> Solo despues de aprobacion del admin</li>
+                        <li><strong>Uso:</strong> Proceso normal de inscripcion de estudiantes</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Script de Busqueda y Validacion -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.needs-validation');
+    const btnMatricular = document.getElementById('btn-matricular');
+    
     // BUSQUEDA DE ALUMNOS POR DNI
     const buscarAlumno = document.getElementById('buscar-alumno');
     const resultadosAlumnos = document.getElementById('resultados-alumnos');
@@ -279,5 +323,107 @@ document.addEventListener('DOMContentLoaded', function() {
         buscarCurso.value = '';
         buscarCurso.removeAttribute('readonly');
     });
+    
+    // VALIDACION Y ENVIO DEL FORMULARIO
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        // PASO 1: Validar que se hayan seleccionado alumno y curso
+        const usuarioId = usuarioIdInput.value;
+        const cursoId = cursoIdInput.value;
+        
+        if (!usuarioId || !cursoId) {
+            let mensajeError = 'Por favor complete los siguientes campos:\n\n';
+            if (!usuarioId) mensajeError += '- Alumno (busque por DNI)\n';
+            if (!cursoId) mensajeError += '- Curso (busque por nombre)\n';
+            
+            alert(mensajeError);
+            return false;
+        }
+        
+        // PASO 2: Confirmar matricula
+        const alumnoTexto = alumnoSeleccionadoTexto.textContent;
+        const cursoTexto = cursoSeleccionadoTexto.textContent;
+        
+        const confirmar = confirm(
+            'Esta seguro de matricular al siguiente alumno?\n\n' +
+            'Alumno: ' + alumnoTexto + '\n' +
+            'Curso: ' + cursoTexto + '\n\n' +
+            'La inscripcion sera aprobada inmediatamente.'
+        );
+        
+        if (!confirmar) {
+            return false;
+        }
+        
+        // PASO 3: Deshabilitar boton y enviar formulario
+        btnMatricular.disabled = true;
+        btnMatricular.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Matriculando...';
+        
+        // Enviar el formulario
+        form.submit();
+    });
 });
 </script>
+
+<style>
+    .form-select-lg, .form-control-lg {
+        font-size: 1.1rem;
+        padding: 0.75rem 1rem;
+    }
+    
+    .card-header p {
+        font-size: 0.9rem;
+    }
+    
+    .form-label {
+        font-size: 1.05rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .alert ul {
+        padding-left: 1.5rem;
+    }
+    
+    .btn-group-lg .btn {
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+    }
+    
+    /* Estilos para resultados de busqueda */
+    .list-group-item-action {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .list-group-item-action:hover {
+        background-color: #e9ecef;
+        border-left: 4px solid #007bff;
+    }
+    
+    #resultados-alumnos::-webkit-scrollbar,
+    #resultados-cursos::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    #resultados-alumnos::-webkit-scrollbar-thumb,
+    #resultados-cursos::-webkit-scrollbar-thumb {
+        background-color: #6c757d;
+        border-radius: 4px;
+    }
+    
+    #alumno-seleccionado,
+    #curso-seleccionado {
+        position: relative;
+        padding-right: 40px;
+    }
+    
+    #alumno-seleccionado .btn-close,
+    #curso-seleccionado .btn-close {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+</style>

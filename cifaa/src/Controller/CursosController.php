@@ -426,9 +426,9 @@ class CursosController extends AppController
             // Asumimos que rechazado = no disponible para solicitar de nuevo inmediatamente.
         }
 
-        // 3. Buscar cursos disponibles (Activos y NO inscritos/pendientes)
+        // 3. Buscar cursos disponibles (Activos/Publicados y NO inscritos/pendientes)
         $queryDisponibles = $this->Cursos->find()
-            ->where(['Cursos.estado' => 'activo']);
+            ->where(['Cursos.estado IN' => ['activo', 'publicado']]);
             
         if (!empty($cursosInteractuadosIds)) {
             $queryDisponibles->where(['Cursos.id NOT IN' => $cursosInteractuadosIds]);

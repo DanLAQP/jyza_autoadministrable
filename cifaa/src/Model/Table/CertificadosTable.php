@@ -88,7 +88,18 @@ class CertificadosTable extends Table
             ->scalar('codigo')
             ->maxLength('codigo', 50)
             ->requirePresence('codigo', 'create')
-            ->notEmptyString('codigo');
+            ->notEmptyString('codigo')
+            ->add('codigo', 'unique', ['rule' => 'validateUnique', 'provider' => 'table']);
+
+        $validator
+            ->scalar('archivo_pdf')
+            ->maxLength('archivo_pdf', 255)
+            ->allowEmptyString('archivo_pdf');
+
+        $validator
+            ->scalar('estado')
+            ->notEmptyString('estado')
+            ->inList('estado', ['activo', 'anulado']);
 
         return $validator;
     }
@@ -104,7 +115,47 @@ class CertificadosTable extends Table
     {
         $rules->add($rules->existsIn(['user_id'], 'Users'), ['errorField' => 'user_id']);
         $rules->add($rules->existsIn(['curso_id'], 'Cursos'), ['errorField' => 'curso_id']);
+        $rules->add($rules->isUnique(['codigo']), ['errorField' => 'codigo', 'message' => 'Este codigo de certificado ya existe.']);
 
         return $rules;
+    }
+
+    /**
+     * Validar que solo exista un certificado activo por usuario y curso.
+     * Metodo auxiliar para prevenir duplicados.
+     * 
+     * @param int $userId ID del usuario
+     * @param int $cursoId ID del curso
+     * @return bool True si no existe certificado activo, False si ya existe
+     */
+    public function puedeGenerarCertificado($userId, $cursoId): bool
+    {
+        $count = $this->find()
+            ->where([
+                'user_id' => $userId,
+                'curso_id' => $cursoId,
+                'estado' => 'activo'
+            ])
+            ->count();
+
+        return $count === 0;
+    }
+
+    /**
+     * Obtener certificado activo de un usuario para un curso especifico.
+     * 
+     * @param int $userId ID del usuario
+     * @param int $cursoId ID del curso
+     * @return \App\Model\Entity\Certificado|null
+     */
+    public function obtenerCertificadoActivo($userId, $cursoId)
+    {
+        return $this->find()
+            ->where([
+                'user_id' => $userId,
+                'curso_id' => $cursoId,
+                'estado' => 'activo'
+            ])
+            ->first();
     }
 }

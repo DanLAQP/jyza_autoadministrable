@@ -17,8 +17,10 @@
 
 
 
-<!-- Mensajes de error de login -->
-<?= $this->Flash->render('flash', ['params' => ['class' => 'login-error-message']]) ?>
+<!-- Mensajes Flash en login -->
+<div class="mb-3">
+    <?= $this->Flash->render() ?>
+</div>
 
 <?= $this->Form->create() ?>
 
@@ -73,20 +75,5 @@
         outline: none;
         box-shadow: 0 0 5px rgba(51, 51, 51, 0.5);
     }
-    /* Estilo destacado para el mensaje de error en login */
-    .login-error-message {
-        background: #c0392b !important; /* Rojo suave, menos saturado */
-        color: #fff !important;
-        border-radius: 8px;
-        padding: 18px 20px;
-        margin: 20px auto 25px auto;
-        font-size: 1.15em;
-        font-weight: bold;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.25);
-        text-align: center;
-        max-width: 420px;
-        letter-spacing: 0.5px;
-        border: 2px solid #fff3;
-        transition: background 0.2s;
     }
 </style>

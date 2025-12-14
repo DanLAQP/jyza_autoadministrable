@@ -186,11 +186,30 @@
                         <p>Certificados</p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="<?= $this->Url->build(['controller' => 'Inscripciones', 'action' => 'index']) ?>" class="nav-link">
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
                         <i class="fas fa-user-check nav-icon"></i>
-                        <p>Inscripciones</p>
+                        <p>
+                            Inscripciones
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="<?= $this->Url->build(['controller' => 'Inscripciones', 'action' => 'index']) ?>" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Ver Solicitudes</p>
+                            </a>
+                        </li>
+                        <?php if ($usuario['rol'] == 1): ?>
+                        <li class="nav-item">
+                            <a href="<?= $this->Url->build(['controller' => 'Inscripciones', 'action' => 'matricular']) ?>" class="nav-link">
+                                <i class="fas fa-user-plus nav-icon text-success"></i>
+                                <p>Matricular Alumno</p>
+                            </a>
+                        </li>
+                        <?php endif; ?>
+                    </ul>
                 </li>
                 <?php endif; ?>
             </ul>
@@ -216,6 +235,11 @@
         </div><!-- /.container-fluid -->
 
     <!-- /.content-header -->
+
+    <!-- Mensajes Flash -->
+    <div class="container-fluid mt-3">
+        <?= $this->Flash->render() ?>
+    </div>
 
     <!-- Main content -->
 <section class="content">
@@ -457,6 +481,20 @@
 <?php if ($this->fetch('title') === 'Dashboard') : ?>
     <script src="<?= $this->Url->assetUrl('dist/js/pages/dashboard2.js') ?>"></script>
 <?php endif; ?>
+
+<!-- Script para auto-dismiss de alertas Flash -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-dismiss alerts despues de 5 segundos
+        const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+        alerts.forEach(function(alert) {
+            setTimeout(function() {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 5000); // 5 segundos
+        });
+    });
+</script>
 
 
 

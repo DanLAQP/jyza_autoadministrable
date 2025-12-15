@@ -132,19 +132,23 @@
                     </a>
                 </li>
 
-                <!-- Calculadoras estadísticas - Visible para todos los roles -->
+                <!-- Calculadora Estadística Unificada - Visible para todos los roles -->
                 <li class="nav-item">
-                    <a href="<?= $this->Url->build(['controller' => 'Statistics', 'action' => 'sampleSize']) ?>" class="nav-link">
+                    <a href="<?= $this->Url->build(['controller' => 'Statistics', 'action' => 'calculadora']) ?>" class="nav-link">
                         <i class="fas fa-calculator nav-icon"></i>
-                        <p>Calculadora Tamaño de Muestra</p>
+                        <p>Calculadora Estadística</p>
                     </a>
                 </li>
+                
+                <!-- WhatsApp - Visible solo para estudiantes (Rol 3) -->
+                <?php if (isset($usuario) && $usuario->rol == 3): ?>
                 <li class="nav-item">
-                    <a href="<?= $this->Url->build(['controller' => 'Statistics', 'action' => 'marginOfError']) ?>" class="nav-link">
-                        <i class="fas fa-percent nav-icon"></i>
-                        <p>Calculadora Margen de Error</p>
+                    <a href="https://wa.me/51901562110?text=Hola,%20necesito%20información%20sobre%20los%20cursos%20de%20CIFAA" target="_blank" class="nav-link">
+                        <i class="fab fa-whatsapp nav-icon text-success"></i>
+                        <p>Contactar Administrador</p>
                     </a>
                 </li>
+                <?php endif; ?>
                 
                 <!-- Mis Certificados - Visible solo para estudiantes (Rol 3) -->
                 <?php if (isset($usuario) && $usuario->rol == 3): ?>

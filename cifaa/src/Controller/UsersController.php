@@ -12,6 +12,18 @@ namespace App\Controller;
 class UsersController extends AppController
 {
     /**
+     * Before filter callback
+     * Se ejecuta antes de cada acción del controlador
+     */
+    public function beforeFilter(\Cake\Event\EventInterface $event)
+    {
+        parent::beforeFilter($event);
+        
+        // Permitir acceso a buscarUsuarios para usuarios autenticados
+        // No se agrega a unauthenticatedActions porque debe requerir login
+    }
+
+    /**
      * Index method
      *
      * @return \Cake\Http\Response|null|void Renders view
@@ -38,10 +50,15 @@ class UsersController extends AppController
         
         $query = $this->Users->find();
 
-        // Filtro por DNI
-        $dni = $this->request->getQuery('dni');
-        if (!empty($dni)) {
-            $query->where(['Users.dni LIKE' => '%' . $dni . '%']);
+        // Filtro de búsqueda (Lógica unificada con Matrícula)
+        $termino = $this->request->getQuery('termino');
+        if (!empty($termino)) {
+            $query->where([
+                'OR' => [
+                    'Users.username LIKE' => '%' . $termino . '%',
+                    'Users.dni LIKE' => '%' . $termino . '%'
+                ]
+            ]);
         }
         
         $users = $this->paginate($query);
@@ -290,5 +307,40 @@ class UsersController extends AppController
             $this->Flash->success('You have been logged out');
         }
         return $this->redirect(['controller' => 'Users', 'action' => 'login']);
+    }
+
+    /**
+     * Buscar usuarios por username o DNI (AJAX)
+     * Método para búsqueda dinámica en tiempo real
+     * Búsqueda case-insensitive (sin distinción mayúsculas/minúsculas)
+     * 
+     * @return \Cake\Http\Response JSON con resultados
+     */
+    public function buscarUsuarios()
+    {
+        $this->request->allowMethod(['get']);
+        $this->viewBuilder()->setLayout('ajax');
+        
+        $termino = $this->request->getQuery('termino');
+        $resultados = [];
+        
+        if (!empty($termino) && strlen($termino) >= 2) { // Mínimo 2 caracteres
+            $resultados = $this->Users->find()
+                ->select(['id', 'username', 'dni', 'rol', 'estado', 'created'])
+                ->where([
+                    'OR' => [
+                        'Users.username LIKE' => '%' . $termino . '%',
+                        'Users.dni LIKE' => '%' . $termino . '%'
+                    ]
+                ])
+                ->order(['Users.username' => 'ASC'])
+                ->limit(15)
+                ->toArray();
+        }
+        
+        $this->response = $this->response->withType('application/json')
+            ->withStringBody(json_encode($resultados, JSON_UNESCAPED_UNICODE));
+        
+        return $this->response;
     }
 }

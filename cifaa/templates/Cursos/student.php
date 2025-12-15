@@ -117,6 +117,33 @@ $whatsappAdmin = Configure::read('Cifa.whatsapp_admin', '51999999999');
     <!-- SECCIÓN 3: EXPLORAR CURSOS (DISPONIBLES) -->
     <div class="mb-5">
         <h4 class="text-info mb-3"><i class="fas fa-search me-2"></i>Explorar Cursos Disponibles</h4>
+
+        <!-- Buscador estándar -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <?= $this->Form->create(null, ['type' => 'get']) ?>
+                <div class="input-group">
+                    <?= $this->Form->control('termino', [
+                        'label' => false, 
+                        'placeholder' => 'Buscar curso por título...',
+                        'class' => 'form-control',
+                        'value' => $this->request->getQuery('termino')
+                    ]) ?>
+                    <?= $this->Form->button('<i class="fas fa-search"></i>', [
+                        'class' => 'btn btn-primary', 
+                        'escape' => false
+                    ]) ?>
+                    <?php if (!empty($this->request->getQuery('termino'))): ?>
+                        <?= $this->Html->link(
+                            '<i class="fas fa-times"></i>', 
+                            ['action' => 'student'], 
+                            ['class' => 'btn btn-secondary', 'escape' => false, 'title' => 'Limpiar']
+                        ) ?>
+                    <?php endif; ?>
+                </div>
+                <?= $this->Form->end() ?>
+            </div>
+        </div>
         
         <?php if ($disponibles->isEmpty()): ?>
             <div class="alert alert-light text-center py-5">

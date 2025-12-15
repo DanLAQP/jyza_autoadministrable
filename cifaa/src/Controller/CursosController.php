@@ -97,9 +97,19 @@ class CursosController extends AppController
 
         $query = $this->Cursos->find()
             ->contain(['Users']);
+
+        // Filtro de búsqueda (Lógica unificada con Matrícula)
+        $termino = $this->request->getQuery('termino');
+        if (!empty($termino)) {
+            $query->where([
+                'Cursos.estado IN' => ['activo', 'publicado'],
+                'Cursos.titulo LIKE' => '%' . $termino . '%'
+            ]);
+        }
+
         $cursos = $this->paginate($query);
 
-        $this->set(compact('cursos'));
+        $this->set(compact('cursos', 'termino'));
     }
 
     /**
@@ -434,12 +444,21 @@ class CursosController extends AppController
             $queryDisponibles->where(['Cursos.id NOT IN' => $cursosInteractuadosIds]);
         }
         
+        // Filtro de búsqueda (Lógica unificada)
+        $termino = $this->request->getQuery('termino');
+        if (!empty($termino)) {
+            $queryDisponibles->where([
+                'Cursos.titulo LIKE' => '%' . $termino . '%'
+            ]);
+            // Nota: El filtro de 'estado' ya se aplica en la consulta base $queryDisponibles
+        }
+        
         $queryDisponibles->contain(['Users'])
             ->orderBy(['Cursos.created' => 'DESC']);
 
         $disponibles = $this->paginate($queryDisponibles, ['limit' => 9]);
 
-        $this->set(compact('matriculados', 'pendientes', 'disponibles'));
+        $this->set(compact('matriculados', 'pendientes', 'disponibles', 'termino'));
     }
 
     /**
@@ -542,5 +561,41 @@ class CursosController extends AppController
         return $this->redirect(['action' => 'view', $id]);
 
     } // <-- cierre del método solicitar
+
+    /**
+     * Buscar cursos por título (AJAX)
+     * Método para búsqueda dinámica en tiempo real
+     * Búsqueda case-insensitive (sin distinción mayúsculas/minúsculas)
+     * 
+     * @return \Cake\Http\Response JSON con resultados
+     */
+    public function buscarCursos()
+    {
+        $this->request->allowMethod(['get']);
+        $this->viewBuilder()->setLayout('ajax');
+        
+        $termino = $this->request->getQuery('termino');
+        $resultados = [];
+        
+        if (!empty($termino) && strlen($termino) >= 2) { // Mínimo 2 caracteres
+            $resultados = $this->Cursos->find()
+                ->select(['id', 'titulo', 'nivel', 'categoria', 'estado'])
+                ->where([
+                    'OR' => [
+                        'titulo LIKE' => '%' . $termino . '%',
+                        'descripcion LIKE' => '%' . $termino . '%',
+                        'categoria LIKE' => '%' . $termino . '%'
+                    ]
+                ])
+                ->order(['titulo' => 'ASC'])
+                ->limit(15)
+                ->toArray();
+        }
+        
+        $this->response = $this->response->withType('application/json')
+            ->withStringBody(json_encode($resultados, JSON_UNESCAPED_UNICODE));
+        
+        return $this->response;
+    }
 
 } // <-- cierre de la clase CursosController

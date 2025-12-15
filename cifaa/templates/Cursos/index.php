@@ -23,6 +23,32 @@
         </div>
     </div>
 
+    <!-- Buscador AJAX en Tiempo Real -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <label for="buscar-curso-ajax" class="form-label fw-bold">
+                        <i class="fas fa-search text-primary"></i> Búsqueda en Tiempo Real
+                    </label>
+                    <input 
+                        type="text" 
+                        id="buscar-curso-ajax" 
+                        class="form-control form-control-lg" 
+                        placeholder="Escriba título, descripción o categoría del curso (mín. 2 caracteres)..."
+                        autocomplete="off"
+                    >
+                    <small class="form-text text-muted">
+                        <i class="fas fa-info-circle"></i> Búsqueda automática mientras escribes. Busca por título, descripción o categoría.
+                    </small>
+                    
+                    <!-- Lista de resultados AJAX -->
+                    <div id="resultados-cursos-ajax" class="list-group mt-3" style="display: none; max-height: 400px; overflow-y: auto;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Lista de Cursos en Cards -->
     <div class="row g-4">
         <?php if (empty($cursos)): ?>
@@ -182,4 +208,90 @@
     .btn-group .btn {
         flex: 1;
     }
+    
+    #resultados-cursos-ajax .list-group-item {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    #resultados-cursos-ajax .list-group-item:hover {
+        background-color: #f0f0f0;
+    }
 </style>
+
+<!-- Script de Búsqueda AJAX -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const buscarInput = document.getElementById('buscar-curso-ajax');
+    const resultadosDiv = document.getElementById('resultados-cursos-ajax');
+    let timeoutBusqueda = null;
+    
+    buscarInput.addEventListener('input', function() {
+        const termino = this.value.trim();
+        
+        // Limpiar timeout anterior
+        clearTimeout(timeoutBusqueda);
+        
+        // Ocultar resultados si está vacío o muy corto
+        if (termino.length < 2) {
+            resultadosDiv.style.display = 'none';
+            resultadosDiv.innerHTML = '';
+            return;
+        }
+        
+        // Buscar después de 300ms de inactividad
+        timeoutBusqueda = setTimeout(function() {
+            fetch('<?= $this->Url->build(['controller' => 'Cursos', 'action' => 'buscarCursos']) ?>?termino=' + encodeURIComponent(termino))
+                .then(response => response.json())
+                .then(data => {
+                    resultadosDiv.innerHTML = '';
+                    
+                    if (data.length === 0) {
+                        resultadosDiv.innerHTML = '<div class="list-group-item text-muted"><i class="fas fa-info-circle"></i> No se encontraron cursos con ese criterio</div>';
+                        resultadosDiv.style.display = 'block';
+                    } else {
+                        data.forEach(curso => {
+                            const item = document.createElement('a');
+                            item.href = '<?= $this->Url->build(['action' => 'view']) ?>/' + curso.id;
+                            item.className = 'list-group-item list-group-item-action';
+                            
+                            // Badges de estado y nivel
+                            let estadoBadge = '';
+                            if (curso.estado === 'activo' || curso.estado === 'publicado') {
+                                estadoBadge = '<span class="badge bg-success ms-2"><i class="fas fa-check-circle"></i> ' + curso.estado + '</span>';
+                            } else {
+                                estadoBadge = '<span class="badge bg-danger ms-2"><i class="fas fa-times-circle"></i> ' + curso.estado + '</span>';
+                            }
+                            
+                            let nivelBadge = curso.nivel ? '<span class="badge bg-secondary ms-1"><i class="fas fa-graduation-cap"></i> ' + curso.nivel + '</span>' : '';
+                            let categoriaBadge = curso.categoria ? '<span class="badge bg-primary ms-1"><i class="fas fa-tag"></i> ' + curso.categoria + '</span>' : '';
+                            
+                            item.innerHTML = '<div class="d-flex justify-content-between align-items-center">' +
+                                           '<div>' +
+                                           '<strong class="text-info"><i class="fas fa-book"></i> ' + curso.titulo + '</strong>' +
+                                           '<div class="small text-muted mt-1">' + nivelBadge + categoriaBadge + '</div>' +
+                                           '</div>' +
+                                           '<div>' + estadoBadge + '</div>' +
+                                           '</div>';
+                            
+                            resultadosDiv.appendChild(item);
+                        });
+                        resultadosDiv.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al buscar cursos:', error);
+                    resultadosDiv.innerHTML = '<div class="list-group-item text-danger"><i class="fas fa-exclamation-triangle"></i> Error en la búsqueda</div>';
+                    resultadosDiv.style.display = 'block';
+                });
+        }, 300);
+    });
+    
+    // Ocultar resultados al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        if (!buscarInput.contains(e.target) && !resultadosDiv.contains(e.target)) {
+            resultadosDiv.style.display = 'none';
+        }
+    });
+});
+</script>

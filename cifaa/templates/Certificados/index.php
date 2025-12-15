@@ -21,6 +21,33 @@
         </div>
     </div>
 
+    <!-- Buscador estándar -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <?= $this->Form->create(null, ['type' => 'get']) ?>
+            <div class="input-group">
+                <?= $this->Form->control('termino', [
+                    'label' => false, 
+                    'placeholder' => 'Buscar por nombre del estudiante...',
+                    'class' => 'form-control',
+                    'value' => $this->request->getQuery('termino')
+                ]) ?>
+                <?= $this->Form->button('<i class="fas fa-search"></i>', [
+                    'class' => 'btn btn-primary', 
+                    'escape' => false
+                ]) ?>
+                <?php if (!empty($this->request->getQuery('termino'))): ?>
+                    <?= $this->Html->link(
+                        '<i class="fas fa-times"></i>', 
+                        ['action' => 'index'], 
+                        ['class' => 'btn btn-secondary', 'escape' => false, 'title' => 'Limpiar']
+                    ) ?>
+                <?php endif; ?>
+            </div>
+            <?= $this->Form->end() ?>
+        </div>
+    </div>
+
     <!-- Tabla de certificados -->
     <div class="row">
         <div class="col-12">

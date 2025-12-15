@@ -39,9 +39,20 @@ class CertificadosController extends AppController
             ->contain(['Users', 'Cursos'])
             ->order(['Certificados.created' => 'DESC']);
             
+        // Filtro de búsqueda
+        $termino = $this->request->getQuery('termino');
+        if (!empty($termino)) {
+            $query->where([
+                'OR' => [
+                    'Certificados.nombre_completo LIKE' => '%' . $termino . '%',
+                    'Users.username LIKE' => '%' . $termino . '%'
+                ]
+            ]);
+        }
+            
         $certificados = $this->paginate($query);
 
-        $this->set(compact('certificados'));
+        $this->set(compact('certificados', 'termino'));
     }
 
     /**
@@ -208,9 +219,15 @@ class CertificadosController extends AppController
             ->where(['Certificados.user_id' => $user->id])
             ->order(['Certificados.created' => 'DESC']);
 
+        // Filtro de búsqueda
+        $termino = $this->request->getQuery('termino');
+        if (!empty($termino)) {
+            $query->where(['Cursos.titulo LIKE' => '%' . $termino . '%']);
+        }
+
         $certificados = $this->paginate($query);
 
-        $this->set(compact('certificados'));
+        $this->set(compact('certificados', 'termino'));
     }
 
     /**

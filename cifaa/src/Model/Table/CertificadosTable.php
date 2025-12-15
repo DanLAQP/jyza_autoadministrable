@@ -50,11 +50,11 @@ class CertificadosTable extends Table
 
         $this->belongsTo('Users', [
             'foreignKey' => 'user_id',
-            'joinType' => 'INNER',
+            'joinType' => 'LEFT',
         ]);
         $this->belongsTo('Cursos', [
             'foreignKey' => 'curso_id',
-            'joinType' => 'INNER',
+            'joinType' => 'LEFT',
         ]);
     }
 
@@ -68,16 +68,48 @@ class CertificadosTable extends Table
     {
         $validator
             ->integer('user_id')
-            ->notEmptyString('user_id');
+            ->allowEmptyString('user_id');
 
         $validator
             ->integer('curso_id')
-            ->notEmptyString('curso_id');
+            ->allowEmptyString('curso_id');
+
+        $validator
+            ->scalar('nombre_completo')
+            ->maxLength('nombre_completo', 255)
+            ->allowEmptyString('nombre_completo');
+
+        $validator
+            ->scalar('nombre_curso')
+            ->maxLength('nombre_curso', 255)
+            ->allowEmptyString('nombre_curso');
 
         $validator
             ->integer('horas')
             ->requirePresence('horas', 'create')
             ->notEmptyString('horas');
+
+        $validator
+            ->decimal('nota_final')
+            ->allowEmptyString('nota_final');
+
+        $validator
+            ->integer('duracion_meses')
+            ->allowEmptyString('duracion_meses');
+
+        $validator
+            ->scalar('fecha_inicio')
+            ->maxLength('fecha_inicio', 100)
+            ->allowEmptyString('fecha_inicio');
+
+        $validator
+            ->scalar('fecha_fin')
+            ->maxLength('fecha_fin', 100)
+            ->allowEmptyString('fecha_fin');
+
+        $validator
+            ->scalar('modulos')
+            ->allowEmptyString('modulos');
 
         $validator
             ->date('fecha_emision')
@@ -113,8 +145,35 @@ class CertificadosTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->existsIn(['user_id'], 'Users'), ['errorField' => 'user_id']);
-        $rules->add($rules->existsIn(['curso_id'], 'Cursos'), ['errorField' => 'curso_id']);
+        // Make user_id and curso_id optional - only validate if provided
+        $rules->add(
+            function ($entity, $options) {
+                if (empty($entity->user_id)) {
+                    return true;
+                }
+                return $this->Users->exists(['id' => $entity->user_id]);
+            },
+            'validUser',
+            [
+                'errorField' => 'user_id',
+                'message' => 'El usuario especificado no existe'
+            ]
+        );
+        
+        $rules->add(
+            function ($entity, $options) {
+                if (empty($entity->curso_id)) {
+                    return true;
+                }
+                return $this->Cursos->exists(['id' => $entity->curso_id]);
+            },
+            'validCurso',
+            [
+                'errorField' => 'curso_id',
+                'message' => 'El curso especificado no existe'
+            ]
+        );
+        
         $rules->add($rules->isUnique(['codigo']), ['errorField' => 'codigo', 'message' => 'Este codigo de certificado ya existe.']);
 
         return $rules;

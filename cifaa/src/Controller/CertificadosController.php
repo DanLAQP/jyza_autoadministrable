@@ -15,6 +15,17 @@ use Dompdf\Options;
 class CertificadosController extends AppController
 {
     /**
+     * beforeFilter method
+     * Allow public access to verification action
+     */
+    public function beforeFilter(\Cake\Event\EventInterface $event)
+    {
+        parent::beforeFilter($event);
+        // Permitir acceso público a la verificación de certificados
+        $this->Authentication->addUnauthenticatedActions(['verificar']);
+    }
+
+    /**
      * Index method (Admin only)
      * Lists all certificates and allows managing them.
      */
@@ -35,16 +46,8 @@ class CertificadosController extends AppController
 
     /**
      * Generar method (Admin only)
-     * Genera un certificado manualmente para un usuario y curso especifico.
-     * 
-     * Flujo de validacion:
-     * 1. Verificar que usuario existe y es alumno (rol=2) 
-     * 2. Verificar que curso existe
-     * 3. Verificar que existe inscripcion del alumno al curso
-     * 4. Validar progreso 100% y estado aprobada
-     * 5. Verificar que no exista certificado activo previo
-     * 6. Generar codigo unico y crear certificado
-     * 7. Redirigir a descarga automatica del PDF
+     * Genera un certificado personalizado sin restricciones.
+     * Permite ingreso manual de todos los datos.
      */
     public function generar()
     {
@@ -56,94 +59,127 @@ class CertificadosController extends AppController
         
         if ($this->request->is('post')) {
             $data = $this->request->getData();
-            $userId = $data['user_id'] ?? null;
-            $cursoId = $data['curso_id'] ?? null;
             
-            // VALIDACION 1: Verificar que usuario existe y es alumno (rol=3)
-            $user = $this->Certificados->Users->find()
-                ->where(['id' => $userId, 'rol' => 3])
-                ->first();
-                
-            if (!$user) {
-                $this->Flash->error(__('Usuario invalido o no es alumno. Solo se pueden generar certificados para alumnos.'));
-                return $this->redirect(['action' => 'generar']);
+            // DEBUG: Ver todos los datos recibidos
+            $this->log("====== DATOS RECIBIDOS DEL FORMULARIO ======", 'debug');
+            $this->log("nombre_completo: " . ($data['nombre_completo'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("nombre_curso: " . ($data['nombre_curso'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("horas: " . ($data['horas'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("nota_final: " . ($data['nota_final'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("duracion_meses: " . ($data['duracion_meses'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("fecha_inicio: " . ($data['fecha_inicio'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("fecha_fin: " . ($data['fecha_fin'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("modulo_tema: " . json_encode($data['modulo_tema'] ?? []), 'debug');
+            $this->log("============================================", 'debug');
+            
+            // Procesar módulos desde el formulario dinámico
+            $modulosArray = [];
+            if (!empty($data['modulo_tema']) && is_array($data['modulo_tema'])) {
+                $numeroRomano = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+                foreach ($data['modulo_tema'] as $index => $tema) {
+                    if (!empty($tema)) {
+                        $modulosArray[] = [
+                            'numero' => $numeroRomano[$index] ?? ($index + 1),
+                            'tema' => $tema
+                        ];
+                    }
+                }
             }
             
-            // VALIDACION 2: Verificar que curso existe
-            $curso = $this->Certificados->Cursos->find()
-                ->where(['id' => $cursoId])
-                ->first();
-                
-            if (!$curso) {
-                $this->Flash->error(__('El curso especificado no existe.'));
-                return $this->redirect(['action' => 'generar']);
+            // Generar código único
+            $codigo = 'CER-' . date('Y') . '-' . strtoupper(substr(md5(uniqid()), 0, 10));
+            
+            // Formatear fechas si vienen del datepicker
+            $fechaInicio = null;
+            $fechaFin = null;
+            
+            if (!empty($data['fecha_inicio'])) {
+                if ($data['fecha_inicio'] instanceof \Cake\I18n\FrozenDate) {
+                    $fechaInicio = $data['fecha_inicio']->format('d \d\e F \d\e Y');
+                } elseif (is_string($data['fecha_inicio'])) {
+                    // Convertir formato YYYY-MM-DD a texto español
+                    try {
+                        $date = new \DateTime($data['fecha_inicio']);
+                        $meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                                  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+                        $fechaInicio = $date->format('d') . ' de ' . $meses[(int)$date->format('m') - 1] . ' de ' . $date->format('Y');
+                    } catch (\Exception $e) {
+                        $fechaInicio = $data['fecha_inicio'];
+                    }
+                }
             }
             
-            // VALIDACION 3: Buscar inscripcion del alumno al curso
-            $Inscripciones = $this->fetchTable('Inscripciones');
-            $inscripcion = $Inscripciones->find()
-                ->where([
-                    'usuario_id' => $userId,
-                    'curso_id' => $cursoId
-                ])
-                ->first();
-                
-            if (!$inscripcion) {
-                $this->Flash->error(__('El usuario {0} no esta inscrito en el curso {1}.', $user->username, $curso->titulo));
-                return $this->redirect(['action' => 'generar']);
+            if (!empty($data['fecha_fin'])) {
+                if ($data['fecha_fin'] instanceof \Cake\I18n\FrozenDate) {
+                    $fechaFin = $data['fecha_fin']->format('d \d\e F \d\e Y');
+                } elseif (is_string($data['fecha_fin'])) {
+                    // Convertir formato YYYY-MM-DD a texto español
+                    try {
+                        $date = new \DateTime($data['fecha_fin']);
+                        $meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                                  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+                        $fechaFin = $date->format('d') . ' de ' . $meses[(int)$date->format('m') - 1] . ' de ' . $date->format('Y');
+                    } catch (\Exception $e) {
+                        $fechaFin = $data['fecha_fin'];
+                    }
+                }
             }
             
-            // VALIDACION 4: Verificar duplicados (solo un certificado activo por inscripcion)
-            $certificadoExistente = $this->Certificados->find()
-                ->where([
-                    'user_id' => $userId,
-                    'curso_id' => $cursoId,
-                    'estado' => 'activo'
-                ])
-                ->first();
-                
-            if ($certificadoExistente) {
-                $this->Flash->warning(__('Ya existe un certificado activo para este usuario y curso. Codigo: {0}', $certificadoExistente->codigo));
-                return $this->redirect(['action' => 'descargar', $certificadoExistente->id]);
-            }
-            
-            // PASO 6: Generar codigo unico para el certificado
-            // Formato: CER-ANIO-USERID-CURSOID-RANDOM
-            $codigo = 'CER-' . date('Y') . '-' . str_pad($userId, 4, '0', STR_PAD_LEFT) . 
-                      '-' . str_pad($cursoId, 4, '0', STR_PAD_LEFT) . '-' . strtoupper(substr(md5(uniqid()), 0, 6));
-            
-            // Crear entidad del certificado con datos completos
+            // Preparar datos del certificado
             $certificadoData = [
-                'user_id' => $userId,
-                'curso_id' => $cursoId,
-                'horas' => $curso->duracion_horas ?? 40, // Usar duracion del curso o valor por defecto
+                'user_id' => !empty($data['user_id']) ? $data['user_id'] : null,
+                'curso_id' => !empty($data['curso_id']) ? $data['curso_id'] : null,
+                'nombre_completo' => trim($data['nombre_completo'] ?? ''),
+                'nombre_curso' => trim($data['nombre_curso'] ?? ''),
+                'horas' => (int)($data['horas'] ?? 0),
+                'nota_final' => !empty($data['nota_final']) ? $data['nota_final'] : null,
+                'duracion_meses' => !empty($data['duracion_meses']) ? (int)$data['duracion_meses'] : null,
+                'fecha_inicio' => $fechaInicio,
+                'fecha_fin' => $fechaFin,
+                'modulos' => !empty($modulosArray) ? json_encode($modulosArray, JSON_UNESCAPED_UNICODE) : null,
                 'fecha_emision' => date('Y-m-d'),
                 'codigo' => $codigo,
                 'estado' => 'activo'
             ];
             
+            // Aplicar datos al entity
             $certificado = $this->Certificados->patchEntity($certificado, $certificadoData);
             
-            // PASO 7: Guardar certificado y redirigir a descarga
-            if ($this->Certificados->save($certificado)) {
-                $this->log("Certificado generado manualmente. ID: {$certificado->id}, Codigo: {$codigo}, Usuario: {$userId}, Curso: {$cursoId}", 'info');
-                $this->Flash->success(__('Certificado generado exitosamente para {0} - {1}. Codigo: {2}', $user->username, $curso->titulo, $codigo));
-                
-                // Redirigir automaticamente a descarga del PDF
-                return $this->redirect(['action' => 'descargar', $certificado->id]);
-            }
+            // Debug: Log data being saved
+            $this->log("====== GUARDANDO EN BD ======", 'debug');
+            $this->log("Datos preparados: " . json_encode($certificadoData, JSON_UNESCAPED_UNICODE), 'debug');
+            $this->log("Entity nombre_completo: " . ($certificado->nombre_completo ?? 'NULL'), 'debug');
+            $this->log("Entity nombre_curso: " . ($certificado->nombre_curso ?? 'NULL'), 'debug');
+            $this->log("Entity horas: " . ($certificado->horas ?? 'NULL'), 'debug');
+            $this->log("Entity nota_final: " . ($certificado->nota_final ?? 'NULL'), 'debug');
+            $this->log("Entity duracion_meses: " . ($certificado->duracion_meses ?? 'NULL'), 'debug');
+            $this->log("============================", 'debug');
             
-            $this->Flash->error(__('Error al guardar el certificado en la base de datos. Intente nuevamente.'));
+            if ($this->Certificados->save($certificado)) {
+                $this->log("Certificado generado exitosamente. ID: {$certificado->id}, Codigo: {$codigo}, Nombre: {$certificado->nombre_completo}, Curso: {$certificado->nombre_curso}", 'info');
+                $this->Flash->success(__('Certificado generado exitosamente. Código: {0}', $codigo));
+                
+                return $this->redirect(['action' => 'index']);
+            } else {
+                // Log de errores de validación
+                $errors = $certificado->getErrors();
+                $this->log("ERROR al guardar certificado. Errores: " . json_encode($errors), 'error');
+                $this->Flash->error(__('Error al guardar el certificado. Revise los datos ingresados.'));
+                
+                // Mostrar errores específicos en el log
+                foreach ($errors as $field => $error) {
+                    $this->log("Campo '{$field}': " . json_encode($error), 'error');
+                }
+            }
         }
         
         // Cargar listas para los dropdowns del formulario
         $users = $this->Certificados->Users->find('list', [
             'keyField' => 'id',
             'valueField' => function ($user) {
-                $email = !empty($user->email) ? ' (' . $user->email . ')' : '';
-                return $user->username . $email;
+                return $user->username . ' (DNI: ' . ($user->dni ?? 'N/A') . ')';
             }
-        ])->where(['rol' => 2]) // Solo alumnos
+        ])->where(['rol' => 3]) // Solo estudiantes
           ->order(['username' => 'ASC'])
           ->all();
           
@@ -262,20 +298,39 @@ class CertificadosController extends AppController
         
         $dompdf = new Dompdf($options);
         
-        // PASO 4.3: Renderizar HTML del certificado
+        // PASO 4.3: Generar URL de verificación dinámica
+        $baseUrl = $this->request->getUri()->getScheme() . '://' . 
+                   $this->request->getUri()->getHost();
+        
+        // Agregar puerto solo si no es estándar (80 para HTTP, 443 para HTTPS)
+        $port = $this->request->getUri()->getPort();
+        if ($port && $port != 80 && $port != 443) {
+            $baseUrl .= ':' . $port;
+        }
+        
+        // Agregar webroot (subdirectorio si existe)
+        $baseUrl .= $this->request->getAttribute('webroot');
+        
+        // URL completa de verificación
+        $verificarUrl = $baseUrl . 'certificados/verificar/' . $certificado->codigo;
+        
+        $this->log("URL de verificación generada: {$verificarUrl}", 'debug');
+        
+        // PASO 4.4: Renderizar HTML del certificado
         $html = $this->viewBuilder()
             ->setClassName('Cake\View\View')
             ->setTemplatePath('Certificados/pdf')
             ->setTemplate('certificado')
             ->setLayout('ajax')
-            ->setOption('serialize', ['certificado', 'logoBase64', 'firmaBase64'])
+            ->setOption('serialize', ['certificado', 'logoBase64', 'firmaBase64', 'verificarUrl'])
             ->setVar('certificado', $certificado)
             ->setVar('logoBase64', $logoBase64)
             ->setVar('firmaBase64', $firmaBase64)
+            ->setVar('verificarUrl', $verificarUrl)
             ->build()
             ->render();
 
-        // PASO 4.4: Generar PDF en memoria
+        // PASO 4.5: Generar PDF en memoria
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
@@ -337,5 +392,58 @@ class CertificadosController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+
+    /**
+     * Verificar method (Public - No authentication required)
+     * Verifica la autenticidad de un certificado mediante su código.
+     * Accesible públicamente para validación externa.
+     */
+    public function verificar($codigo = null)
+    {
+        // Esta acción debe ser pública
+        $this->viewBuilder()->setLayout('default');
+        
+        $certificado = null;
+        $mensaje = null;
+        $tipo = null; // 'success', 'error', 'warning'
+        
+        // Si viene código por URL o por POST
+        if ($this->request->is('post')) {
+            $codigo = $this->request->getData('codigo');
+        }
+        
+        if (!empty($codigo)) {
+            $codigo = strtoupper(trim($codigo));
+            
+            try {
+                $certificado = $this->Certificados->find()
+                    ->where(['codigo' => $codigo])
+                    ->contain(['Users', 'Cursos'])
+                    ->first();
+                
+                if ($certificado) {
+                    if ($certificado->estado === 'activo') {
+                        $mensaje = 'Certificado válido y activo';
+                        $tipo = 'success';
+                        $this->log("Verificación exitosa del certificado: {$codigo}", 'info');
+                    } else {
+                        $mensaje = 'Este certificado ha sido anulado';
+                        $tipo = 'warning';
+                        $this->log("Intento de verificación de certificado anulado: {$codigo}", 'warning');
+                    }
+                } else {
+                    $mensaje = 'Código de certificado no encontrado';
+                    $tipo = 'error';
+                    $this->log("Intento de verificación con código inválido: {$codigo}", 'warning');
+                }
+            } catch (\Exception $e) {
+                $mensaje = 'Error al verificar el certificado';
+                $tipo = 'error';
+                $this->log("Error en verificación: " . $e->getMessage(), 'error');
+            }
+        }
+        
+        $this->set(compact('certificado', 'codigo', 'mensaje', 'tipo'));
     }
 }

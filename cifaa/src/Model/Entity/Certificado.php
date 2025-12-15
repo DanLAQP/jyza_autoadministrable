@@ -9,11 +9,20 @@ use Cake\ORM\Entity;
  * Certificado Entity
  *
  * @property int $id
- * @property int $user_id
- * @property int $curso_id
+ * @property int|null $user_id
+ * @property int|null $curso_id
+ * @property string|null $nombre_completo
+ * @property string|null $nombre_curso
  * @property int $horas
+ * @property float|null $nota_final
+ * @property int|null $duracion_meses
+ * @property string|null $fecha_inicio
+ * @property string|null $fecha_fin
+ * @property string|null $modulos
  * @property \Cake\I18n\Date $fecha_emision
  * @property string $codigo
+ * @property string|null $archivo_pdf
+ * @property string $estado
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  *
@@ -34,9 +43,18 @@ class Certificado extends Entity
     protected array $_accessible = [
         'user_id' => true,
         'curso_id' => true,
+        'nombre_completo' => true,
+        'nombre_curso' => true,
         'horas' => true,
+        'nota_final' => true,
+        'duracion_meses' => true,
+        'fecha_inicio' => true,
+        'fecha_fin' => true,
+        'modulos' => true,
         'fecha_emision' => true,
         'codigo' => true,
+        'archivo_pdf' => true,
+        'estado' => true,
         'created' => true,
         'modified' => true,
         'user' => true,

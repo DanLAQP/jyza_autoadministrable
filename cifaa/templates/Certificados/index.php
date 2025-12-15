@@ -51,18 +51,32 @@
                                 <td class="text-muted"><?= $this->Number->format($certificado->id) ?></td>
                                 <td>
                                     <i class="fas fa-user-circle text-primary me-1"></i>
-                                    <strong><?= $certificado->has('user') ? h($certificado->user->username) : 'N/A' ?></strong>
+                                    <strong>
+                                        <?php 
+                                        if (!empty($certificado->nombre_completo)) {
+                                            echo h($certificado->nombre_completo);
+                                        } elseif ($certificado->has('user')) {
+                                            echo h($certificado->user->username);
+                                        } else {
+                                            echo 'N/A';
+                                        }
+                                        ?>
+                                    </strong>
                                     <?php if ($certificado->has('user') && $certificado->user->dni): ?>
                                         <br><small class="text-muted">DNI: <?= h($certificado->user->dni) ?></small>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if ($certificado->has('curso')): ?>
-                                        <i class="fas fa-graduation-cap text-info me-1"></i>
-                                        <?= h($certificado->curso->titulo) ?>
-                                    <?php else: ?>
-                                        <span class="text-muted">N/A</span>
-                                    <?php endif; ?>
+                                    <i class="fas fa-graduation-cap text-info me-1"></i>
+                                    <?php 
+                                    if (!empty($certificado->nombre_curso)) {
+                                        echo h($certificado->nombre_curso);
+                                    } elseif ($certificado->has('curso')) {
+                                        echo h($certificado->curso->titulo);
+                                    } else {
+                                        echo '<span class="text-muted">N/A</span>';
+                                    }
+                                    ?>
                                 </td>
                                 <td>
                                     <span class="badge bg-secondary">

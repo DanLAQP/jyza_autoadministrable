@@ -52,6 +52,10 @@ return function (RouteBuilder $routes): void {
     $routes->connect('/login', ['controller' => 'Users', 'action' => 'login']);
     $routes->connect('/', ['controller' => 'Pages', 'action' => 'display', 'home']);
     $routes->connect('/logout', ['controller' => 'Users', 'action' => 'logout']);
+    
+    // Ruta pública para verificación de certificados
+    $routes->connect('/certificados/verificar', ['controller' => 'Certificados', 'action' => 'verificar']);
+    $routes->connect('/certificados/verificar/:codigo', ['controller' => 'Certificados', 'action' => 'verificar'], ['pass' => ['codigo']]);
     $routes->connect('/buscarPaciente', ['controller' => 'Pacientes1', 'action' => 'buscarPaciente']);
     $routes->connect('/citas-diarias', ['controller' => 'Citas', 'action' => 'citaDiaria']);
         // Verifica si la ruta está bien configurada en config/routes.php

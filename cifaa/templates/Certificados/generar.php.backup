@@ -1,0 +1,283 @@
+<?php
+/**
+ * @var \App\View\AppView $this
+ * @var \App\Model\Entity\Certificado $certificado
+ */
+$this->assign('title', 'Generar Certificado');
+?>
+
+<div class="container-fluid mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h3 class="card-title mb-0">
+                <i class="fas fa-file-signature"></i> Generar Certificado
+            </h3>
+            <p class="mb-0 mt-2 small">
+                <i class="fas fa-info-circle"></i> Complete los datos para generar un certificado de finalización de curso.
+            </p>
+        </div>
+        <div class="card-body">
+            <?= $this->Form->create($certificado, ['class' => 'needs-validation', 'novalidate' => true]) ?>
+            
+            <div class="row g-4">
+                <!-- Busqueda de Alumno por DNI -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="buscar-alumno" class="form-label fw-bold">
+                            <i class="fas fa-user-graduate text-primary"></i> Buscar Alumno por DNI
+                        </label>
+                        <input 
+                            type="text" 
+                            id="buscar-alumno" 
+                            class="form-control form-control-lg" 
+                            placeholder="Ingrese DNI o nombre (min. 3 caracteres)..."
+                            autocomplete="off"
+                        >
+                        <small class="form-text text-muted">
+                            <i class="fas fa-search"></i> Busca por DNI o nombre de usuario (mínimo 3 caracteres)
+                        </small>
+                        
+                        <!-- Lista de resultados -->
+                        <div id="resultados-alumnos" class="list-group mt-2" style="display: none; max-height: 250px; overflow-y: auto;"></div>
+                        
+                        <!-- Campo oculto para almacenar el ID seleccionado -->
+                        <?= $this->Form->control('user_id', [
+                            'type' => 'hidden',
+                            'id' => 'usuario-id',
+                            'required' => true
+                        ]) ?>
+                        
+                        <!-- Mostrar alumno seleccionado -->
+                        <div id="alumno-seleccionado" class="alert alert-success mt-2" style="display: none;">
+                            <strong>Alumno seleccionado:</strong> <span id="alumno-seleccionado-texto"></span>
+                            <button type="button" class="btn-close float-end" id="limpiar-alumno"></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Busqueda de Curso por Nombre -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="buscar-curso" class="form-label fw-bold">
+                            <i class="fas fa-book text-info"></i> Buscar Curso por Nombre
+                        </label>
+                        <input 
+                            type="text" 
+                            id="buscar-curso" 
+                            class="form-control form-control-lg" 
+                            placeholder="Escriba el nombre del curso (min. 2 caracteres)..."
+                            autocomplete="off"
+                        >
+                        <small class="form-text text-muted">
+                            <i class="fas fa-search"></i> Búsqueda dinámica - encuentra Python, Java, HTML, MySQL, etc.
+                        </small>
+                        
+                        <!-- Lista de resultados -->
+                        <div id="resultados-cursos" class="list-group mt-2" style="display: none; max-height: 250px; overflow-y: auto;"></div>
+                        
+                        <!-- Campo oculto para almacenar el ID seleccionado -->
+                        <?= $this->Form->control('curso_id', [
+                            'type' => 'hidden',
+                            'id' => 'curso-id',
+                            'required' => true
+                        ]) ?>
+                        
+                        <!-- Mostrar curso seleccionado -->
+                        <div id="curso-seleccionado" class="alert alert-info mt-2" style="display: none;">
+                            <strong>Curso seleccionado:</strong> <span id="curso-seleccionado-texto"></span>
+                            <button type="button" class="btn-close float-end" id="limpiar-curso"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos adicionales del certificado -->
+            <div class="row mt-4 g-3">
+                <div class="col-md-6">
+                    <?= $this->Form->control('horas', [
+                        'class' => 'form-control form-control-lg', 
+                        'label' => ['text' => '<i class="fas fa-clock"></i> Horas Académicas', 'escape' => false],
+                        'min' => 1,
+                        'required' => true
+                    ]) ?>
+                </div>
+                <div class="col-md-6">
+                    <?= $this->Form->control('fecha_emision', [
+                        'type' => 'date', 
+                        'class' => 'form-control form-control-lg', 
+                        'label' => ['text' => '<i class="fas fa-calendar"></i> Fecha de Emisión', 'escape' => false],
+                        'value' => date('Y-m-d'),
+                        'required' => true
+                    ]) ?>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="mt-4 text-center">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-file-signature"></i> Generar Certificado
+                </button>
+                <?= $this->Html->link('<i class="fas fa-times"></i> Cancelar', ['action' => 'index'], [
+                    'class' => 'btn btn-secondary btn-lg ms-2',
+                    'escape' => false
+                ]) ?>
+            </div>
+            
+            <?= $this->Form->end() ?>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // BUSQUEDA DE ALUMNOS POR DNI
+    const buscarAlumno = document.getElementById('buscar-alumno');
+    const resultadosAlumnos = document.getElementById('resultados-alumnos');
+    const usuarioIdInput = document.getElementById('usuario-id');
+    const alumnoSeleccionado = document.getElementById('alumno-seleccionado');
+    const alumnoSeleccionadoTexto = document.getElementById('alumno-seleccionado-texto');
+    const limpiarAlumno = document.getElementById('limpiar-alumno');
+    
+    let timeoutAlumno = null;
+    
+    buscarAlumno.addEventListener('input', function() {
+        const dni = this.value.trim();
+        
+        // Limpiar timeout anterior
+        clearTimeout(timeoutAlumno);
+        
+        // Ocultar resultados si esta vacio o muy corto
+        if (dni.length < 3) {
+            resultadosAlumnos.style.display = 'none';
+            resultadosAlumnos.innerHTML = '';
+            return;
+        }
+        
+        // Buscar despues de 300ms de inactividad
+        timeoutAlumno = setTimeout(function() {
+            fetch('<?= $this->Url->build(['controller' => 'Inscripciones', 'action' => 'buscarAlumnos']) ?>?dni=' + encodeURIComponent(dni))
+                .then(response => response.json())
+                .then(data => {
+                    resultadosAlumnos.innerHTML = '';
+                    
+                    if (data.length === 0) {
+                        resultadosAlumnos.innerHTML = '<div class="list-group-item text-muted"><i class="fas fa-info-circle"></i> No se encontraron alumnos con ese DNI</div>';
+                        resultadosAlumnos.style.display = 'block';
+                    } else {
+                        data.forEach(alumno => {
+                            const item = document.createElement('a');
+                            item.href = '#';
+                            item.className = 'list-group-item list-group-item-action';
+                            item.innerHTML = '<strong>' + alumno.username + '</strong><br>' +
+                                           '<small class="text-muted"><i class="fas fa-id-card"></i> DNI: ' + alumno.dni + '</small>';
+                            
+                            item.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                seleccionarAlumno(alumno.id, alumno.username, alumno.dni);
+                            });
+                            
+                            resultadosAlumnos.appendChild(item);
+                        });
+                        resultadosAlumnos.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al buscar alumnos:', error);
+                    resultadosAlumnos.innerHTML = '<div class="list-group-item text-danger">Error en la busqueda</div>';
+                    resultadosAlumnos.style.display = 'block';
+                });
+        }, 300);
+    });
+    
+    function seleccionarAlumno(id, nombre, dni) {
+        usuarioIdInput.value = id;
+        alumnoSeleccionadoTexto.textContent = nombre + ' (DNI: ' + dni + ')';
+        alumnoSeleccionado.style.display = 'block';
+        resultadosAlumnos.style.display = 'none';
+        buscarAlumno.value = nombre + ' (DNI: ' + dni + ')';
+        buscarAlumno.setAttribute('readonly', true);
+    }
+    
+    limpiarAlumno.addEventListener('click', function() {
+        usuarioIdInput.value = '';
+        alumnoSeleccionado.style.display = 'none';
+        buscarAlumno.value = '';
+        buscarAlumno.removeAttribute('readonly');
+    });
+    
+    // BUSQUEDA DE CURSOS POR NOMBRE
+    const buscarCurso = document.getElementById('buscar-curso');
+    const resultadosCursos = document.getElementById('resultados-cursos');
+    const cursoIdInput = document.getElementById('curso-id');
+    const cursoSeleccionado = document.getElementById('curso-seleccionado');
+    const cursoSeleccionadoTexto = document.getElementById('curso-seleccionado-texto');
+    const limpiarCurso = document.getElementById('limpiar-curso');
+    
+    let timeoutCurso = null;
+    
+    buscarCurso.addEventListener('input', function() {
+        const nombre = this.value.trim();
+        
+        // Limpiar timeout anterior
+        clearTimeout(timeoutCurso);
+        
+        // Ocultar resultados si esta vacio o muy corto
+        if (nombre.length < 2) {
+            resultadosCursos.style.display = 'none';
+            resultadosCursos.innerHTML = '';
+            return;
+        }
+        
+        // Buscar despues de 300ms de inactividad
+        timeoutCurso = setTimeout(function() {
+            fetch('<?= $this->Url->build(['controller' => 'Inscripciones', 'action' => 'buscarCursos']) ?>?nombre=' + encodeURIComponent(nombre))
+                .then(response => response.json())
+                .then(data => {
+                    resultadosCursos.innerHTML = '';
+                    
+                    if (data.length === 0) {
+                        resultadosCursos.innerHTML = '<div class="list-group-item text-muted"><i class="fas fa-info-circle"></i> No se encontraron cursos</div>';
+                        resultadosCursos.style.display = 'block';
+                    } else {
+                        data.forEach(curso => {
+                            const item = document.createElement('a');
+                            item.href = '#';
+                            item.className = 'list-group-item list-group-item-action';
+                            item.innerHTML = '<strong>' + curso.titulo + '</strong><br>' +
+                                           '<small class="text-muted">Nivel: ' + (curso.nivel || 'N/A') + ' | Categoría: ' + (curso.categoria || 'N/A') + '</small>';
+                            
+                            item.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                seleccionarCurso(curso.id, curso.titulo);
+                            });
+                            
+                            resultadosCursos.appendChild(item);
+                        });
+                        resultadosCursos.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al buscar cursos:', error);
+                    resultadosCursos.innerHTML = '<div class="list-group-item text-danger">Error en la busqueda</div>';
+                    resultadosCursos.style.display = 'block';
+                });
+        }, 300);
+    });
+    
+    function seleccionarCurso(id, titulo) {
+        cursoIdInput.value = id;
+        cursoSeleccionadoTexto.textContent = titulo;
+        cursoSeleccionado.style.display = 'block';
+        resultadosCursos.style.display = 'none';
+        buscarCurso.value = titulo;
+        buscarCurso.setAttribute('readonly', true);
+    }
+    
+    limpiarCurso.addEventListener('click', function() {
+        cursoIdInput.value = '';
+        cursoSeleccionado.style.display = 'none';
+        buscarCurso.value = '';
+        buscarCurso.removeAttribute('readonly');
+    });
+});
+</script>

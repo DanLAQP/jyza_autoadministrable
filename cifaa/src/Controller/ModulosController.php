@@ -111,10 +111,14 @@ class ModulosController extends AppController
             if ($this->Modulos->save($modulo)) {
                 $this->Flash->success(__('The modulo has been saved.'));
                 
-                // Si vino de un curso, mantener el contexto
+                // Redirigir a la vista del curso para continuar editando
                 $cursoId = $this->request->getQuery('curso_id');
+                if (!$cursoId && $modulo->curso_id) {
+                    $cursoId = $modulo->curso_id;
+                }
+                
                 if ($cursoId) {
-                    return $this->redirect(['action' => 'index', '?' => ['curso_id' => $cursoId]]);
+                    return $this->redirect(['controller' => 'Cursos', 'action' => 'view', $cursoId]);
                 }
                 return $this->redirect(['action' => 'index']);
             }

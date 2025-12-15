@@ -129,11 +129,20 @@ class LeccionesController extends AppController
             if ($this->Lecciones->save($leccione)) {
                 $this->Flash->success(__('The leccione has been saved.'));
 
-                // Obtener curso_id del request
+                // Obtener curso_id del request o a través del módulo
                 $cursoId = $this->request->getQuery('curso_id');
                 
+                if (!$cursoId && $leccione->modulo_id) {
+                     try {
+                         $modulo = $this->Lecciones->Modulos->get($leccione->modulo_id);
+                         $cursoId = $modulo->curso_id;
+                     } catch (\Exception $e) {
+                         // Fallback si no se encuentra módulo
+                     }
+                }
+
                 if ($cursoId) {
-                    return $this->redirect(['action' => 'index', '?' => ['curso_id' => $cursoId]]);
+                    return $this->redirect(['controller' => 'Cursos', 'action' => 'view', $cursoId]);
                 }
                 return $this->redirect(['action' => 'index']);
             }

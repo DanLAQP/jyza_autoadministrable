@@ -170,10 +170,19 @@ class ContenidosLeccionController extends AppController
                 $this->Flash->success(__('El contenido ha sido guardado.'));
 
                 // Obtener curso_id del request
-                $cursoIdParam = $this->request->getQuery('curso_id');
+                $cursoId = $this->request->getQuery('curso_id');
                 
-                if ($cursoIdParam) {
-                    return $this->redirect(['action' => 'index', '?' => ['curso_id' => $cursoIdParam]]);
+                if (!$cursoId && $contenidosLeccion->leccion_id) {
+                    try {
+                        $leccion = $this->ContenidosLeccion->Lecciones->get($contenidosLeccion->leccion_id, ['contain' => ['Modulos']]);
+                        if ($leccion->modulo) {
+                            $cursoId = $leccion->modulo->curso_id;
+                        }
+                    } catch (\Exception $e) { }
+                }
+
+                if ($cursoId) {
+                    return $this->redirect(['controller' => 'Cursos', 'action' => 'view', $cursoId]);
                 }
                 return $this->redirect(['action' => 'index']);
             }

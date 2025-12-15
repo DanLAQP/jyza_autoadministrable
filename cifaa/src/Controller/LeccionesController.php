@@ -249,10 +249,12 @@ class LeccionesController extends AppController
         
         $this->request->allowMethod(['post', 'delete']);
         $leccione = $this->Lecciones->get($id);
+        
+        // NOTA: Lecciones no tiene campo estado, aplicar eliminación física
         if ($this->Lecciones->delete($leccione)) {
-            $this->Flash->success(__('The leccione has been deleted.'));
+            $this->Flash->success(__('Lección eliminada correctamente.'));
         } else {
-            $this->Flash->error(__('The leccione could not be deleted. Please, try again.'));
+            $this->Flash->error(__('No se pudo eliminar la lección. Verifique las dependencias.'));
         }
 
         return $this->redirect(['action' => 'index']);

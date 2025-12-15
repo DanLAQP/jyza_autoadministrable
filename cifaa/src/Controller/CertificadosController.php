@@ -402,10 +402,14 @@ class CertificadosController extends AppController
 
         $this->request->allowMethod(['post', 'delete']);
         $certificado = $this->Certificados->get($id);
-        if ($this->Certificados->delete($certificado)) {
-            $this->Flash->success(__('El certificado ha sido eliminado.'));
+        
+        // Soft delete: cambiar estado de 'activo' a 'anulado'
+        $certificado->estado = 'anulado';
+        
+        if ($this->Certificados->save($certificado)) {
+            $this->Flash->success(__('Certificado anulado correctamente. El certificado quedará marcado como inválido.'));
         } else {
-            $this->Flash->error(__('No se pudo eliminar el certificado.'));
+            $this->Flash->error(__('No se pudo anular el certificado.'));
         }
 
         return $this->redirect(['action' => 'index']);

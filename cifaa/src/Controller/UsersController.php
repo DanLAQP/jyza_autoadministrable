@@ -48,9 +48,24 @@ class UsersController extends AppController
             return $redirect;
         }
         
+        // Obtener filtro de estado desde URL (por defecto: activo)
+        $filtroEstado = $this->request->getQuery('estado', 'activo');
+        
         $query = $this->Users->find();
+        
+        // Aplicar filtro por estado
+        if ($filtroEstado === 'todos') {
+            // Mostrar todos los usuarios (activos e inactivos)
+            // No agregar condición WHERE
+        } elseif ($filtroEstado === 'inactivo') {
+            // Solo usuarios inactivos (desactivados)
+            $query->where(['Users.estado' => 'inactivo']);
+        } else {
+            // Solo usuarios activos (por defecto)
+            $query->where(['Users.estado' => 'activo']);
+        }
 
-        // Filtro de búsqueda (Lógica unificada con Matrícula)
+        // Filtro de búsqueda por término (username o DNI)
         $termino = $this->request->getQuery('termino');
         if (!empty($termino)) {
             $query->where([
@@ -70,7 +85,7 @@ class UsersController extends AppController
             3 => 'Estudiante'
         ];
 
-        $this->set(compact('users', 'roles'));
+        $this->set(compact('users', 'roles', 'filtroEstado'));
     }
 
     /**
@@ -261,10 +276,20 @@ class UsersController extends AppController
         
         $this->request->allowMethod(['post', 'delete']);
         $user = $this->Users->get($id);
-        if ($this->Users->delete($user)) {
-            $this->Flash->success(__('The user has been deleted.'));
+        
+        // Proteger al administrador principal (ID 1)
+        if ($user->id == 1) {
+            $this->Flash->error(__('No se puede desactivar el administrador principal del sistema.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
+        // Soft delete: cambiar estado a 'inactivo' en lugar de eliminar
+        $user->estado = 'inactivo';
+        
+        if ($this->Users->save($user)) {
+            $this->Flash->success(__('Usuario desactivado correctamente. Puede reactivarlo desde el filtro de inactivos.'));
         } else {
-            $this->Flash->error(__('The user could not be deleted. Please, try again.'));
+            $this->Flash->error(__('No se pudo desactivar el usuario. Por favor, inténtelo nuevamente.'));
         }
 
         return $this->redirect(['action' => 'index']);
@@ -307,6 +332,39 @@ class UsersController extends AppController
             $this->Flash->success('You have been logged out');
         }
         return $this->redirect(['controller' => 'Users', 'action' => 'login']);
+    }
+
+    /**
+     * Reactivar usuario inactivo
+     * Cambia el estado de 'inactivo' a 'activo'
+     * 
+     * @param string|null $id User id.
+     * @return \Cake\Http\Response|null Redirects to index.
+     */
+    public function reactivar($id = null)
+    {
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
+        }
+        
+        $this->request->allowMethod(['post', 'put']);
+        $user = $this->Users->get($id);
+        
+        // Verificar que el usuario esté inactivo
+        if ($user->estado === 'inactivo') {
+            $user->estado = 'activo';
+            
+            if ($this->Users->save($user)) {
+                $this->Flash->success(__('Usuario reactivado correctamente. Ahora puede iniciar sesión.'));
+            } else {
+                $this->Flash->error(__('No se pudo reactivar el usuario. Por favor, inténtelo nuevamente.'));
+            }
+        } else {
+            $this->Flash->warning(__('El usuario ya está activo en el sistema.'));
+        }
+        
+        // Redirigir a lista de inactivos para verificar
+        return $this->redirect(['action' => 'index', '?' => ['estado' => 'inactivo']]);
     }
 
     /**

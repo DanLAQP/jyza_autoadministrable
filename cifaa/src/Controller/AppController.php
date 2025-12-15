@@ -162,6 +162,15 @@ class AppController extends Controller
         parent::beforeFilter($event);
         // Permitir acciones sin autenticación
         $this->Authentication->addUnauthenticatedActions(['login', 'logout']);
+        
+        // Validar que usuarios inactivos no puedan acceder al sistema
+        $identity = $this->Authentication->getIdentity();
+        if ($identity && isset($identity->estado) && $identity->estado === 'inactivo') {
+            // Usuario inactivo intentando acceder: cerrar sesión
+            $this->Authentication->logout();
+            $this->Flash->error(__('Su cuenta ha sido desactivada. Por favor, contacte al administrador del sistema.'));
+            return $this->redirect(['controller' => 'Users', 'action' => 'login']);
+        }
     }
 
     // =========================================================================

@@ -336,11 +336,11 @@ class CursosController extends AppController
             
             $curso = $this->Cursos->patchEntity($curso, $data);
             if ($this->Cursos->save($curso)) {
-                $this->Flash->success(__('The curso has been saved.'));
+                $this->Flash->success(__('El curso ha sido actualizado correctamente.'));
 
-                return $this->redirect(['action' => 'index']);
+                return $this->redirect(['action' => 'view', $curso->id]);
             }
-            $this->Flash->error(__('The curso could not be saved. Please, try again.'));
+            $this->Flash->error(__('El curso no pudo ser guardado. Por favor, inténtelo nuevamente.'));
         }
         $users = $this->Cursos->Users->find('list', limit: 200)->all();
         $this->set(compact('curso', 'users'));

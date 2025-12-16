@@ -116,11 +116,11 @@
                             <div class="ribbon ribbon-top-right"><span>INACTIVO</span></div>
                         <?php endif; ?>
                         
-                        <!-- Miniatura -->
+                        <!-- Miniatura (Optimizado: 800x450px - Aspect Ratio 16:9) -->
                         <?php if (!empty($curso->miniatura)): ?>
-                            <img src="<?= $curso->miniatura ?>" class="card-img-top <?= $curso->estado === 'inactivo' ? 'opacity-50' : '' ?>" alt="<?= h($curso->titulo) ?>" style="height: 200px; object-fit: cover;">
+                            <img src="<?= $curso->miniatura ?>" class="card-img-top <?= $curso->estado === 'inactivo' ? 'opacity-50' : '' ?>" alt="<?= h($curso->titulo) ?>" style="height: 225px; object-fit: cover; aspect-ratio: 16/9;">
                         <?php else: ?>
-                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center <?= $curso->estado === 'inactivo' ? 'opacity-50' : '' ?>" style="height: 200px;">
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center <?= $curso->estado === 'inactivo' ? 'opacity-50' : '' ?>" style="height: 225px; aspect-ratio: 16/9;">
                                 <i class="fas fa-image fa-3x text-muted"></i>
                             </div>
                         <?php endif; ?>

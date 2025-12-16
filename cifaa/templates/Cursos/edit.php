@@ -74,16 +74,23 @@
 
         <!-- Campo: Miniatura (Imagen) -->
         <div class="col-12 mb-3">
-            <label class="form-label">Miniatura del Curso</label>
+            <label class="form-label">
+                Miniatura del Curso
+                <span class="badge bg-info ms-2">Recomendado: 800x450px (16:9)</span>
+            </label>
             <?php if (!empty($curso->miniatura)): ?>
                 <div class="mb-3">
                     <p class="text-muted">Imagen actual:</p>
-                    <img src="<?= $curso->miniatura ?>" alt="Miniatura actual" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #17a2b8;">
+                    <img src="<?= $curso->miniatura ?>" alt="Miniatura actual" style="max-width: 400px; height: auto; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; border: 2px solid #17a2b8;">
                 </div>
             <?php endif; ?>
             <div class="input-group">
                 <input type="file" class="form-control" id="miniatura" name="miniatura" accept="image/*" />
-                <small class="d-block text-muted mt-2">Formatos soportados: JPG, PNG, GIF. Tamaño máximo: 5MB</small>
+                <small class="d-block text-muted mt-2">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Formatos soportados: JPG, PNG, GIF, WebP. Tamaño máximo: 5MB. 
+                    <strong>Dimensiones recomendadas: 800x450 píxeles (proporción 16:9)</strong>
+                </small>
             </div>
             <div id="preview-miniatura" class="mt-3"></div>
         </div>

@@ -78,6 +78,11 @@ class AppController extends Controller
             return false;
         }
         
+        // El administrador (rol = 1) tiene acceso a todos los cursos
+        if ($usuario->rol == 1) {
+            return true;
+        }
+        
         // Convertir a int si es necesario
         $cursoId = (int) $cursoId;
         
@@ -109,6 +114,11 @@ class AppController extends Controller
             return false;
         }
         
+        // El administrador (rol = 1) tiene acceso a todos los módulos
+        if ($usuario->rol == 1) {
+            return true;
+        }
+        
         // Convertir a int si es necesario
         $moduloId = (int) $moduloId;
         
@@ -138,6 +148,11 @@ class AppController extends Controller
         
         if (!$usuario) {
             return false;
+        }
+        
+        // El administrador (rol = 1) tiene acceso a todas las lecciones
+        if ($usuario->rol == 1) {
+            return true;
         }
         
         // Convertir a int si es necesario

@@ -46,7 +46,7 @@ $identity = $this->getRequest()->getAttribute('identity');
 
             <!-- Barra de Acciones de Edición (Solo Admin) -->
             <?php if (!empty($identity) && $identity->rol == 1): ?>
-            <div class="btn-group w-100 mb-3" role="group">
+            <div class="btn-group w-100 mb-2" role="group">
                 <?= $this->Html->link(
                     '<i class="fas fa-edit me-1"></i> Editar Curso',
                     ['action' => 'edit', $curso->id],
@@ -67,6 +67,34 @@ $identity = $this->getRequest()->getAttribute('identity');
                     ['controller' => 'ContenidosLeccion', 'action' => 'index', '?' => ['curso_id' => $curso->id]],
                     ['class' => 'btn btn-success', 'escape' => false]
                 ) ?>
+            </div>
+            
+            <!-- Botón Desactivar/Reactivar Curso (Solo Admin) -->
+            <div class="mb-3">
+                <?php if ($curso->estado !== 'inactivo'): ?>
+                    <?= $this->Form->postLink(
+                        '<i class="fas fa-ban me-1"></i> Desactivar Curso',
+                        ['action' => 'delete', $curso->id],
+                        [
+                            'confirm' => '¿Está seguro de desactivar este curso? Podrá reactivarlo después.',
+                            'class' => 'btn btn-danger w-100',
+                            'escape' => false
+                        ]
+                    ) ?>
+                <?php else: ?>
+                    <div class="alert alert-warning mb-2">
+                        <i class="fas fa-exclamation-triangle me-1"></i> Este curso está inactivo
+                    </div>
+                    <?= $this->Form->postLink(
+                        '<i class="fas fa-redo me-1"></i> Reactivar Curso',
+                        ['action' => 'reactivar', $curso->id],
+                        [
+                            'confirm' => '¿Está seguro de reactivar este curso?',
+                            'class' => 'btn btn-success w-100',
+                            'escape' => false
+                        ]
+                    ) ?>
+                <?php endif; ?>
             </div>
             <?php endif; ?>
 
@@ -343,11 +371,7 @@ $identity = $this->getRequest()->getAttribute('identity');
                                 ['controller' => 'Modulos', 'action' => 'add', '?' => ['curso_id' => $curso->id]],
                                 ['class' => 'btn btn-sm btn-success', 'escape' => false]
                             ) ?>
-                            <?= $this->Form->postLink(
-                                '<i class="fas fa-trash me-1"></i> Eliminar Curso',
-                                ['action' => 'delete', $curso->id],
-                                ['confirm' => '¿Estás seguro de eliminar este curso?', 'class' => 'btn btn-sm btn-danger', 'escape' => false]
-                            ) ?>
+                            
                         </div>
                     <?php endif; ?>
                 </div>

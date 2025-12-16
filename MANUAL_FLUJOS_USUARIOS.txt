@@ -1,0 +1,636 @@
+================================================================================
+                    MANUAL DE FLUJOS DE USUARIOS - SISTEMA CIFAA
+================================================================================
+
+Fecha: 15 de diciembre de 2025
+Sistema: Centro Integral de Formación y Asesoría Académica (CIFAA)
+Versión: 1.0
+
+================================================================================
+ÍNDICE
+================================================================================
+1. Generación de Certificados y Diplomados
+2. Inscripción de Nuevos Usuarios por Administrador
+3. Verificación de Certificados/Diplomados
+4. Roles del Sistema
+
+================================================================================
+1. GENERACIÓN DE CERTIFICADOS Y DIPLOMADOS
+================================================================================
+
+### ROLES AUTORIZADOS
+- Solo ADMINISTRADORES (rol = 1) pueden generar certificados/diplomados
+
+### FLUJO DE GENERACIÓN DE CERTIFICADO
+
+PASO 1: Acceso al Formulario
+---------------------------------------------------------------------------
+URL: /certificados/generar
+Navegación: Menú lateral → Certificados → Generar Certificado
+
+PASO 2: Completar Formulario
+---------------------------------------------------------------------------
+El administrador debe llenar los siguientes campos:
+
+A) INFORMACIÓN DEL CERTIFICADO:
+   - Nombre Completo del Estudiante* (obligatorio)
+     * Selector de usuarios registrados
+     * O ingreso manual de nombre
+   
+   - Nombre del Curso* (obligatorio)
+     * Selector de cursos existentes
+     * O ingreso manual del nombre del curso
+   
+   - Horas del Curso* (obligatorio)
+     * Número de horas lectivas
+     * Ejemplo: 40, 80, 120 horas
+
+B) PERÍODO DE REALIZACIÓN:
+   - Fecha de Inicio (opcional)
+     * Formato: dd/mm/yyyy
+     * Ejemplo: 15/01/2025
+   
+   - Fecha de Fin (opcional)
+     * Formato: dd/mm/yyyy
+     * Ejemplo: 15/06/2025
+   
+   - Duración en Meses (opcional)
+     * Número entero
+     * Ejemplo: 6 meses
+
+C) EVALUACIÓN:
+   - Nota Final (opcional)
+     * Calificación del estudiante
+     * Ejemplo: 18, 16, 14
+
+D) MÓDULOS DEL CURSO (opcional):
+   - Módulo I: [Tema]
+   - Módulo II: [Tema]
+   - Módulo III: [Tema]
+   - Módulo IV: [Tema]
+   * Se pueden agregar hasta 4 módulos
+
+PASO 3: Generación del Código
+---------------------------------------------------------------------------
+El sistema genera automáticamente un código único:
+   
+   FORMATO: CER-YYYY-XXXXXXXXXX
+   Ejemplo: CER-2025-E650ADCCAA
+   
+   Donde:
+   - CER = Prefijo de Certificado
+   - 2025 = Año de emisión
+   - E650ADCCAA = Código alfanumérico único (10 caracteres)
+
+PASO 4: Guardado y Redirección
+---------------------------------------------------------------------------
+- Al presionar "Generar Certificado"
+- Sistema guarda en base de datos
+- Mensaje: "Certificado generado exitosamente. Código: CER-2025-XXXXXXXX"
+- Redirige a: /certificados (lista de certificados)
+
+PASO 5: Descarga del PDF
+---------------------------------------------------------------------------
+Desde la lista de certificados:
+- Click en botón "Descargar PDF"
+- Se genera PDF con:
+  * Página 1: Certificado principal
+  * Página 2: Módulos y contenido del curso
+  * Código QR para verificación
+  * Firmas digitales
+- Archivo descargado: certificado_CER-2025-XXXXXXXX.pdf
+
+
+### FLUJO DE GENERACIÓN DE DIPLOMADO
+
+PASO 1: Acceso al Formulario
+---------------------------------------------------------------------------
+URL: /certificados/generarDiplomado
+Navegación: Menú lateral → Certificados → Generar Diplomado
+
+PASO 2: Completar Formulario
+---------------------------------------------------------------------------
+- Mismo formulario que certificados
+- Mismos campos y validaciones
+- Interfaz idéntica (reutiliza generar.php)
+
+PASO 3: Generación del Código
+---------------------------------------------------------------------------
+El sistema genera automáticamente:
+   
+   FORMATO: DIP-YYYY-XXXXXXXXXX
+   Ejemplo: DIP-2025-99429F87FE
+   
+   Donde:
+   - DIP = Prefijo de Diplomado (DIFERENTE a CER)
+   - 2025 = Año de emisión
+   - 99429F87FE = Código alfanumérico único (10 caracteres)
+
+PASO 4: Guardado y Redirección
+---------------------------------------------------------------------------
+- Al presionar "Generar Diplomado"
+- Sistema guarda en base de datos
+- Mensaje: "Diplomado generado exitosamente. Código: DIP-2025-XXXXXXXX"
+- Redirige a: /certificados/diplomados (lista de DIPLOMADOS solamente)
+
+PASO 5: Descarga del PDF
+---------------------------------------------------------------------------
+- Mismo proceso que certificados
+- PDF muestra título "DIPLOMADO" en lugar de "CERTIFICADO"
+- Archivo descargado: diplomado_DIP-2025-XXXXXXXX.pdf
+
+
+### NAVEGACIÓN Y VISUALIZACIÓN
+
+Vista de Certificados (/certificados):
+---------------------------------------------------------------------------
+- Lista SOLO certificados (códigos CER-*)
+- Botones disponibles:
+  * [Ver Certificados] (activo)
+  * [Ver Diplomados]
+  * [Generar Certificado]
+  * [Generar Diplomado]
+
+Vista de Diplomados (/certificados/diplomados):
+---------------------------------------------------------------------------
+- Lista SOLO diplomados (códigos DIP-*)
+- Botones disponibles:
+  * [Ver Certificados]
+  * [Ver Diplomados] (activo)
+  * [Generar Certificado]
+  * [Generar Diplomado]
+
+Ambas vistas tienen:
+- Buscador por nombre, curso o código
+- Filtros de estado (activo/anulado)
+- Paginación
+- Acciones: Ver, Editar, Descargar PDF, Anular
+
+
+================================================================================
+2. INSCRIPCIÓN DE NUEVOS USUARIOS POR ADMINISTRADOR
+================================================================================
+
+### ROLES AUTORIZADOS
+- Solo ADMINISTRADORES (rol = 1) pueden inscribir usuarios a cursos
+
+### MÉTODO 1: INSCRIPCIÓN DIRECTA DESDE INSCRIPCIONES
+
+PASO 1: Acceso al Formulario
+---------------------------------------------------------------------------
+URL: /inscripciones/add
+Navegación: Menú lateral → Inscripciones → Nueva Inscripción
+
+PASO 2: Seleccionar Usuario
+---------------------------------------------------------------------------
+Campo: "Estudiante"
+- Desplegable con todos los usuarios registrados con rol Estudiante (rol=3)
+- Muestra: Nombre de usuario (username)
+- Búsqueda: Se puede buscar escribiendo el nombre
+
+PASO 3: Seleccionar Curso
+---------------------------------------------------------------------------
+Campo: "Curso"
+- Desplegable con todos los cursos activos
+- Muestra: Título del curso
+- Solo cursos con estado = "activo" o "publicado"
+
+PASO 4: Establecer Estado de Inscripción
+---------------------------------------------------------------------------
+Campo: "Estado"
+Opciones:
+- Pendiente: Solicitud en espera de revisión
+- Aprobada: Usuario tiene acceso completo al curso
+- Rechazada: Solicitud denegada
+
+Recomendación: Seleccionar "aprobada" para inscripción directa por admin
+
+PASO 5: Establecer Progreso Inicial
+---------------------------------------------------------------------------
+Campo: "Progreso"
+- Valor numérico entre 0 y 100
+- Por defecto: 0%
+- Ejemplo: Si el usuario ya avanzó algo, se puede poner 25, 50, etc.
+
+PASO 6: Guardar Inscripción
+---------------------------------------------------------------------------
+- Click en "Guardar"
+- Validaciones del sistema:
+  * Verifica que el usuario sea estudiante (rol=3)
+  * Verifica que el curso exista
+  * Verifica que no exista inscripción duplicada
+- Mensaje: "Inscripción creada exitosamente"
+- Redirige a: /inscripciones (lista de inscripciones)
+
+
+### MÉTODO 2: INSCRIPCIÓN DESDE GESTIÓN DE CURSO
+
+PASO 1: Acceso desde Curso
+---------------------------------------------------------------------------
+URL: /inscripciones/administrarCurso/[ID_CURSO]
+Navegación: 
+- Menú → Cursos → [Ver curso]
+- Click en "Administrar Inscripciones"
+
+PASO 2: Vista de Inscripciones del Curso
+---------------------------------------------------------------------------
+Muestra:
+- Lista de estudiantes ya inscritos
+- Estado de cada inscripción (pendiente/aprobada/rechazada)
+- Progreso de cada estudiante
+- Botón "Nueva Inscripción" para agregar más estudiantes
+
+PASO 3: Agregar Nueva Inscripción
+---------------------------------------------------------------------------
+- Click en "Nueva Inscripción"
+- Redirige al formulario con el curso pre-seleccionado
+- Solo falta elegir el estudiante y estado
+
+
+### MÉTODO 3: APROBACIÓN DE SOLICITUDES
+
+PASO 1: Revisar Solicitudes Pendientes
+---------------------------------------------------------------------------
+URL: /inscripciones
+Filtro: Estado = "Pendiente"
+
+PASO 2: Aprobar o Rechazar
+---------------------------------------------------------------------------
+Para cada inscripción pendiente:
+
+Opciones:
+A) Aprobar:
+   - Click en "Editar"
+   - Cambiar estado a "Aprobada"
+   - Guardar
+   - El estudiante obtiene acceso inmediato al curso
+
+B) Rechazar:
+   - Click en "Editar"
+   - Cambiar estado a "Rechazada"
+   - Guardar
+   - El estudiante ve mensaje de solicitud rechazada
+
+
+### CREACIÓN DE NUEVO USUARIO (PREVIO A INSCRIPCIÓN)
+
+Si el estudiante NO existe en el sistema:
+
+PASO 1: Crear Usuario
+---------------------------------------------------------------------------
+URL: /users/add
+Navegación: Menú lateral → Usuarios → Agregar Usuario
+
+PASO 2: Completar Datos del Usuario
+---------------------------------------------------------------------------
+Campos obligatorios:
+- Username* (nombre de usuario único)
+- Email* (correo electrónico)
+- Password* (contraseña)
+- Rol*: Seleccionar "Estudiante"
+
+Campos opcionales:
+- DNI
+- Nombre completo
+- Teléfono
+- Dirección
+
+PASO 3: Guardar Usuario
+---------------------------------------------------------------------------
+- Click en "Guardar"
+- Sistema valida datos únicos (username, email)
+- Mensaje: "Usuario creado exitosamente"
+- Ahora el usuario aparecerá en los desplegables de inscripción
+
+
+================================================================================
+3. VERIFICACIÓN DE CERTIFICADOS/DIPLOMADOS
+================================================================================
+
+### ACCESO PÚBLICO
+- URL: /certificados/verificar
+- No requiere login
+- Disponible para cualquier persona (público general)
+
+### PROPÓSITO
+Validar la autenticidad de certificados y diplomados emitidos por CIFAA
+
+
+### FLUJO DE VERIFICACIÓN
+
+PASO 1: Acceso a la Página de Verificación
+---------------------------------------------------------------------------
+Métodos de acceso:
+A) URL directa: https://[dominio]/certificados/verificar
+B) Escanear código QR del certificado/diplomado
+C) Link desde el PDF descargado
+
+
+PASO 2: Interfaz de Verificación
+---------------------------------------------------------------------------
+La página muestra:
+- Logo de CIFAA
+- Título: "Verificación de Certificado / Diplomado"
+- Formulario de búsqueda
+- Campo de texto para código
+
+
+PASO 3: Ingresar Código
+---------------------------------------------------------------------------
+Campo: "Código del Certificado / Diplomado"
+
+Formatos válidos:
+- Certificado: CER-2025-E650ADCCAA
+- Diplomado: DIP-2025-99429F87FE
+
+Características:
+- Texto convertido automáticamente a MAYÚSCULAS
+- Formato monospace para mejor legibilidad
+- Placeholder: "Ej: CER-2025-XXXXXX o DIP-2025-XXXXXX"
+- Máximo 50 caracteres
+
+
+PASO 4: Click en "Verificar Documento"
+---------------------------------------------------------------------------
+El sistema realiza:
+1. Limpia y normaliza el código (trim, uppercase)
+2. Busca en base de datos
+3. Detecta automáticamente si es certificado (CER-) o diplomado (DIP-)
+4. Verifica el estado (activo/anulado)
+
+
+PASO 5: Resultados de Verificación
+
+A) CERTIFICADO/DIPLOMADO VÁLIDO (Estado: Activo)
+---------------------------------------------------------------------------
+Alerta verde con:
+✓ "Certificado válido y activo" o "Diplomado válido y activo"
+
+Información mostrada:
+- Código del documento
+- Nombre del estudiante
+- Curso completado
+- Horas del curso
+- Fecha de emisión
+- Fecha de inicio y fin (si aplica)
+- Nota final (si aplica)
+- Duración en meses (si aplica)
+- Módulos del curso
+- Estado: Badge verde "ACTIVO"
+
+B) CERTIFICADO/DIPLOMADO ANULADO
+---------------------------------------------------------------------------
+Alerta naranja con:
+⚠ "Este certificado ha sido anulado" o "Este diplomado ha sido anulado"
+
+Información mostrada:
+- Código del documento
+- Nombre del estudiante
+- Curso
+- Estado: Badge rojo "ANULADO"
+- Mensaje: "Este documento no tiene validez oficial"
+
+C) CÓDIGO NO ENCONTRADO
+---------------------------------------------------------------------------
+Alerta roja con:
+✗ "Código no encontrado (verifique CER-XXXX o DIP-XXXX)"
+
+Mensaje:
+- "El código ingresado no corresponde a ningún documento emitido"
+- "Verifique que el código esté correcto"
+- Sugerencia: "Formato: CER-2025-XXXXXXXX o DIP-2025-XXXXXXXX"
+
+
+### DETECCIÓN AUTOMÁTICA DE TIPO
+
+El sistema identifica automáticamente:
+
+Si el código comienza con "CER-":
+- Es un Certificado
+- Muestra "Certificado válido y activo"
+- Badge azul con icono de certificado
+
+Si el código comienza con "DIP-":
+- Es un Diplomado
+- Muestra "Diplomado válido y activo"
+- Badge amarillo con icono de medalla
+
+
+### VERIFICACIÓN VÍA QR
+
+PASO 1: Escanear QR del Documento
+---------------------------------------------------------------------------
+- Cada certificado/diplomado incluye un código QR
+- Ubicación: Esquina inferior derecha del PDF
+- Al escanear, redirige automáticamente a:
+  /certificados/verificar/[CODIGO]
+
+PASO 2: Resultado Automático
+---------------------------------------------------------------------------
+- El código se extrae de la URL
+- La verificación se ejecuta automáticamente
+- Se muestra el resultado sin necesidad de escribir el código
+
+
+### LOG Y SEGURIDAD
+
+El sistema registra:
+✓ Verificaciones exitosas
+✓ Intentos con códigos inválidos
+✓ Accesos a certificados anulados
+
+Información registrada:
+- Fecha y hora
+- Código consultado
+- IP del visitante (si aplica)
+- Resultado de la verificación
+
+
+================================================================================
+4. ROLES DEL SISTEMA
+================================================================================
+
+### ROL 1: ADMINISTRADOR
+---------------------------------------------------------------------------
+Permisos completos:
+✓ Gestionar usuarios (crear, editar, eliminar, reactivar)
+✓ Gestionar cursos (crear, editar, desactivar, reactivar)
+✓ Gestionar módulos y lecciones
+✓ Gestionar inscripciones (crear, aprobar, rechazar)
+✓ Generar certificados y diplomados
+✓ Descargar y anular certificados/diplomados
+✓ Ver contenido de todos los cursos sin estar inscrito
+✓ Acceder a estadísticas del sistema
+✓ Ver todos los usuarios y sus progresos
+
+Restricciones:
+✗ No puede eliminarse a sí mismo (usuario ID=1 protegido)
+
+
+### ROL 2: DOCENTE
+---------------------------------------------------------------------------
+Permisos:
+✓ Ver cursos asignados
+✓ Ver estudiantes inscritos en sus cursos
+✓ Ver contenido de cursos donde es docente
+✓ Revisar progreso de estudiantes
+✓ Acceder a sus datos de perfil
+
+Restricciones:
+✗ No puede crear o editar cursos
+✗ No puede generar certificados
+✗ No puede gestionar inscripciones
+✗ No puede ver cursos de otros docentes
+✗ No puede acceder al panel de administración
+
+
+### ROL 3: ESTUDIANTE
+---------------------------------------------------------------------------
+Permisos:
+✓ Ver catálogo de cursos publicados
+✓ Solicitar inscripción a cursos
+✓ Ver cursos donde está inscrito (estado: aprobada)
+✓ Acceder a lecciones de cursos aprobados
+✓ Ver su progreso personal
+✓ Descargar sus propios certificados
+✓ Actualizar su perfil personal
+
+Restricciones:
+✗ No puede ver contenido sin estar inscrito y aprobado
+✗ No puede gestionar usuarios ni cursos
+✗ No puede generar certificados
+✗ No puede ver datos de otros estudiantes
+✗ No puede acceder a cursos rechazados o pendientes
+
+
+### PERMISOS ESPECIALES
+
+Contenido de Cursos:
+- Administrador: Acceso total sin inscripción
+- Docente: Solo cursos asignados
+- Estudiante: Solo cursos con inscripción aprobada
+
+Generación de Documentos:
+- Solo Administrador puede generar certificados/diplomados
+
+Inscripciones:
+- Administrador: Crea y gestiona todas
+- Estudiante: Solo solicita, no puede aprobar
+
+Verificación de Certificados:
+- Público general: Acceso libre sin login
+
+
+================================================================================
+FLUJOS ESPECIALES Y CASOS DE USO
+================================================================================
+
+### CASO 1: Estudiante Completa Curso
+
+1. Estudiante solicita inscripción
+2. Admin aprueba la inscripción
+3. Estudiante accede al contenido
+4. Estudiante completa lecciones (progreso → 100%)
+5. Admin genera certificado/diplomado con datos del estudiante
+6. Estudiante puede descargar su certificado desde "Mis Certificados"
+7. Certificado incluye QR para verificación pública
+
+
+### CASO 2: Inscripción Masiva de Estudiantes
+
+1. Admin crea usuarios nuevos si no existen
+2. Admin va a Inscripciones → Nueva Inscripción
+3. Repite el proceso para cada estudiante:
+   - Selecciona estudiante
+   - Selecciona curso
+   - Estado: Aprobada
+   - Progreso: 0%
+   - Guardar
+4. Todos los estudiantes obtienen acceso inmediato
+
+
+### CASO 3: Verificación por Empleador
+
+1. Estudiante envía su PDF de certificado/diplomado
+2. Empleador escanea el código QR del documento
+3. Sistema verifica automáticamente
+4. Empleador ve datos oficiales del documento
+5. Confirma autenticidad del certificado
+
+
+### CASO 4: Anulación de Certificado Emitido
+
+1. Admin detecta error o fraude
+2. Admin va a Certificados → [Ver certificado]
+3. Admin click en "Anular"
+4. Confirma la anulación
+5. Estado cambia a "anulado"
+6. Verificaciones futuras muestran documento anulado
+
+
+================================================================================
+RUTAS Y URLs DEL SISTEMA
+================================================================================
+
+CERTIFICADOS Y DIPLOMADOS:
+/certificados                    → Lista de certificados
+/certificados/diplomados         → Lista de diplomados
+/certificados/generar            → Formulario de certificado
+/certificados/generarDiplomado   → Formulario de diplomado
+/certificados/verificar          → Verificación pública
+/certificados/verificar/[CODIGO] → Verificación directa
+/certificados/descargar/[ID]     → Descargar PDF
+/certificados/misCertificados    → Certificados del estudiante
+
+INSCRIPCIONES:
+/inscripciones                   → Lista de inscripciones
+/inscripciones/add               → Nueva inscripción
+/inscripciones/edit/[ID]         → Editar inscripción
+/inscripciones/administrarCurso/[ID] → Gestionar inscripciones de un curso
+
+USUARIOS:
+/users                           → Lista de usuarios
+/users/add                       → Crear nuevo usuario
+/users/edit/[ID]                 → Editar usuario
+/users/delete/[ID]               → Desactivar usuario
+/users/reactivar/[ID]            → Reactivar usuario
+
+CURSOS:
+/cursos                          → Lista de cursos
+/cursos/view/[ID]                → Ver detalles del curso
+/cursos/add                      → Crear nuevo curso
+/cursos/edit/[ID]                → Editar curso
+/cursos/delete/[ID]              → Desactivar curso
+/cursos/reactivar/[ID]           → Reactivar curso
+
+
+================================================================================
+NOTAS TÉCNICAS
+================================================================================
+
+CÓDIGOS ÚNICOS:
+- Generados con: date('Y') + md5(uniqid(rand(), true))
+- Longitud: 10 caracteres alfanuméricos
+- Prefijo: CER- para certificados, DIP- para diplomados
+- Ejemplo: CER-2025-E650ADCCAA
+
+SOFT DELETE:
+- Usuarios: estado = 'activo' / 'inactivo'
+- Cursos: estado = 'activo' / 'inactivo'
+- Certificados: estado = 'activo' / 'anulado'
+- No se eliminan físicamente, solo cambian de estado
+
+BÚSQUEDAS:
+- Certificados: Por código, nombre de estudiante, nombre de curso
+- Usuarios: Por username, email, DNI, nombre
+- Cursos: Por título, descripción
+
+PERMISOS:
+- Validados en cada controlador con trait ControlAccesoRoles
+- Redirección automática si no tiene permisos
+- Mensajes flash de error para accesos denegados
+
+
+================================================================================
+FIN DEL MANUAL
+================================================================================

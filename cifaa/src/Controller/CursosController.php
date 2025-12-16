@@ -641,4 +641,50 @@ class CursosController extends AppController
         return $this->response;
     }
 
+    /**
+     * Obtener módulos de un curso (AJAX)
+     * Usado para cargar automáticamente los módulos al seleccionar un curso en certificados
+     *
+     * @param int $id ID del curso
+     * @return \Cake\Http\Response JSON con módulos del curso
+     */
+    public function getModulos($id = null)
+    {
+        // Deshabilitar renderizado de vista
+        $this->autoRender = false;
+        
+        $modulos = [];
+        
+        if ($id) {
+            try {
+                $modulosTable = $this->fetchTable('Modulos');
+                $modulos = $modulosTable->find()
+                    ->select(['id', 'titulo', 'posicion'])
+                    ->where(['curso_id' => $id])
+                    ->order(['posicion' => 'ASC', 'id' => 'ASC'])
+                    ->toArray();
+            } catch (\Exception $e) {
+                $this->response = $this->response
+                    ->withType('application/json')
+                    ->withStringBody(json_encode([
+                        'error' => true,
+                        'message' => $e->getMessage(),
+                        'modulos' => []
+                    ], JSON_UNESCAPED_UNICODE));
+                return $this->response;
+            }
+        }
+        
+        $response = [
+            'success' => true,
+            'modulos' => $modulos
+        ];
+        
+        $this->response = $this->response
+            ->withType('application/json')
+            ->withStringBody(json_encode($response, JSON_UNESCAPED_UNICODE));
+        
+        return $this->response;
+    }
+
 } // <-- cierre de la clase CursosController

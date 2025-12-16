@@ -56,6 +56,11 @@ return function (RouteBuilder $routes): void {
     // Ruta pública para verificación de certificados
     $routes->connect('/certificados/verificar', ['controller' => 'Certificados', 'action' => 'verificar']);
     $routes->connect('/certificados/verificar/:codigo', ['controller' => 'Certificados', 'action' => 'verificar'], ['pass' => ['codigo']]);
+    
+    // Rutas para Titulares (AJAX endpoints)
+    $routes->connect('/titulares/buscar/:dni', ['controller' => 'Titulares', 'action' => 'buscar'], ['pass' => ['dni']]);
+    $routes->connect('/titulares/verificar/:dni', ['controller' => 'Titulares', 'action' => 'verificar'], ['pass' => ['dni']]);
+    
     $routes->connect('/buscarPaciente', ['controller' => 'Pacientes1', 'action' => 'buscarPaciente']);
     $routes->connect('/citas-diarias', ['controller' => 'Citas', 'action' => 'citaDiaria']);
         // Verifica si la ruta está bien configurada en config/routes.php

@@ -222,6 +222,7 @@
                         </li>
                     </ul>
                 </li>
+                <!-- Opción de Titulares eliminada - gestión interna automática -->
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="fas fa-user-check nav-icon"></i>

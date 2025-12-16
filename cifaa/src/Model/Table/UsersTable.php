@@ -46,6 +46,12 @@ class UsersTable extends Table
 
         $this->addBehavior('Timestamp');
 
+        // NUEVA ARQUITECTURA: Usuarios se vinculan a Titulares
+        $this->belongsTo('Titulares', [
+            'foreignKey' => 'titular_id',
+            'joinType' => 'LEFT',  // Opcional (NULL en DB para admin)
+        ]);
+
         $this->hasMany('Transacciones', [
             'foreignKey' => 'user_id',
         ]);
@@ -100,8 +106,29 @@ class UsersTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->isUnique(['username']), ['errorField' => 'username']);
-        $rules->add($rules->isUnique(['dni'], ['allowMultipleNulls' => true]), ['errorField' => 'dni', 'message' => 'Este DNI ya está registrado.']);
+        // Username debe ser único
+        $rules->add($rules->isUnique(['username']), [
+            'errorField' => 'username',
+            'message' => 'Este nombre de usuario ya existe.'
+        ]);
+        
+        // DNI debe ser único (permitir NULLs múltiples)
+        $rules->add($rules->isUnique(['dni'], ['allowMultipleNulls' => true]), [
+            'errorField' => 'dni',
+            'message' => 'Este DNI ya está registrado en otro usuario.'
+        ]);
+        
+        // NUEVA REGLA CRÍTICA: titular_id debe ser único
+        // Un titular solo puede estar vinculado a UN usuario
+        $rules->add($rules->isUnique(['titular_id'], ['allowMultipleNulls' => true]), [
+            'errorField' => 'titular_id',
+            'message' => 'Este titular ya está vinculado a otro usuario. Un titular solo puede tener una cuenta.'
+        ]);
+        
+        // Validar que titular_id exista en la tabla titulares
+        $rules->add($rules->existsIn(['titular_id'], 'Titulares', 'El titular especificado no existe.'), [
+            'errorField' => 'titular_id'
+        ]);
 
         return $rules;
     }

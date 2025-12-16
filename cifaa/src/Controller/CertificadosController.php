@@ -36,7 +36,7 @@ class CertificadosController extends AppController
         }
 
         $query = $this->Certificados->find()
-            ->contain(['Users', 'Cursos'])
+            ->contain(['Titulares', 'Cursos'])
             ->order(['Certificados.created' => 'DESC']);
             
         // Filtro de búsqueda
@@ -45,7 +45,8 @@ class CertificadosController extends AppController
             $query->where([
                 'OR' => [
                     'Certificados.nombre_completo LIKE' => '%' . $termino . '%',
-                    'Users.username LIKE' => '%' . $termino . '%'
+                    'Certificados.dni LIKE' => '%' . $termino . '%',
+                    'Titulares.nombre_completo LIKE' => '%' . $termino . '%'
                 ]
             ]);
         }
@@ -71,17 +72,27 @@ class CertificadosController extends AppController
         if ($this->request->is('post')) {
             $data = $this->request->getData();
             
-            // DEBUG: Ver todos los datos recibidos
-            $this->log("====== DATOS RECIBIDOS DEL FORMULARIO ======", 'debug');
-            $this->log("nombre_completo: " . ($data['nombre_completo'] ?? 'NO ENVIADO'), 'debug');
-            $this->log("nombre_curso: " . ($data['nombre_curso'] ?? 'NO ENVIADO'), 'debug');
-            $this->log("horas: " . ($data['horas'] ?? 'NO ENVIADO'), 'debug');
-            $this->log("nota_final: " . ($data['nota_final'] ?? 'NO ENVIADO'), 'debug');
-            $this->log("duracion_meses: " . ($data['duracion_meses'] ?? 'NO ENVIADO'), 'debug');
-            $this->log("fecha_inicio: " . ($data['fecha_inicio'] ?? 'NO ENVIADO'), 'debug');
-            $this->log("fecha_fin: " . ($data['fecha_fin'] ?? 'NO ENVIADO'), 'debug');
-            $this->log("modulo_tema: " . json_encode($data['modulo_tema'] ?? []), 'debug');
-            $this->log("============================================", 'debug');
+            // DEBUG: Log TODOS los datos recibidos
+            $this->log("========== DATOS RECIBIDOS DEL FORMULARIO ==========", 'debug');
+            $this->log("DNI: " . ($data['dni'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("Nombre Completo: " . ($data['nombre_completo'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("Nombre Curso: " . ($data['nombre_curso'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("Curso ID: " . ($data['curso_id'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("Horas: " . ($data['horas'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("Módulos: " . (isset($data['modulo_tema']) ? count($data['modulo_tema']) : '0'), 'debug');
+            $this->log("===================================================", 'debug');
+            
+            // PASO CRÍTICO: Gestionar titular (buscar o crear)
+            $titularId = $this->gestionarTitular($data);
+            
+            $this->log(">>> Titular ID obtenido: " . ($titularId ?? 'NULL'), 'debug');
+            
+            if (!$titularId) {
+                $this->Flash->error(__('Error al procesar datos del titular. Verifique DNI y nombre completo.'));
+                $this->log("ERROR: gestionarTitular retornó NULL", 'error');
+                // Recargar formulario con datos
+                goto cargarFormulario;
+            }
             
             // Procesar módulos desde el formulario dinámico
             $modulosArray = [];
@@ -108,7 +119,6 @@ class CertificadosController extends AppController
                 if ($data['fecha_inicio'] instanceof \Cake\I18n\FrozenDate) {
                     $fechaInicio = $data['fecha_inicio']->format('d \d\e F \d\e Y');
                 } elseif (is_string($data['fecha_inicio'])) {
-                    // Convertir formato YYYY-MM-DD a texto español
                     try {
                         $date = new \DateTime($data['fecha_inicio']);
                         $meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
@@ -124,7 +134,6 @@ class CertificadosController extends AppController
                 if ($data['fecha_fin'] instanceof \Cake\I18n\FrozenDate) {
                     $fechaFin = $data['fecha_fin']->format('d \d\e F \d\e Y');
                 } elseif (is_string($data['fecha_fin'])) {
-                    // Convertir formato YYYY-MM-DD a texto español
                     try {
                         $date = new \DateTime($data['fecha_fin']);
                         $meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
@@ -136,10 +145,11 @@ class CertificadosController extends AppController
                 }
             }
             
-            // Preparar datos del certificado
+            // Preparar datos del certificado (NUEVA ARQUITECTURA: usa titular_id)
             $certificadoData = [
-                'user_id' => !empty($data['user_id']) ? $data['user_id'] : null,
+                'titular_id' => $titularId,  // ← NUEVO: titular en lugar de user
                 'curso_id' => !empty($data['curso_id']) ? $data['curso_id'] : null,
+                'dni' => trim($data['dni'] ?? ''),  // ← Guardar DNI también en certificados
                 'nombre_completo' => trim($data['nombre_completo'] ?? ''),
                 'nombre_curso' => trim($data['nombre_curso'] ?? ''),
                 'horas' => (int)($data['horas'] ?? 0),
@@ -157,51 +167,36 @@ class CertificadosController extends AppController
             $certificado = $this->Certificados->patchEntity($certificado, $certificadoData);
             
             // Debug: Log data being saved
-            $this->log("====== GUARDANDO EN BD ======", 'debug');
-            $this->log("Datos preparados: " . json_encode($certificadoData, JSON_UNESCAPED_UNICODE), 'debug');
-            $this->log("Entity nombre_completo: " . ($certificado->nombre_completo ?? 'NULL'), 'debug');
-            $this->log("Entity nombre_curso: " . ($certificado->nombre_curso ?? 'NULL'), 'debug');
-            $this->log("Entity horas: " . ($certificado->horas ?? 'NULL'), 'debug');
-            $this->log("Entity nota_final: " . ($certificado->nota_final ?? 'NULL'), 'debug');
-            $this->log("Entity duracion_meses: " . ($certificado->duracion_meses ?? 'NULL'), 'debug');
-            $this->log("============================", 'debug');
+            $this->log("====== GUARDANDO CERTIFICADO CON TITULARES ======", 'debug');
+            $this->log("Titular ID: {$titularId}", 'debug');
+            $this->log("Codigo: {$codigo}", 'debug');
+            $this->log("Nombre: {$certificado->nombre_completo}", 'debug');
+            $this->log("Curso: {$certificado->nombre_curso}", 'debug');
+            $this->log("================================================", 'debug');
             
             if ($this->Certificados->save($certificado)) {
-                $this->log("Certificado generado exitosamente. ID: {$certificado->id}, Codigo: {$codigo}, Nombre: {$certificado->nombre_completo}, Curso: {$certificado->nombre_curso}", 'info');
+                $this->log("Certificado generado exitosamente. ID: {$certificado->id}, Codigo: {$codigo}, Titular ID: {$titularId}", 'info');
                 $this->Flash->success(__('Certificado generado exitosamente. Código: {0}', $codigo));
                 
                 return $this->redirect(['action' => 'index']);
             } else {
-                // Log de errores de validación
                 $errors = $certificado->getErrors();
                 $this->log("ERROR al guardar certificado. Errores: " . json_encode($errors), 'error');
                 $this->Flash->error(__('Error al guardar el certificado. Revise los datos ingresados.'));
-                
-                // Mostrar errores específicos en el log
-                foreach ($errors as $field => $error) {
-                    $this->log("Campo '{$field}': " . json_encode($error), 'error');
-                }
             }
         }
         
+        cargarFormulario:
         // Cargar listas para los dropdowns del formulario
-        $users = $this->Certificados->Users->find('list', [
-            'keyField' => 'id',
-            'valueField' => function ($user) {
-                return $user->username . ' (DNI: ' . ($user->dni ?? 'N/A') . ')';
-            }
-        ])->where(['rol' => 3]) // Solo estudiantes
-          ->order(['username' => 'ASC'])
-          ->all();
-          
+        // NOTA: Ya no se carga lista de users, ahora se ingresa DNI del titular directamente
         $cursos = $this->Certificados->Cursos->find('list', [
             'keyField' => 'id',
             'valueField' => 'titulo'
         ])->order(['titulo' => 'ASC'])
           ->all();
 
-        $esDiplomado = false; // Variable para diferenciar en el template PDF
-        $this->set(compact('certificado', 'users', 'cursos', 'esDiplomado'));
+        $esDiplomado = false;
+        $this->set(compact('certificado', 'cursos', 'esDiplomado'));
     }
 
     /**
@@ -218,6 +213,16 @@ class CertificadosController extends AppController
         
         if ($this->request->is('post')) {
             $data = $this->request->getData();
+            
+            // DEBUG: Log TODOS los datos recibidos
+            $this->log("========== DATOS RECIBIDOS DEL FORMULARIO (DIPLOMADO) ==========", 'debug');
+            $this->log("DNI: " . ($data['dni'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("Nombre Completo: " . ($data['nombre_completo'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("Nombre Curso: " . ($data['nombre_curso'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("Curso ID: " . ($data['curso_id'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("Horas: " . ($data['horas'] ?? 'NO ENVIADO'), 'debug');
+            $this->log("Módulos: " . (isset($data['modulo_tema']) ? count($data['modulo_tema']) : '0'), 'debug');
+            $this->log("===================================================================", 'debug');
             
             // Procesar módulos desde el formulario dinámico
             $modulosArray = [];
@@ -270,10 +275,22 @@ class CertificadosController extends AppController
                 }
             }
             
-            // Preparar datos del diplomado (guardar con tipo_documento)
+            // PASO CRÍTICO: Gestionar titular (buscar o crear)
+            $titularId = $this->gestionarTitular($data);
+            
+            $this->log(">>> Titular ID obtenido (Diplomado): " . ($titularId ?? 'NULL'), 'debug');
+            
+            if (!$titularId) {
+                $this->Flash->error(__('Error al procesar datos del titular. Verifique DNI y nombre completo.'));
+                $this->log("ERROR: gestionarTitular retornó NULL (Diplomado)", 'error');
+                goto cargarFormulario;
+            }
+            
+            // Preparar datos del diplomado (NUEVA ARQUITECTURA: usa titular_id)
             $certificadoData = [
-                'user_id' => !empty($data['user_id']) ? $data['user_id'] : null,
+                'titular_id' => $titularId,  // ← NUEVO: titular en lugar de user
                 'curso_id' => !empty($data['curso_id']) ? $data['curso_id'] : null,
+                'dni' => trim($data['dni'] ?? ''),  // ← Guardar DNI también en certificados
                 'nombre_completo' => trim($data['nombre_completo'] ?? ''),
                 'nombre_curso' => trim($data['nombre_curso'] ?? ''),
                 'horas' => (int)($data['horas'] ?? 0),
@@ -289,32 +306,29 @@ class CertificadosController extends AppController
             
             $certificado = $this->Certificados->patchEntity($certificado, $certificadoData);
             
-            // Marcar como diplomado en sesión para el PDF
-            $this->request->getSession()->write('esDiplomado', true);
+            // Debug: Log data being saved
+            $this->log("====== GUARDANDO DIPLOMADO CON TITULARES ======", 'debug');
+            $this->log("Titular ID: {$titularId}", 'debug');
+            $this->log("Codigo: {$codigo}", 'debug');
+            $this->log("Nombre: {$certificado->nombre_completo}", 'debug');
+            $this->log("Curso: {$certificado->nombre_curso}", 'debug');
+            $this->log("================================================", 'debug');
             
             if ($this->Certificados->save($certificado)) {
-                $this->log("Diplomado generado exitosamente. ID: {$certificado->id}, Codigo: {$codigo}", 'info');
+                $this->log("Diplomado generado exitosamente. ID: {$certificado->id}, Codigo: {$codigo}, Titular ID: {$titularId}", 'info');
                 $this->Flash->success(__('Diplomado generado exitosamente. Código: {0}', $codigo));
-                $this->request->getSession()->delete('esDiplomado');
-                return $this->redirect(['action' => 'diplomados']); // Redirige a vista de diplomados
+                return $this->redirect(['action' => 'diplomados']);
             } else {
                 $errors = $certificado->getErrors();
                 $this->log("ERROR al guardar diplomado. Errores: " . json_encode($errors), 'error');
                 $this->Flash->error(__('Error al guardar el diplomado. Revise los datos ingresados.'));
-                $this->request->getSession()->delete('esDiplomado');
             }
         }
         
+        cargarFormulario:
+        
         // Cargar listas para los dropdowns del formulario
-        $users = $this->Certificados->Users->find('list', [
-            'keyField' => 'id',
-            'valueField' => function ($user) {
-                return $user->username . ' (DNI: ' . ($user->dni ?? 'N/A') . ')';
-            }
-        ])->where(['rol' => 3])
-          ->order(['username' => 'ASC'])
-          ->all();
-          
+        // NOTA: Ya no se carga lista de users, ahora se ingresa DNI del titular directamente
         $cursos = $this->Certificados->Cursos->find('list', [
             'keyField' => 'id',
             'valueField' => 'titulo'
@@ -322,13 +336,18 @@ class CertificadosController extends AppController
           ->all();
 
         $esDiplomado = true; // Variable para mostrar "DIPLOMADO" en lugar de "CERTIFICADO"
-        $this->set(compact('certificado', 'users', 'cursos', 'esDiplomado'));
+        $this->set(compact('certificado', 'cursos', 'esDiplomado'));
         $this->render('generar'); // Usa la misma vista que generar
     }
 
     /**
      * Mis Certificados (Student only)
      * Shows certificates belonging to the current user.
+     * 
+     * Nueva arquitectura con Titulares:
+     * - Busca certificados por titular_id en lugar de user_id
+     * - Si el usuario no tiene titular vinculado, muestra mensaje
+     * - Hereda certificados emitidos ANTES de crear la cuenta
      */
     public function misCertificados()
     {
@@ -337,20 +356,38 @@ class CertificadosController extends AppController
             return $this->redirect(['controller' => 'Users', 'action' => 'login']);
         }
 
+        // Obtener titular_id del usuario
+        $this->loadModel('Users');
+        $usuarioCompleto = $this->Users->get($user->id, ['contain' => ['Titulares']]);
+        
+        if (!$usuarioCompleto->titular_id) {
+            $this->Flash->warning(__('No tiene un titular vinculado. Contacte al administrador para vincular su DNI.'));
+            $this->set('certificados', []);
+            $this->set('termino', null);
+            return;
+        }
+
         $query = $this->Certificados->find()
-            ->contain(['Cursos'])
-            ->where(['Certificados.user_id' => $user->id])
+            ->contain(['Cursos', 'Titulares'])
+            ->where(['Certificados.titular_id' => $usuarioCompleto->titular_id])
             ->order(['Certificados.created' => 'DESC']);
 
         // Filtro de búsqueda
         $termino = $this->request->getQuery('termino');
         if (!empty($termino)) {
-            $query->where(['Cursos.titulo LIKE' => '%' . $termino . '%']);
+            $query->where([
+                'OR' => [
+                    'Cursos.titulo LIKE' => '%' . $termino . '%',
+                    'Certificados.codigo LIKE' => '%' . $termino . '%',
+                    'Certificados.nombre_curso LIKE' => '%' . $termino . '%'
+                ]
+            ]);
         }
 
         $certificados = $this->paginate($query);
 
         $this->set(compact('certificados', 'termino'));
+        $this->log("Usuario {$user->username} (titular_id: {$usuarioCompleto->titular_id}) accedió a sus certificados", 'info');
     }
 
     /**
@@ -362,7 +399,7 @@ class CertificadosController extends AppController
     {
         // Filtrar solo diplomados por el prefijo del código
         $query = $this->Certificados->find()
-            ->contain(['Users', 'Cursos'])
+            ->contain(['Titulares', 'Cursos'])
             ->where(['Certificados.codigo LIKE' => 'DIP-%'])
             ->order(['Certificados.created' => 'DESC']);
 
@@ -379,8 +416,9 @@ class CertificadosController extends AppController
                 'OR' => [
                     'Certificados.codigo LIKE' => '%' . $termino . '%',
                     'Certificados.nombre_completo LIKE' => '%' . $termino . '%',
+                    'Certificados.dni LIKE' => '%' . $termino . '%',
                     'Certificados.nombre_curso LIKE' => '%' . $termino . '%',
-                    'Users.username LIKE' => '%' . $termino . '%',
+                    'Titulares.nombre_completo LIKE' => '%' . $termino . '%',
                     'Cursos.titulo LIKE' => '%' . $termino . '%'
                 ]
             ]);
@@ -411,7 +449,7 @@ class CertificadosController extends AppController
         // PASO 1: Buscar certificado por ID con datos relacionados
         try {
             $certificado = $this->Certificados->get($id, [
-                'contain' => ['Users', 'Cursos']
+                'contain' => ['Titulares', 'Cursos']
             ]);
         } catch (\Exception $e) {
             $this->Flash->error(__('Certificado no encontrado.'));
@@ -563,25 +601,66 @@ class CertificadosController extends AppController
     /**
      * Delete method (Admin only)
      */
-    public function delete($id = null)
+    /**
+     * Anular method (Admin only)
+     * Marca el certificado como 'anulado' sin borrarlo de la base de datos
+     * Un certificado anulado queda como inválido pero permanece en el registro
+     */
+    public function anular($id = null)
     {
         if ($redirect = $this->requiereAdministrador()) {
             return $redirect;
         }
 
-        $this->request->allowMethod(['post', 'delete']);
+        $this->request->allowMethod(['post']);
         $certificado = $this->Certificados->get($id);
         
-        // Soft delete: cambiar estado de 'activo' a 'anulado'
+        $codigoOriginal = $certificado->codigo;
+        $esDiplomado = strpos($codigoOriginal, 'DIP-') === 0;
+        
+        // Anular: cambiar estado a 'anulado'
         $certificado->estado = 'anulado';
         
         if ($this->Certificados->save($certificado)) {
-            $this->Flash->success(__('Certificado anulado correctamente. El certificado quedará marcado como inválido.'));
+            $tipo = $esDiplomado ? 'Diplomado' : 'Certificado';
+            $this->Flash->success(__("{$tipo} {0} anulado correctamente. El certificado quedará marcado como inválido.", $codigoOriginal));
+            $this->log("Certificado {$codigoOriginal} anulado por admin", 'info');
         } else {
             $this->Flash->error(__('No se pudo anular el certificado.'));
         }
 
-        return $this->redirect(['action' => 'index']);
+        return $this->redirect($this->referer(['action' => 'index']));
+    }
+    
+    /**
+     * Restaurar method (Admin only)
+     * Restaura un certificado previamente anulado, cambiando su estado a 'activo'
+     * Esto reactiva el certificado haciéndolo válido nuevamente
+     */
+    public function restaurar($id = null)
+    {
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
+        }
+
+        $this->request->allowMethod(['post']);
+        $certificado = $this->Certificados->get($id);
+        
+        $codigoOriginal = $certificado->codigo;
+        $esDiplomado = strpos($codigoOriginal, 'DIP-') === 0;
+        
+        // Restaurar: cambiar estado de 'anulado' a 'activo'
+        $certificado->estado = 'activo';
+        
+        if ($this->Certificados->save($certificado)) {
+            $tipo = $esDiplomado ? 'Diplomado' : 'Certificado';
+            $this->Flash->success(__("{$tipo} {0} restaurado correctamente. El certificado vuelve a ser válido.", $codigoOriginal));
+            $this->log("Certificado {$codigoOriginal} restaurado por admin", 'info');
+        } else {
+            $this->Flash->error(__('No se pudo restaurar el certificado.'));
+        }
+
+        return $this->redirect($this->referer(['action' => 'index']));
     }
 
     /**
@@ -607,9 +686,10 @@ class CertificadosController extends AppController
             $codigo = strtoupper(trim($codigo));
             
             try {
+                // Nueva arquitectura: cargar Titulares en lugar de Users
                 $certificado = $this->Certificados->find()
                     ->where(['codigo' => $codigo])
-                    ->contain(['Users', 'Cursos'])
+                    ->contain(['Titulares', 'Cursos'])
                     ->first();
                 
                 if ($certificado) {
@@ -620,7 +700,7 @@ class CertificadosController extends AppController
                     if ($certificado->estado === 'activo') {
                         $mensaje = $tipoDoc . ' válido y activo';
                         $tipo = 'success';
-                        $this->log("Verificación exitosa del {$tipoDoc}: {$codigo}", 'info');
+                        $this->log("Verificación exitosa del {$tipoDoc}: {$codigo} (Titular: {$certificado->titular->dni})", 'info');
                     } else {
                         $mensaje = 'Este ' . strtolower($tipoDoc) . ' ha sido anulado';
                         $tipo = 'warning';
@@ -639,5 +719,62 @@ class CertificadosController extends AppController
         }
         
         $this->set(compact('certificado', 'codigo', 'mensaje', 'tipo'));
+    }
+
+    /**
+     * Método auxiliar: Gestionar titular (buscar o crear)
+     * 
+     * Este método implementa la nueva arquitectura de titulares:
+     * - Busca un titular por DNI
+     * - Si existe, lo reutiliza
+     * - Si no existe, crea un nuevo titular
+     * 
+     * @param array $data Datos del formulario
+     * @return int|null ID del titular o null si hay error
+     */
+    private function gestionarTitular(array $data): ?int
+    {
+        // Validar datos mínimos requeridos
+        $dni = trim($data['dni'] ?? '');
+        $nombreCompleto = trim($data['nombre_completo'] ?? '');
+        
+        $this->log(">>> gestionarTitular INICIADO", 'debug');
+        $this->log(">>> DNI recibido: '$dni'", 'debug');
+        $this->log(">>> Nombre Completo recibido: '$nombreCompleto'", 'debug');
+        
+        if (empty($dni)) {
+            $this->log("Error: DNI vacío en gestionarTitular", 'error');
+            return null;
+        }
+        
+        // Obtener o cargar TitularesTable
+        $titularesTable = $this->fetchTable('Titulares');
+        
+        // 1. Buscar titular existente por DNI
+        $titular = $titularesTable->buscarPorDni($dni);
+        
+        // 2. Si existe, retornar su ID
+        if ($titular) {
+            $this->log("Titular encontrado por DNI {$dni}. ID: {$titular->id}, Nombre: {$titular->nombre_completo}", 'debug');
+            return $titular->id;
+        }
+        
+        // 3. Si no existe, validar que tengamos nombre completo
+        if (empty($nombreCompleto)) {
+            $this->log("Error: Titular no existe y falta nombre completo para crear. DNI: {$dni}", 'error');
+            return null;
+        }
+        
+        // 4. Crear nuevo titular usando buscarOCrear
+        $nuevoTitular = $titularesTable->buscarOCrear($dni, $nombreCompleto);
+        
+        if ($nuevoTitular) {
+            $this->log("Nuevo titular creado. ID: {$nuevoTitular->id}, DNI: {$dni}, Nombre: {$nombreCompleto}", 'info');
+            return $nuevoTitular->id;
+        }
+        
+        // 5. Error al guardar
+        $this->log("Error al crear titular. DNI: {$dni}", 'error');
+        return null;
     }
 }

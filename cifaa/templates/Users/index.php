@@ -102,9 +102,9 @@
                                     <th><?= $this->Paginator->sort('username', 'Usuario') ?></th>
                                     <th><?= $this->Paginator->sort('dni', 'DNI') ?></th>
                                     <th><?= $this->Paginator->sort('rol', 'Rol') ?></th>
+                                    <th>Titular</th>
                                     <th><?= $this->Paginator->sort('estado', 'Estado') ?></th>
                                     <th><?= $this->Paginator->sort('created', 'Creado') ?></th>
-                                    <th><?= $this->Paginator->sort('modified', 'Modificado') ?></th>
                                     <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>
@@ -121,11 +121,30 @@
                                             <span class="badge bg-warning text-dark ms-2"><i class="fas fa-shield-alt"></i> PROTEGIDO</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td><?= h($user->dni) ?></td>
+                                    <td>
+                                        <?php if ($user->dni): ?>
+                                            <span class="badge bg-secondary"><?= h($user->dni) ?></span>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td>
                                         <span class="badge bg-<?= $user->rol == 1 ? 'danger' : ($user->rol == 2 ? 'warning text-dark' : 'info') ?>">
                                             <?= $roles[$user->rol] ?? 'Desconocido' ?>
                                         </span>
+                                    </td>
+                                    <td>
+                                        <?php if ($user->titular_id && isset($user->titulare)): ?>
+                                            <span class="badge bg-success" title="<?= h($user->titulare->nombre_completo) ?>">
+                                                <i class="fas fa-check-circle"></i> Vinculado
+                                            </span>
+                                        <?php elseif ($user->rol == 3): ?>
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-exclamation-triangle"></i> Sin vincular
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php if ($user->estado === 'activo'): ?>
@@ -135,7 +154,6 @@
                                         <?php endif; ?>
                                     </td>
                                     <td><?= h($user->created->format('d/m/Y')) ?></td>
-                                    <td><?= h($user->modified->format('d/m/Y')) ?></td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
                                             <?= $this->Html->link(

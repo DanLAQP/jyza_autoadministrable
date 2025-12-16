@@ -53,13 +53,14 @@ $this->assign('title', 'Administrar Inscripciones - ' . h($curso->titulo));
                                     class="form-control form-control-lg" 
                                     placeholder="Ingrese DNI o nombre (min. 3 caracteres)..."
                                     autocomplete="off"
+                                    style="color: #d9d9d9;"
                                 >
                                 <small class="form-text text-muted">
                                     <i class="fas fa-info-circle"></i> Busca por DNI o nombre de usuario (mínimo 3 caracteres)
                                 </small>
                                 
                                 <!-- Lista de resultados -->
-                                <div id="resultados-alumnos" class="list-group mt-2" style="display: none; max-height: 250px; overflow-y: auto;"></div>
+                                <div id="resultados-alumnos" class="list-group mt-2" style="display: none; max-height: 250px; overflow-y: scroll; overflow-x: hidden; scrollbar-width: thin;"></div>
                                 
                                 <!-- Campo oculto -->
                                 <?= $this->Form->control('usuario_id', [
@@ -77,7 +78,7 @@ $this->assign('title', 'Administrar Inscripciones - ' . h($curso->titulo));
                         </div>
                         <div class="col-md-4 d-flex align-items-end">
                             <button type="submit" class="btn btn-success btn-lg w-100">
-                                <i class="fas fa-user-plus"></i> Matricular Alumno
+                                Matricular
                             </button>
                         </div>
                     </div>
@@ -200,15 +201,19 @@ $this->assign('title', 'Administrar Inscripciones - ' . h($curso->titulo));
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+// Función para inicializar el buscador de alumnos
+function inicializarBuscadorAlumnos() {
     // Activar tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
-    // BUSQUEDA DE ALUMNOS
-    const buscarAlumno = document.getElementById('buscar-alumno');
+    // BUSQUEDA DE ALUMNOS - usando delegación de eventos
+    const buscarAlumnoInput = document.getElementById('buscar-alumno');
+    
+    if (!buscarAlumnoInput) return; // Si el elemento no existe, salir
+    
     const resultadosAlumnos = document.getElementById('resultados-alumnos');
     const usuarioIdInput = document.getElementById('usuario-id');
     const alumnoSeleccionado = document.getElementById('alumno-seleccionado');
@@ -217,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let timeoutAlumno = null;
     
-    buscarAlumno.addEventListener('input', function() {
+    buscarAlumnoInput.addEventListener('input', function() {
         const dni = this.value.trim();
         
         clearTimeout(timeoutAlumno);
@@ -241,7 +246,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         data.forEach(alumno => {
                             const item = document.createElement('a');
                             item.href = '#';
-                            item.className = 'list-group-item list-group-item-action';
+                            item.className = 'list-group-item text-light';
+                            item.style.backgroundColor = '#0f3460';
+                            item.style.border = 'none';
                             item.innerHTML = '<strong>' + alumno.username + '</strong><br>' +
                                            '<small class="text-muted"><i class="fas fa-id-card"></i> DNI: ' + alumno.dni + '</small>';
                             
@@ -268,15 +275,71 @@ document.addEventListener('DOMContentLoaded', function() {
         alumnoSeleccionadoTexto.textContent = nombre + ' (DNI: ' + dni + ')';
         alumnoSeleccionado.style.display = 'block';
         resultadosAlumnos.style.display = 'none';
-        buscarAlumno.value = nombre + ' (DNI: ' + dni + ')';
-        buscarAlumno.setAttribute('readonly', true);
+        buscarAlumnoInput.value = nombre + ' (DNI: ' + dni + ')';
+        buscarAlumnoInput.setAttribute('readonly', true);
     }
     
     limpiarAlumno.addEventListener('click', function() {
         usuarioIdInput.value = '';
         alumnoSeleccionado.style.display = 'none';
-        buscarAlumno.value = '';
-        buscarAlumno.removeAttribute('readonly');
+        buscarAlumnoInput.value = '';
+        buscarAlumnoInput.removeAttribute('readonly');
     });
-});
+}
+
+// Ejecutar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', inicializarBuscadorAlumnos);
+
+// También ejecutar cuando se carga contenido dinámicamente en modales
+document.addEventListener('shown.bs.modal', inicializarBuscadorAlumnos);
+
+// Alternativamente, si estás usando un sistema personalizado de modales, 
+// puedes llamar a inicializarBuscadorAlumnos() después de cargar el contenido vía AJAX
 </script>
+
+<style>
+    #buscar-alumno::placeholder {
+        color: #6c757d !important;
+        opacity: 1;
+    }
+    
+    #resultados-alumnos {
+        scrollbar-color: #5dade2 #16213e;
+    }
+    
+    #resultados-alumnos::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    #resultados-alumnos::-webkit-scrollbar-track {
+        background: #16213e;
+    }
+    
+    #resultados-alumnos::-webkit-scrollbar-thumb {
+        background: #5dade2;
+        border-radius: 3px;
+    }
+    
+    #resultados-alumnos::-webkit-scrollbar-thumb:hover {
+        background: #3a9fd8;
+    }
+    
+    #resultados-alumnos .list-group-item {
+        background-color: #0f3460;
+        border: none;
+        color: #d9d9d9;
+        transition: background-color 0.15s ease-in-out;
+        padding: 0.75rem 1.25rem;
+    }
+    
+    #resultados-alumnos .list-group-item:hover {
+        background-color: #16213e;
+        color: #d9d9d9;
+        cursor: pointer;
+        border: none;
+    }
+    
+    #resultados-alumnos .list-group-item strong {
+        color: #5dade2;
+    }
+</style>

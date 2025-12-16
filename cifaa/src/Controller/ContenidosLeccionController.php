@@ -91,6 +91,12 @@ class ContenidosLeccionController extends AppController
         }
         
         $this->set(compact('contenidosLeccion'));
+        // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**
@@ -217,6 +223,12 @@ class ContenidosLeccionController extends AppController
         
         $lecciones = $leccionesQuery->all();
         $this->set(compact('contenidosLeccion', 'lecciones', 'leccionId', 'cursoId'));
+        // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**
@@ -318,6 +330,12 @@ class ContenidosLeccionController extends AppController
         
         $lecciones = $this->ContenidosLeccion->Lecciones->find('list', limit: 200)->all();
         $this->set(compact('contenidosLeccion', 'lecciones', 'leccionId'));
+        // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**

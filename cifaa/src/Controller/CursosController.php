@@ -234,7 +234,7 @@ class CursosController extends AppController
                     $data['miniatura'] = 'uploads/cursos/' . $fileName;
                 } else {
                     $this->Flash->error(__('El archivo de imagen no es válido. Formatos permitidos: JPG, PNG, GIF, WebP.'));
-                    $users = $this->Cursos->Users->find('list', limit: 200)->all();
+                    $users = $this->Cursos->Users->find('list')->all();
                     $this->set(compact('curso', 'users'));
                     return;
                 }
@@ -250,8 +250,14 @@ class CursosController extends AppController
             }
             $this->Flash->error(__('The curso could not be saved. Please, try again.'));
         }
-        $users = $this->Cursos->Users->find('list', limit: 200)->all();
+        $users = $this->Cursos->Users->find('list')->all();
         $this->set(compact('curso', 'users'));
+         // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**
@@ -314,7 +320,7 @@ class CursosController extends AppController
                     $data['miniatura'] = 'uploads/cursos/' . $fileName;
                 } else {
                     $this->Flash->error(__('El archivo de imagen no es válido. Formatos permitidos: JPG, PNG, GIF, WebP.'));
-                    $users = $this->Cursos->Users->find('list', limit: 200)->all();
+                    $users = $this->Cursos->Users->find('list')->all();
                     $this->set(compact('curso', 'users'));
                     return;
                 }
@@ -330,8 +336,14 @@ class CursosController extends AppController
             }
             $this->Flash->error(__('The curso could not be saved. Please, try again.'));
         }
-        $users = $this->Cursos->Users->find('list', limit: 200)->all();
+        $users = $this->Cursos->Users->find('list')->all();
         $this->set(compact('curso', 'users'));
+         // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**

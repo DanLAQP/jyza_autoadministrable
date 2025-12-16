@@ -1,127 +1,175 @@
-<!-- Calculadora de margen de error (JS, sin controlador, estilo moderno) -->
+<!-- Calculadora de margen de error -->
 <style>
-.calc-card {
-    background: #23272b;
-    border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-    padding: 2rem;
-    margin-bottom: 2rem;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-}
-.calc-title {
-    font-size: 2rem;
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 1.5rem;
-    color: #fff;
-}
-.calc-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    align-items: stretch;
-}
-.calc-form {
-    flex: 1 1 260px;
-}
-.calc-result {
-    flex: 1 1 260px;
-    background: linear-gradient(135deg, #2c2f36 0%, #23272b 100%);
+.calc-container {
+    background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
     border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
-    min-height: 220px;
+    padding: 2rem;
+    margin: 2rem auto;
+    max-width: 900px;
+    border: 2px solid #5dade2;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
 }
-.calc-number {
-    font-size: 3rem;
+
+.calc-header-title {
+    color: #5dade2;
     font-weight: 700;
-    color: #6f1d7f;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.calc-form-group label {
+    color: #d9d9d9;
+    font-weight: 600;
     margin-bottom: 0.5rem;
 }
-.calc-btn {
-    background: #e74c3c;
-    color: #fff;
-    border: none;
+
+.calc-form-group .form-control,
+.calc-form-group .form-select {
+    background: #0f3460;
+    border: 1px solid #16213e;
+    color: #d9d9d9;
+    padding: 0.75rem;
+}
+
+.calc-form-group .form-control::placeholder {
+    color: #6c757d;
+}
+
+.calc-form-group .form-control:focus,
+.calc-form-group .form-select:focus {
+    background: #0f3460;
+    border-color: #5dade2;
+    color: #d9d9d9;
+    box-shadow: 0 0 0 0.2rem rgba(93, 173, 226, 0.25);
+}
+
+.calc-result-box {
+    background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+    border: 2px solid #5dade2;
     border-radius: 8px;
-    padding: 0.75rem 2rem;
+    padding: 2rem;
+    text-align: center;
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.calc-result-value {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #5dade2;
+    margin: 1rem 0;
+}
+
+.calc-result-label {
+    color: #d9d9d9;
     font-size: 1.1rem;
     font-weight: 600;
-    margin-top: 1rem;
-    transition: background 0.2s;
+    margin-bottom: 1rem;
 }
-.calc-btn:hover {
-    background: #c82333;
+
+.calc-btn-submit {
+    background: #e07856;
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    transition: background 0.3s;
+    width: 100%;
 }
-.calc-label {
-    font-weight: 500;
+
+.calc-btn-submit:hover {
+    background: #d46844;
     color: #fff;
 }
-.calc-desc {
-    font-size: 0.98rem;
+
+.calc-desc-text {
     color: #b0b3b8;
+    font-size: 0.9rem;
+    margin-top: 1.5rem;
+    line-height: 1.5;
     text-align: center;
-    margin-top: 1rem;
 }
-.form-control, .form-select, .input-group-text {
-    background: #181a1b;
-    color: #fff;
-    border: 1px solid #444;
-}
-.form-control:focus, .form-select:focus {
-    background: #23272b;
-    color: #fff;
-    border-color: #e74c3c;
-    box-shadow: none;
-}
+
 .input-group-text {
-    background: #23272b;
-    color: #fff;
-    border: 1px solid #444;
+    background: #16213e;
+    border: 1px solid #16213e;
+    color: #d9d9d9;
 }
 </style>
-<div class="calc-card">
-    <div class="calc-title">Margen de error</div>
-    <div class="calc-row">
-        <form id="marginErrorForm" class="calc-form">
-            <div class="mb-3">
-                <label for="sample_size" class="calc-label">Tamaño de Muestra (n):</label>
-                <input type="number" min="1" id="sample_size" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label for="p" class="calc-label">Probabilidad de éxito/fracaso (p/q):</label>
-                <div class="input-group">
-                    <input type="number" min="0" max="100" step="0.1" id="p" class="form-control" value="50">
-                    <span class="input-group-text">%</span>
+
+<div class="container-fluid mt-4 mb-4">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h2 class="text-info mb-0">
+                <i class="fas fa-calculator"></i> Calculadora de Margen de Error
+            </h2>
+            <a href="<?= $this->Url->build(['controller' => 'Statistics', 'action' => 'index']) ?>" class="btn btn-outline-info">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="calc-container">
+    <div class="calc-header-title">Margen de Error</div>
+    
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <form id="marginErrorForm">
+                <div class="calc-form-group mb-3">
+                    <label for="sample_size" class="form-label">Tamaño de Muestra (n):</label>
+                    <input type="number" min="1" id="sample_size" class="form-control" required placeholder="Ej: 370">
                 </div>
-            </div>
-            <div class="mb-3">
-                <label for="population" class="calc-label">Población total (N):</label>
-                <input type="number" min="0" id="population" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label for="confidence" class="calc-label">Nivel de confianza:</label>
-                <select id="confidence" class="form-select">
-                    <option value="90">90%</option>
-                    <option value="95" selected>95%</option>
-                    <option value="99">99%</option>
-                </select>
-            </div>
-            <button type="submit" class="calc-btn w-100">Calcular</button>
-        </form>
-        <div class="calc-result" id="marginErrorResult" style="display:flex;">
-            <div id="marginErrorNumber" class="calc-number" style="display:none;"></div>
-            <div id="marginErrorText" style="font-size:1.2rem;"></div>
-            <div class="calc-desc">
-                Si no se conoce la probabilidad se recomienda asumir 50%. Si no se conoce el tamaño de la población o es mayor a 100,000 unidades, se recomienda dejar el casillero en blanco.
+
+                <div class="calc-form-group mb-3">
+                    <label for="p" class="form-label">Probabilidad de éxito/fracaso (p/q):</label>
+                    <div class="input-group">
+                        <input type="number" min="0" max="100" step="0.1" id="p" class="form-control" value="50" placeholder="Ej: 50">
+                        <span class="input-group-text">%</span>
+                    </div>
+                </div>
+
+                <div class="calc-form-group mb-3">
+                    <label for="population" class="form-label">Población total (N):</label>
+                    <input type="number" min="0" id="population" class="form-control" required placeholder="Ej: 10000">
+                </div>
+
+                <div class="calc-form-group mb-4">
+                    <label for="confidence" class="form-label">Nivel de confianza:</label>
+                    <select id="confidence" class="form-select">
+                        <option value="90">90%</option>
+                        <option value="95" selected>95%</option>
+                        <option value="99">99%</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="calc-btn-submit">
+                    <i class="fas fa-calculator"></i> Calcular
+                </button>
+
+                <div class="calc-desc-text">
+                    <strong>Notas:</strong> Si no se conoce la probabilidad, asumir 50%. Si no se conoce el tamaño de la población o es mayor a 100,000, dejar en blanco.
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="calc-result-box" id="marginErrorResult">
+                <div style="color: #5dade2; font-size: 0.95rem; font-weight: 600;">Resultado del cálculo</div>
+                <div id="marginErrorNumber" class="calc-result-value" style="display:none;"></div>
+                <div id="marginErrorText" class="calc-result-label" style="display:none;"></div>
+                <div style="color: #5dade2; font-weight: 600;">Ingresa los datos y haz clic en Calcular</div>
             </div>
         </div>
     </div>
 </div>
+
 <script>
     document.getElementById('marginErrorForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -129,11 +177,16 @@
         const pInput = parseFloat(document.getElementById('p').value);
         const N = parseInt(document.getElementById('population').value);
         const conf = document.getElementById('confidence').value;
-        let number = '';
-        let result = '';
+        
+        const resultNumber = document.getElementById('marginErrorNumber');
+        const resultText = document.getElementById('marginErrorText');
+        const defaultText = document.querySelector('#marginErrorResult > div:first-child');
+        
         if (n <= 0) {
-            result = '<span style="color:#c82333;font-weight:600;">El tamaño de muestra debe ser mayor que 0.</span>';
-            document.getElementById('marginErrorNumber').style.display = 'none';
+            resultNumber.style.display = 'none';
+            resultText.style.display = 'none';
+            defaultText.textContent = '❌ El tamaño de muestra debe ser mayor que 0.';
+            defaultText.style.color = '#e07856';
         } else {
             const p = (pInput > 0 ? pInput : 50) / 100.0;
             const q = 1 - p;
@@ -141,17 +194,21 @@
             const z = zValues[conf] || 1.96;
             const base = (p * q) / n;
             let error;
+            
             if (N > 0 && N <= 100000 && N > n) {
                 const fpc = (N - n) / (N - 1);
                 error = z * Math.sqrt(base * fpc);
             } else {
                 error = z * Math.sqrt(base);
             }
-            number = (Math.round(error * 1000) / 10).toFixed(1);
-            result = 'Margen de error';
-            document.getElementById('marginErrorNumber').textContent = number + '%';
-            document.getElementById('marginErrorNumber').style.display = 'block';
+            
+            const errorValue = (Math.round(error * 1000) / 10).toFixed(1);
+            
+            resultNumber.textContent = '± ' + errorValue + '%';
+            resultNumber.style.display = 'block';
+            resultText.textContent = 'Margen de error (Intervalo de Confianza ' + conf + '%)';
+            resultText.style.display = 'block';
+            defaultText.style.display = 'none';
         }
-        document.getElementById('marginErrorText').innerHTML = result;
     });
 </script>

@@ -21,7 +21,8 @@ $usuario = $this->getRequest()->getAttribute('identity');
             <?= $this->Form->control('titulo', [
                 'label' => 'Título del Curso',
                 'class' => 'form-control',
-                'placeholder' => 'Ej: Python Avanzado'
+                'placeholder' => 'Ej: Python Avanzado',
+                'required' => true
             ]) ?>
         </div>
         <!-- Campo: Usuario/Instructor -->
@@ -29,7 +30,9 @@ $usuario = $this->getRequest()->getAttribute('identity');
             <?= $this->Form->control('usuario_id', [
                 'label' => 'Instructor',
                 'class' => 'form-control',
-                'options' => $users
+                'type' => 'select',
+                'options' => $users,
+                'required' => true
             ]) ?>
         </div>
         <!-- Campo: Descripción -->
@@ -39,7 +42,8 @@ $usuario = $this->getRequest()->getAttribute('identity');
                 'type' => 'textarea',
                 'class' => 'form-control',
                 'rows' => 4,
-                'placeholder' => 'Describa el contenido y objetivos del curso'
+                'placeholder' => 'Describa el contenido y objetivos del curso',
+                'required' => true
             ]) ?>
         </div>
         <!-- Campo: Nivel -->
@@ -53,6 +57,8 @@ $usuario = $this->getRequest()->getAttribute('identity');
                     'intermedio' => 'Intermedio',
                     'avanzado' => 'Avanzado',
                 ],
+                'default' => 'basico',
+                'required' => true
             ]) ?>
         </div>
         <!-- Campo: Categoría -->
@@ -60,7 +66,8 @@ $usuario = $this->getRequest()->getAttribute('identity');
             <?= $this->Form->control('categoria', [
                 'label' => 'Categoría',
                 'class' => 'form-control',
-                'placeholder' => 'Ej: Programación, Diseño, etc.'
+                'placeholder' => 'Ej: Programación, Diseño, etc.',
+                'required' => true
             ]) ?>
         </div>
         <!-- Campo: Miniatura (Imagen) -->
@@ -68,7 +75,7 @@ $usuario = $this->getRequest()->getAttribute('identity');
             <label class="form-label">Miniatura del Curso</label>
             <div class="input-group">
                 <input type="file" class="form-control" id="miniatura" name="miniatura" accept="image/*" />
-                <small class="d-block text-muted mt-2">Formatos soportados: JPG, PNG, GIF. Tamaño máximo: 5MB</small>
+                <small class="d-block text-muted mt-2">Tamaño recomendado: 800x450px. Formatos: JPG, PNG, GIF. Máximo: 5MB</small>
             </div>
             <div id="preview-miniatura" class="mt-3"></div>
         </div>
@@ -82,7 +89,8 @@ $usuario = $this->getRequest()->getAttribute('identity');
                     'activo' => 'Activo',
                     'inactivo' => 'Inactivo',
                 ],
-                'default' => 'activo'
+                'default' => 'activo',
+                'required' => true
             ]) ?>
         </div>
         <!-- Botones -->
@@ -93,6 +101,40 @@ $usuario = $this->getRequest()->getAttribute('identity');
         <?= $this->Form->end() ?>
     <?php endif; ?>
 </div>
+
+<!-- CSS para placeholder visible y selects diferenciados -->
+<style>
+    .form-control::placeholder {
+        color: #6c757d !important;
+        opacity: 1;
+    }
+    
+    .form-control:focus::placeholder {
+        color: #6c757d !important;
+    }
+    
+    /* Mejorar visual de los select */
+    select.form-control {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-color: #fff;
+        background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath fill=%22%23495057%22 d=%22M7 10l5 5 5-5z%22/%3E%3C/svg%3E');
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 24px 24px;
+        padding-right: 3rem;
+        cursor: pointer;
+    }
+    
+    select.form-control:hover {
+        background-color: #f8f9fa;
+    }
+    
+    select.form-control:focus {
+        background-color: #fff;
+    }
+</style>
 
 <!-- Script para preview de imagen -->
 <script>
@@ -106,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    previewContainer.innerHTML = '<img src="' + e.target.result + '" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #17a2b8;">';
+                    previewContainer.innerHTML = '<img src="' + e.target.result + '" alt="Preview" style="max-width: 300px; max-height: 200px; border-radius: 8px; border: 2px solid #17a2b8;">';
                 };
                 reader.readAsDataURL(file);
             }

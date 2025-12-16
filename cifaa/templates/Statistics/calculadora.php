@@ -5,14 +5,8 @@
 $this->assign('title', 'Herramientas Estadísticas');
 ?>
 
-<div class="container-fluid mt-4">
-    <!-- Breadcrumb simple para navegación -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb rounded-pill px-3 py-2">
-            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Inicio</a></li>
-            <li class="breadcrumb-item active text-white" aria-current="page">Herramientas Estadísticas</li>
-        </ol>
-    </nav>
+<div class="container mt-4">
+    
 
     <div class="row mb-5">
         <div class="col-12 text-center">
@@ -51,8 +45,8 @@ $this->assign('title', 'Herramientas Estadísticas');
 
     <!-- Back Button -->
     <div class="row mb-3 d-none" id="backButtonContainer">
-        <div class="col-12">
-            <button class="btn btn-link text-muted text-decoration-none ps-0 hover-light" onclick="showSelector()">
+        <div class="col-12 text-end">
+            <button class="btn btn-info" onclick="showSelector()">
                 <i class="fas fa-arrow-left me-2"></i> Volver al menú
             </button>
         </div>
@@ -113,7 +107,7 @@ $this->assign('title', 'Herramientas Estadísticas');
                                 </form>
                             </div>
 
-                            <div class="col-md-6 d-flex align-items-center justify-content-center bg-dark-subtle rounded-3 p-4">
+                            <div class="col-md-6 d-flex align-items-center justify-content-center rounded-3 p-4" style="background: linear-gradient(135deg, #16213e 0%, #0f3460 100%); border: 2px solid #5dade2;">
                                 <div id="sampleResultPlaceholder" class="text-center text-muted">
                                     <i class="fas fa-chart-bar fa-4x mb-3 opacity-25"></i>
                                     <p class="mb-0">Completa el formulario para ver los resultados aquí.</p>
@@ -125,15 +119,15 @@ $this->assign('title', 'Herramientas Estadísticas');
                                     
                                     <div class="row text-start g-3">
                                         <div class="col-6">
-                                            <div class="p-3 rounded bg-body-tertiary">
+                                            <div class="p-3 rounded" style="background: #16213e; border: 1px solid #5dade2;">
                                                 <small class="text-muted d-block text-uppercase ls-1" style="font-size: 0.7rem;">Población</small>
-                                                <span class="text-white fw-bold" id="resPop">0</span>
+                                                <span class="text-info fw-bold" id="resPop">0</span>
                                             </div>
                                         </div>
                                         <div class="col-6">
-                                            <div class="p-3 rounded bg-body-tertiary">
+                                            <div class="p-3 rounded" style="background: #16213e; border: 1px solid #5dade2;">
                                                 <small class="text-muted d-block text-uppercase ls-1" style="font-size: 0.7rem;">Confianza</small>
-                                                <span class="text-white fw-bold" id="resConf">95%</span>
+                                                <span class="text-info fw-bold" id="resConf">95%</span>
                                             </div>
                                         </div>
                                         <div class="col-12">
@@ -202,7 +196,7 @@ $this->assign('title', 'Herramientas Estadísticas');
                                 </form>
                             </div>
 
-                            <div class="col-md-6 d-flex align-items-center justify-content-center bg-dark-subtle rounded-3 p-4">
+                            <div class="col-md-6 d-flex align-items-center justify-content-center rounded-3 p-4" style="background: linear-gradient(135deg, #16213e 0%, #0f3460 100%); border: 2px solid #5dade2;">
                                 <div id="errorResultPlaceholder" class="text-center text-muted">
                                     <i class="fas fa-search-plus fa-4x mb-3 opacity-25"></i>
                                     <p class="mb-0">Completa el formulario para calcular el margen.</p>
@@ -214,20 +208,20 @@ $this->assign('title', 'Herramientas Estadísticas');
                                     
                                     <div class="row text-start g-3">
                                         <div class="col-6">
-                                            <div class="p-3 rounded bg-body-tertiary">
+                                            <div class="p-3 rounded" style="background: #16213e; border: 1px solid #5dade2;">
                                                 <small class="text-muted d-block text-uppercase ls-1" style="font-size: 0.7rem;">Población</small>
-                                                <span class="text-white fw-bold" id="resPopErr">0</span>
+                                                <span class="text-info fw-bold" id="resPopErr">0</span>
                                             </div>
                                         </div>
                                         <div class="col-6">
-                                            <div class="p-3 rounded bg-body-tertiary">
+                                            <div class="p-3 rounded" style="background: #16213e; border: 1px solid #5dade2;">
                                                 <small class="text-muted d-block text-uppercase ls-1" style="font-size: 0.7rem;">Muestra</small>
-                                                <span class="text-white fw-bold" id="resSampErr">0</span>
+                                                <span class="text-info fw-bold" id="resSampErr">0</span>
                                             </div>
                                         </div>
                                         <div class="col-12">
-                                            <div class="p-2 rounded bg-warning-subtle border border-warning text-warning text-center text-dark">
-                                                <small class="text-dark fw-bold"><i class="fas fa-check-circle me-1"></i> Nivel de Confianza: <span id="resConfErr">95%</span></small>
+                                            <div class="p-2 rounded" style="background: #16213e; border: 2px solid #5dade2;">
+                                                <small class="text-info fw-bold"><i class="fas fa-check-circle me-1"></i> Nivel de Confianza: <span id="resConfErr">95%</span></small>
                                             </div>
                                         </div>
                                     </div>

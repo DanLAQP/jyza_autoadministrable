@@ -66,7 +66,7 @@
                     <td>
                         <?= $this->Html->link(__('Ver'), ['action' => 'view', $modulo->id], ['class' => 'btn btn-sm btn-outline-light me-1']) ?>
                         <?php if (!empty($usuario) && $usuario->rol == 1): ?>
-                            <?= $this->Html->link(__('Editar'), ['action' => 'edit', $modulo->id], ['class' => 'btn btn-sm btn-info me-1']) ?>
+                            <?= $this->Html->link(__('Editar'), ['action' => 'edit', $modulo->id], ['class' => 'btn btn-sm btn-info me-1 openModal']) ?>
                             <?= $this->Form->postLink(__('Eliminar'), ['action' => 'delete', $modulo->id], ['class' => 'btn btn-sm btn-danger', 'confirm' => __('¿Seguro que deseas eliminar el módulo #{0}?', $modulo->id)]) ?>
                         <?php endif; ?>
                     </td>

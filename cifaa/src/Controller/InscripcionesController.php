@@ -113,6 +113,7 @@ class InscripcionesController extends AppController
         $inscripciones = $this->paginate($query);
 
         $this->set(compact('inscripciones', 'estado', 'pendientesCount'));
+        
     }
 
     /**
@@ -142,6 +143,12 @@ class InscripcionesController extends AppController
         }
         
         $this->set(compact('inscripcione'));
+         // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**
@@ -233,6 +240,7 @@ class InscripcionesController extends AppController
                     }
                 }
             }
+            
         }
         
         // Cargar listas para el formulario
@@ -255,6 +263,12 @@ class InscripcionesController extends AppController
           ->all();
 
         $this->set(compact('inscripcione', 'users', 'cursos'));
+         // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**
@@ -343,6 +357,12 @@ class InscripcionesController extends AppController
         }
 
         $this->set(compact('curso', 'inscripciones'));
+         // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**
@@ -379,10 +399,9 @@ class InscripcionesController extends AppController
                 $this->Flash->error(__('Debe seleccionar usuario y curso.'));
                 
                 $users = $this->Inscripciones->Users->find('list', [
-                    'conditions' => ['rol' => 3],
-                    'limit' => 200
+                    'conditions' => ['rol' => 3]
                 ])->all();
-                $cursos = $this->Inscripciones->Cursos->find('list', ['limit' => 200])->all();
+                $cursos = $this->Inscripciones->Cursos->find('list')->all();
                 $this->set(compact('inscripcione', 'users', 'cursos'));
                 return;
             }
@@ -394,10 +413,9 @@ class InscripcionesController extends AppController
                 $this->Flash->error(__('Usuario o curso inválido.'));
                 
                 $users = $this->Inscripciones->Users->find('list', [
-                    'conditions' => ['rol' => 3],
-                    'limit' => 200
+                    'conditions' => ['rol' => 3]
                 ])->all();
-                $cursos = $this->Inscripciones->Cursos->find('list', ['limit' => 200])->all();
+                $cursos = $this->Inscripciones->Cursos->find('list')->all();
                 $this->set(compact('inscripcione', 'users', 'cursos'));
                 return;
             }
@@ -414,10 +432,9 @@ class InscripcionesController extends AppController
                 $this->Flash->error(__('Ya existe una inscripción para este usuario en este curso.'));
                 
                 $users = $this->Inscripciones->Users->find('list', [
-                    'conditions' => ['rol' => 3],
-                    'limit' => 200
+                    'conditions' => ['rol' => 3]
                 ])->all();
-                $cursos = $this->Inscripciones->Cursos->find('list', ['limit' => 200])->all();
+                $cursos = $this->Inscripciones->Cursos->find('list')->all();
                 $this->set(compact('inscripcione', 'users', 'cursos'));
                 return;
             }
@@ -442,12 +459,17 @@ class InscripcionesController extends AppController
         
         // Preparar datos para el formulario (solo estudiantes activos)
         $users = $this->Inscripciones->Users->find('list', [
-            'conditions' => ['rol' => 3],
-            'limit' => 200
+            'conditions' => ['rol' => 3]
         ])->all();
-        $cursos = $this->Inscripciones->Cursos->find('list', ['limit' => 200])->all();
+        $cursos = $this->Inscripciones->Cursos->find('list')->all();
         
         $this->set(compact('inscripcione', 'users', 'cursos'));
+         // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**
@@ -469,7 +491,7 @@ class InscripcionesController extends AppController
             return $redirect;
         }
         
-        $inscripcione = $this->Inscripciones->get($id, contain: []);
+        $inscripcione = $this->Inscripciones->get($id, contain: ['Users', 'Cursos']);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $inscripcione = $this->Inscripciones->patchEntity($inscripcione, $this->request->getData());
             if ($this->Inscripciones->save($inscripcione)) {
@@ -479,9 +501,15 @@ class InscripcionesController extends AppController
             }
             $this->Flash->error(__('The inscripcione could not be saved. Please, try again.'));
         }
-        $users = $this->Inscripciones->Users->find('list', limit: 200)->all();
-        $cursos = $this->Inscripciones->Cursos->find('list', limit: 200)->all();
+        $users = $this->Inscripciones->Users->find('list')->all();
+        $cursos = $this->Inscripciones->Cursos->find('list')->all();
         $this->set(compact('inscripcione', 'users', 'cursos'));
+         // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**

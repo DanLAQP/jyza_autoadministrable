@@ -81,14 +81,9 @@
                         <small><i class="fas fa-info-circle"></i> Creado: <?= $leccione->created->format('d/m/Y H:i') ?> | Actualizado: <?= $leccione->modified->format('d/m/Y H:i') ?></small>
                     </div>
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                        <?= $this->Form->postLink(
-                            '<i class="fas fa-trash"></i> Eliminar',
-                            ['action' => 'delete', $leccione->id],
-                            ['confirm' => '¿Estás seguro de que deseas eliminar esta lección?', 'class' => 'btn btn-danger btn-lg', 'escape' => false]
-                        ) ?>
+                    <div class="d-grid gap-2 d-md-flex justify-content-center mt-4">
                         <?= $this->Html->link(
-                            '<i class="fas fa-times"></i> Cancelar',
+                            'Cancelar',
                             ['action' => 'index'],
                             ['class' => 'btn btn-secondary btn-lg', 'escape' => false]
                         ) ?>

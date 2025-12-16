@@ -114,7 +114,7 @@
                                                         <?= $this->Html->link(
                                                             '<i class="fas fa-edit"></i>',
                                                             ['action' => 'edit', $leccione->id],
-                                                            ['class' => 'btn btn-warning', 'title' => 'Editar', 'escape' => false]
+                                                            ['class' => 'btn btn-warning openModal', 'title' => 'Editar', 'escape' => false]
                                                         ) ?>
                                                         <?= $this->Form->postLink(
                                                             '<i class="fas fa-trash"></i>',

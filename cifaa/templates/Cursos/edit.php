@@ -34,7 +34,9 @@
             <?= $this->Form->control('usuario_id', [
                 'label' => 'Instructor',
                 'class' => 'form-control',
-                'options' => $users
+                'type' => 'select',
+                'options' => $users,
+                'empty' => false
             ]) ?>
         </div>
 
@@ -60,6 +62,7 @@
                     'intermedio' => 'Intermedio',
                     'avanzado' => 'Avanzado',
                 ],
+                'empty' => false
             ]) ?>
         </div>
 
@@ -97,24 +100,54 @@
                 'options' => [
                     'activo' => 'Activo',
                     'inactivo' => 'Inactivo',
-                ]
+                ],
+                'empty' => false
             ]) ?>
         </div>
 
         <!-- Botones -->
         <div class="col-12 text-center">
             <?= $this->Form->button(__('Guardar Cambios'), ['class' => 'btn btn-info']) ?>
-            <?= $this->Form->postLink(
-                __('Eliminar'),
-                ['action' => 'delete', $curso->id],
-                ['confirm' => __('¿Está seguro de que desea eliminar este curso?'), 'class' => 'btn btn-danger ms-2']
-            ) ?>
-            <?= $this->Html->link(__('Cancelar'), ['action' => 'index'], ['class' => 'btn btn-secondary ms-2']) ?>
+            <?= $this->Html->link(__('Cancelar'), '#', ['class' => 'btn btn-secondary ms-2', 'data-bs-dismiss' => 'modal']) ?>
         </div>
 
         <?= $this->Form->end() ?>
     <?php endif; ?>
 </div>
+
+<!-- CSS para placeholder visible y selects diferenciados -->
+<style>
+    .form-control::placeholder {
+        color: #6c757d !important;
+        opacity: 1;
+    }
+    
+    .form-control:focus::placeholder {
+        color: #6c757d !important;
+    }
+    
+    /* Mejorar visual de los select */
+    select.form-control {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-color: #fff;
+        background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath fill=%22%23495057%22 d=%22M7 10l5 5 5-5z%22/%3E%3C/svg%3E');
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 24px 24px;
+        padding-right: 3rem;
+        cursor: pointer;
+    }
+    
+    select.form-control:hover {
+        background-color: #f8f9fa;
+    }
+    
+    select.form-control:focus {
+        background-color: #fff;
+    }
+</style>
 
 <!-- Script para preview de imagen -->
 <script>

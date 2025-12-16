@@ -167,7 +167,7 @@ class LeccionesController extends AppController
         
         // Filtrar módulos por curso si viene el parámetro
         $cursoId = $this->request->getQuery('curso_id');
-        $modulos = $this->Lecciones->Modulos->find('list', limit: 200);
+        $modulos = $this->Lecciones->Modulos->find('list');
         
         if ($cursoId) {
             $modulos->where(['Modulos.curso_id' => $cursoId]);
@@ -175,6 +175,12 @@ class LeccionesController extends AppController
         
         $modulos = $modulos->all();
         $this->set(compact('leccione', 'modulos', 'moduloId', 'cursoId'));
+        // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**
@@ -218,8 +224,14 @@ class LeccionesController extends AppController
             $this->Flash->error(__('The leccione could not be saved. Please, try again.'));
         }
         
-        $modulos = $this->Lecciones->Modulos->find('list', limit: 200)->all();
+        $modulos = $this->Lecciones->Modulos->find('list')->all();
         $this->set(compact('leccione', 'modulos'));
+        // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**

@@ -124,7 +124,7 @@ class ModulosController extends AppController
             }
             $this->Flash->error(__('The modulo could not be saved. Please, try again.'));
         }
-        $cursos = $this->Modulos->Cursos->find('list', limit: 200)->all();
+        $cursos = $this->Modulos->Cursos->find('list')->all();
         
         // Pre-seleccionar el curso si viene como parámetro
         $cursoId = $this->request->getQuery('curso_id');
@@ -145,6 +145,12 @@ class ModulosController extends AppController
         }
         
         $this->set(compact('modulo', 'cursos', 'cursoId'));
+         // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**
@@ -182,8 +188,14 @@ class ModulosController extends AppController
             }
             $this->Flash->error(__('The modulo could not be saved. Please, try again.'));
         }
-        $cursos = $this->Modulos->Cursos->find('list', limit: 200)->all();
+        $cursos = $this->Modulos->Cursos->find('list')->all();
         $this->set(compact('modulo', 'cursos'));
+         // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**

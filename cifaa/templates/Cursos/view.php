@@ -46,26 +46,11 @@ $identity = $this->getRequest()->getAttribute('identity');
 
             <!-- Barra de Acciones de Edición (Solo Admin) -->
             <?php if (!empty($identity) && $identity->rol == 1): ?>
-            <div class="btn-group w-100 mb-3" role="group">
+            <div class="mb-3">
                 <?= $this->Html->link(
                     '<i class="fas fa-edit me-1"></i> Editar Curso',
                     ['action' => 'edit', $curso->id],
-                    ['class' => 'btn btn-warning', 'escape' => false]
-                ) ?>
-                <?= $this->Html->link(
-                    '<i class="fas fa-folder me-1"></i> Editar Módulos',
-                    ['controller' => 'Modulos', 'action' => 'index', '?' => ['curso_id' => $curso->id]],
-                    ['class' => 'btn btn-primary', 'escape' => false]
-                ) ?>
-                <?= $this->Html->link(
-                    '<i class="fas fa-list me-1"></i> Editar Lecciones',
-                    ['controller' => 'Lecciones', 'action' => 'index', '?' => ['curso_id' => $curso->id]],
-                    ['class' => 'btn btn-info', 'escape' => false]
-                ) ?>
-                <?= $this->Html->link(
-                    '<i class="fas fa-file-alt me-1"></i> Editar Contenidos',
-                    ['controller' => 'ContenidosLeccion', 'action' => 'index', '?' => ['curso_id' => $curso->id]],
-                    ['class' => 'btn btn-success', 'escape' => false]
+                    ['class' => 'btn btn-warning openModal', 'escape' => false]
                 ) ?>
             </div>
             <?php endif; ?>
@@ -128,14 +113,28 @@ $identity = $this->getRequest()->getAttribute('identity');
                                                 type="button"
                                                 data-bs-toggle="collapse"
                                                 data-bs-target="#collapse<?= $modulo->id ?>"
-                                                aria-expanded="<?= $index === 0 ? 'true' : 'false' ?>">
-                                            <span class="me-2 badge bg-info"><?= $modulo->posicion ?></span>
-                                            <strong><?= h($modulo->titulo) ?></strong>
-                                            <?php if (!empty($modulo->lecciones)): ?>
-                                                <span class="ms-auto me-3 small text-muted">
-                                                    <?= count($modulo->lecciones) ?> lecciones
-                                                </span>
-                                            <?php endif; ?>
+                                                aria-expanded="<?= $index === 0 ? 'true' : 'false' ?>"
+                                                style="display: flex; align-items: center; justify-content: space-between;">
+                                            <div class="d-flex align-items-center flex-grow-1">
+                                                <span class="me-2 badge bg-info"><?= $modulo->posicion ?></span>
+                                                <strong><?= h($modulo->titulo) ?></strong>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-3" style="margin-right: 30px;">
+                                                <?php if (!empty($modulo->lecciones)): ?>
+                                                    <span class="small text-muted">
+                                                        <?= count($modulo->lecciones) ?> lecciones
+                                                    </span>
+                                                <?php endif; ?>
+                                                <?php if (!empty($identity) && $identity->rol == 1): ?>
+                                                    <span onclick="event.stopPropagation();">
+                                                        <?= $this->Html->link(
+                                                            '<i class="fas fa-edit"></i>',
+                                                            ['controller' => 'Modulos', 'action' => 'edit', $modulo->id],
+                                                            ['class' => 'btn btn-sm btn-warning openModal', 'title' => 'Editar módulo', 'escape' => false]
+                                                        ) ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
                                         </button>
                                     </h2>
                                     <div id="collapse<?= $modulo->id ?>" class="accordion-collapse collapse <?= $index === 0 ? 'show' : '' ?>"
@@ -187,6 +186,17 @@ $identity = $this->getRequest()->getAttribute('identity');
                                                                         ]
                                                                     ) ?>
                                                                 <?php endif; ?>
+                                                                <?php if (!empty($identity) && $identity->rol == 1): ?>
+                                                                    <?= $this->Html->link(
+                                                                        '<i class="fas fa-edit"></i>',
+                                                                        ['controller' => 'Lecciones', 'action' => 'edit', $leccion->id],
+                                                                        [
+                                                                            'class' => 'btn btn-sm btn-warning openModal rounded-pill ',
+                                                                            'escape' => false,
+                                                                            'title' => 'Editar lección'
+                                                                        ]
+                                                                    ) ?>
+                                                                <?php endif; ?>
                                                             </div>
                                                         </li>
                                                     <?php endforeach; ?>
@@ -198,7 +208,7 @@ $identity = $this->getRequest()->getAttribute('identity');
                                                         <?= $this->Html->link(
                                                             'Agregar lección',
                                                             ['controller' => 'Lecciones', 'action' => 'add', '?' => ['modulo_id' => $modulo->id]],
-                                                            ['class' => 'text-info']
+                                                            ['class' => 'text-info openModal']
                                                         ) ?>
                                                     <?php endif; ?>
                                                 </p>
@@ -331,17 +341,17 @@ $identity = $this->getRequest()->getAttribute('identity');
                             <?= $this->Html->link(
                                 '<i class="fas fa-users-cog me-1"></i> Administrar Inscripciones',
                                 ['controller' => 'Inscripciones', 'action' => 'administrarCurso', $curso->id],
-                                ['class' => 'btn btn-sm btn-info', 'escape' => false]
+                                ['class' => 'btn btn-sm btn-info openModal', 'escape' => false]
                             ) ?>
                             <?= $this->Html->link(
                                 '<i class="fas fa-edit me-1"></i> Editar Curso',
                                 ['action' => 'edit', $curso->id],
-                                ['class' => 'btn btn-sm btn-warning', 'escape' => false]
+                                ['class' => 'btn btn-sm btn-warning openModal', 'escape' => false]
                             ) ?>
                             <?= $this->Html->link(
                                 '<i class="fas fa-plus me-1"></i> Agregar Módulo',
                                 ['controller' => 'Modulos', 'action' => 'add', '?' => ['curso_id' => $curso->id]],
-                                ['class' => 'btn btn-sm btn-success', 'escape' => false]
+                                ['class' => 'btn btn-sm btn-success openModal', 'escape' => false]
                             ) ?>
                             <?= $this->Form->postLink(
                                 '<i class="fas fa-trash me-1"></i> Eliminar Curso',
@@ -426,12 +436,12 @@ $identity = $this->getRequest()->getAttribute('identity');
                                                 <?= $this->Html->link(
                                                     '<i class="fas fa-eye"></i>',
                                                     ['controller' => 'Inscripciones', 'action' => 'view', $inscripcion->id],
-                                                    ['class' => 'btn btn-info', 'title' => 'Ver', 'escape' => false, 'data-bs-toggle' => 'tooltip']
+                                                    ['class' => 'btn btn-info openModal', 'title' => 'Ver', 'escape' => false, 'data-bs-toggle' => 'tooltip']
                                                 ) ?>
                                                 <?= $this->Html->link(
                                                     '<i class="fas fa-chart-line"></i>',
                                                     ['controller' => 'Inscripciones', 'action' => 'edit', $inscripcion->id],
-                                                    ['class' => 'btn btn-warning', 'title' => 'Editar progreso', 'escape' => false, 'data-bs-toggle' => 'tooltip']
+                                                    ['class' => 'btn btn-warning openModal', 'title' => 'Editar progreso', 'escape' => false, 'data-bs-toggle' => 'tooltip']
                                                 ) ?>
                                                 <?= $this->Form->postLink(
                                                     '<i class="fas fa-user-times"></i>',

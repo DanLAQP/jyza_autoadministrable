@@ -9,121 +9,141 @@ $this->assign('title', 'Editar Inscripción');
 ?>
 
 <div class="container mt-4 mb-4">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card shadow-sm bg-dark border-warning">
-                <div class="card-header bg-warning text-dark">
-                    <h3 class="card-title mb-0">
-                        <i class="fas fa-edit"></i> Editar Inscripción
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <?= $this->Form->create($inscripcione, ['class' => 'needs-validation']) ?>
-                    
-                    <!-- Información del alumno y curso (solo lectura) -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="alert alert-info">
-                                <strong><i class="fas fa-user-graduate"></i> Alumno:</strong><br>
-                                <span class="fs-5"><?= h($inscripcione->user->username) ?></span>
-                                <?php if (!empty($inscripcione->user->dni)): ?>
-                                    <br><small class="text-muted">DNI: <?= h($inscripcione->user->dni) ?></small>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="alert alert-info">
-                                <strong><i class="fas fa-book"></i> Curso:</strong><br>
-                                <span class="fs-5"><?= h($inscripcione->curso->titulo) ?></span>
-                            </div>
-                        </div>
-                    </div>
+    <?= $this->Form->create($inscripcione, ['class' => 'row g-3']) ?>
+    
+    <!-- Información de la Inscripción -->
+    <div class="col-12 mb-4">
+        <h3 class="text-info"><i class="fas fa-edit"></i> Editar Inscripción</h3>
+    </div>
+    
+    <!-- Campo: Usuario/Estudiante (solo lectura) -->
+    <div class="col-md-6 mb-3">
+        <label class="form-label">Estudiante</label>
+        <div class="form-control" style="padding: 0.375rem 0.75rem; line-height: 1.5;">
+            <?php if ($inscripcione->hasValue('user') && $inscripcione->user): ?>
+                <strong><?= h($inscripcione->user->username) ?></strong>
+                <?php if (!empty($inscripcione->user->dni)): ?>
+                    <div style="margin-top: 0.5rem;"><small class="text-muted">DNI: <?= h($inscripcione->user->dni) ?></small></div>
+                <?php endif; ?>
+            <?php else: ?>
+                <span class="text-muted">-</span>
+            <?php endif; ?>
+        </div>
+    </div>
 
-                    <!-- Campos editables -->
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <?= $this->Form->control('progreso', [
-                                'label' => ['text' => '<i class="fas fa-chart-line"></i> Progreso del Curso (%)', 'escape' => false],
-                                'class' => 'form-control form-control-lg',
-                                'type' => 'number',
-                                'min' => 0,
-                                'max' => 100,
-                                'required' => true
-                            ]) ?>
-                            <small class="form-text text-muted">
-                                <i class="fas fa-info-circle"></i> Ingrese un valor entre 0 y 100
-                            </small>
-                        </div>
-                        <div class="col-md-6">
-                            <?= $this->Form->control('estado', [
-                                'label' => ['text' => '<i class="fas fa-toggle-on"></i> Estado de la Inscripción', 'escape' => false],
-                                'options' => [
-                                    'pendiente' => 'Pendiente',
-                                    'aprobada' => 'Aprobada',
-                                    'rechazada' => 'Rechazada'
-                                ],
-                                'class' => 'form-select form-select-lg',
-                                'required' => true
-                            ]) ?>
-                            <small class="form-text text-muted">
-                                <i class="fas fa-info-circle"></i> Cambia el estado de la inscripción
-                            </small>
-                        </div>
-                    </div>
+    <!-- Campo: Curso (solo lectura) -->
+    <div class="col-md-6 mb-3">
+        <label class="form-label">Curso</label>
+        <div class="form-control" style="padding: 0.375rem 0.75rem; line-height: 1.5;">
+            <?php if ($inscripcione->hasValue('curso') && $inscripcione->curso): ?>
+                <strong><?= h($inscripcione->curso->titulo) ?></strong>
+            <?php else: ?>
+                <span class="text-muted">-</span>
+            <?php endif; ?>
+        </div>
+    </div>
 
-                    <!-- Preview del progreso -->
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-eye"></i> Vista Previa del Progreso
-                            </label>
-                            <div class="progress" style="height: 30px;">
-                                <div class="progress-bar bg-info" 
-                                     role="progressbar" 
-                                     id="progress-preview"
-                                     style="width: <?= $inscripcione->progreso ?>%;"
-                                     aria-valuenow="<?= $inscripcione->progreso ?>" 
-                                     aria-valuemin="0" 
-                                     aria-valuemax="100">
-                                    <span id="progress-text"><?= $inscripcione->progreso ?>%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Campo: Estado -->
+    <div class="col-md-6 mb-3">
+        <?= $this->Form->control('estado', [
+            'label' => 'Estado',
+            'class' => 'form-control',
+            'type' => 'select',
+            'options' => [
+                'pendiente' => 'Pendiente',
+                'aprobada' => 'Aprobada',
+                'rechazada' => 'Rechazada'
+            ],
+            'required' => true
+        ]) ?>
+        <small class="form-text text-muted">Estado de la inscripción.</small>
+    </div>
 
-                    <!-- Botones de acción -->
-                    <div class="row mt-4">
-                        <div class="col-12 text-center">
-                            <button type="submit" class="btn btn-warning btn-lg">
-                                <i class="fas fa-save"></i> Guardar Cambios
-                            </button>
-                            <?= $this->Html->link(
-                                '<i class="fas fa-times"></i> Cancelar',
-                                ['action' => 'index'],
-                                ['class' => 'btn btn-secondary btn-lg ms-2', 'escape' => false]
-                            ) ?>
-                            <?= $this->Form->postLink(
-                                '<i class="fas fa-trash"></i> Eliminar Inscripción',
-                                ['action' => 'delete', $inscripcione->id],
-                                [
-                                    'confirm' => __('¿Desmatricular a {0} del curso {1}?', $inscripcione->user->username, $inscripcione->curso->titulo),
-                                    'class' => 'btn btn-danger btn-lg ms-2',
-                                    'escape' => false
-                                ]
-                            ) ?>
-                        </div>
-                    </div>
+    <!-- Campo: Progreso -->
+    <div class="col-md-6 mb-3">
+        <?= $this->Form->control('progreso', [
+            'label' => 'Progreso (%)',
+            'type' => 'number',
+            'class' => 'form-control',
+            'min' => 0,
+            'max' => 100,
+            'required' => true,
+            'id' => 'progreso-input'
+        ]) ?>
+        <small class="form-text text-muted">Valor entre 0 y 100.</small>
+    </div>
 
-                    <?= $this->Form->end() ?>
-                </div>
+    <!-- Vista Previa del Progreso -->
+    <div class="col-12 mb-3">
+        <label class="form-label">Vista Previa del Progreso</label>
+        <div class="progress" style="height: 30px;">
+            <div class="progress-bar bg-info" 
+                 role="progressbar" 
+                 id="progress-preview"
+                 style="width: <?= $inscripcione->progreso ?>%;"
+                 aria-valuenow="<?= $inscripcione->progreso ?>" 
+                 aria-valuemin="0" 
+                 aria-valuemax="100">
+                <span id="progress-text"><?= $inscripcione->progreso ?>%</span>
             </div>
         </div>
     </div>
+
+    <!-- Botones -->
+    <div class="col-12 text-center">
+        <?= $this->Form->button(__('Guardar Cambios'), ['class' => 'btn btn-warning']) ?>
+        <?= $this->Html->link(__('Cancelar'), ['action' => 'index'], ['class' => 'btn btn-secondary ms-2']) ?>
+    </div>
+    
+    <?= $this->Form->end() ?>
 </div>
 
+<!-- CSS para placeholder visible y selects diferenciados -->
+<style>
+    .form-control::placeholder {
+        color: #6c757d !important;
+        opacity: 1;
+    }
+    
+    .form-control:focus::placeholder {
+        color: #6c757d !important;
+    }
+    
+    /* Mejorar visual de los select */
+    select.form-control {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-color: #fff;
+        background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath fill=%22%23495057%22 d=%22M7 10l5 5 5-5z%22/%3E%3C/svg%3E');
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 24px 24px;
+        padding-right: 3rem;
+        cursor: pointer;
+    }
+    
+    select.form-control:hover {
+        background-color: #f8f9fa;
+    }
+    
+    select.form-control:focus {
+        background-color: #fff;
+    }
+
+    .progress-bar {
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+</style>
+
+<!-- Script para actualizar vista previa del progreso -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const progresoInput = document.querySelector('input[name="progreso"]');
+    const progresoInput = document.getElementById('progreso-input');
     const progressBar = document.getElementById('progress-preview');
     const progressText = document.getElementById('progress-text');
     

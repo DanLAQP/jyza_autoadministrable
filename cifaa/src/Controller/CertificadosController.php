@@ -296,7 +296,7 @@ class CertificadosController extends AppController
                 $this->log("Diplomado generado exitosamente. ID: {$certificado->id}, Codigo: {$codigo}", 'info');
                 $this->Flash->success(__('Diplomado generado exitosamente. Código: {0}', $codigo));
                 $this->request->getSession()->delete('esDiplomado');
-                return $this->redirect(['action' => 'index']);
+                return $this->redirect(['action' => 'diplomados']); // Redirige a vista de diplomados
             } else {
                 $errors = $certificado->getErrors();
                 $this->log("ERROR al guardar diplomado. Errores: " . json_encode($errors), 'error');
@@ -613,17 +613,21 @@ class CertificadosController extends AppController
                     ->first();
                 
                 if ($certificado) {
+                    // Detectar si es certificado o diplomado
+                    $esDiplomado = strpos($certificado->codigo, 'DIP-') === 0;
+                    $tipoDoc = $esDiplomado ? 'Diplomado' : 'Certificado';
+                    
                     if ($certificado->estado === 'activo') {
-                        $mensaje = 'Certificado válido y activo';
+                        $mensaje = $tipoDoc . ' válido y activo';
                         $tipo = 'success';
-                        $this->log("Verificación exitosa del certificado: {$codigo}", 'info');
+                        $this->log("Verificación exitosa del {$tipoDoc}: {$codigo}", 'info');
                     } else {
-                        $mensaje = 'Este certificado ha sido anulado';
+                        $mensaje = 'Este ' . strtolower($tipoDoc) . ' ha sido anulado';
                         $tipo = 'warning';
-                        $this->log("Intento de verificación de certificado anulado: {$codigo}", 'warning');
+                        $this->log("Intento de verificación de {$tipoDoc} anulado: {$codigo}", 'warning');
                     }
                 } else {
-                    $mensaje = 'Código de certificado no encontrado';
+                    $mensaje = 'Código no encontrado (verifique CER-XXXX o DIP-XXXX)';
                     $tipo = 'error';
                     $this->log("Intento de verificación con código inválido: {$codigo}", 'warning');
                 }

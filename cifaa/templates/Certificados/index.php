@@ -11,41 +11,62 @@ $accionGenerar = isset($esDiplomado) && $esDiplomado ? 'generarDiplomado' : 'gen
 ?>
 <div class="container mt-4 mb-4">
     <div class="row mb-4">
-        <div class="col-md-8">
+        <div class="col-md-6">
             <h2 class="text-<?= $colorTipo ?> d-inline-block">
                 <i class="fas fa-<?= $iconoTipo ?>"></i> Gestión de <?= $tipoDocumento ?>
             </h2>
             <p class="text-muted">Administra los <?= strtolower($tipoDocumento) ?> emitidos a los estudiantes</p>
         </div>
-        <div class="col-md-4 text-end">
-            <?= $this->Html->link(
-                '<i class="fas fa-plus"></i> Generar Nuevo ' . rtrim($tipoDocumento, 's'),
-                ['action' => $accionGenerar],
-                ['class' => 'btn btn-' . $colorTipo . ' btn-lg', 'escape' => false]
-            ) ?>
+        <div class="col-md-6 text-end">
+            <div class="btn-group" role="group">
+                <?= $this->Html->link(
+                    '<i class="fas fa-certificate"></i> Ver Certificados',
+                    ['action' => 'index'],
+                    ['class' => 'btn btn-outline-info' . (!isset($esDiplomado) || !$esDiplomado ? ' active' : ''), 'escape' => false]
+                ) ?>
+                <?= $this->Html->link(
+                    '<i class="fas fa-medal"></i> Ver Diplomados',
+                    ['action' => 'diplomados'],
+                    ['class' => 'btn btn-outline-warning' . (isset($esDiplomado) && $esDiplomado ? ' active' : ''), 'escape' => false]
+                ) ?>
+            </div>
+            <div class="btn-group ms-2" role="group">
+                <?= $this->Html->link(
+                    '<i class="fas fa-plus-circle"></i> Generar Certificado',
+                    ['action' => 'generar'],
+                    ['class' => 'btn btn-info', 'escape' => false]
+                ) ?>
+                <?= $this->Html->link(
+                    '<i class="fas fa-plus-square"></i> Generar Diplomado',
+                    ['action' => 'generarDiplomado'],
+                    ['class' => 'btn btn-warning', 'escape' => false]
+                ) ?>
+            </div>
         </div>
     </div>
 
     <!-- Buscador estándar -->
     <div class="row mb-4">
-        <div class="col-md-6">
+        <div class="col-md-8">
             <?= $this->Form->create(null, ['type' => 'get']) ?>
             <div class="input-group">
                 <?= $this->Form->control('termino', [
                     'label' => false, 
-                    'placeholder' => 'Buscar por nombre del estudiante...',
+                    'placeholder' => 'Buscar por nombre, curso o código...',
                     'class' => 'form-control',
-                    'value' => $this->request->getQuery('termino')
+                    'value' => $this->request->getQuery('termino'),
+                    'templates' => [
+                        'inputContainer' => '{{content}}'
+                    ]
                 ]) ?>
-                <?= $this->Form->button('<i class="fas fa-search"></i>', [
-                    'class' => 'btn btn-primary', 
-                    'escape' => false
-                ]) ?>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
                 <?php if (!empty($this->request->getQuery('termino'))): ?>
                     <?= $this->Html->link(
                         '<i class="fas fa-times"></i>', 
-                        ['action' => 'index'], 
-                        ['class' => 'btn btn-secondary', 'escape' => false, 'title' => 'Limpiar']
+                        ['action' => isset($esDiplomado) && $esDiplomado ? 'diplomados' : 'index'], 
+                        ['class' => 'btn btn-secondary', 'escape' => false, 'title' => 'Limpiar búsqueda']
                     ) ?>
                 <?php endif; ?>
             </div>

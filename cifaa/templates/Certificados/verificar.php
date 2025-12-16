@@ -6,7 +6,7 @@
  * @var string|null $mensaje
  * @var string|null $tipo
  */
-$this->assign('title', 'Verificación de Certificado');
+$this->assign('title', 'Verificación de Certificado / Diplomado');
 ?>
 
 <div class="container mt-5">
@@ -23,7 +23,7 @@ $this->assign('title', 'Verificación de Certificado');
                     ]) ?>
                 </div>
                 <h1 class="display-5 fw-bold text-primary mb-2">
-                    <i class="fas fa-shield-check"></i> Verificación de Certificado
+                    <i class="fas fa-shield-check"></i> Verificación de Certificado / Diplomado
                 </h1>
                 <p class="lead text-muted">
                     Centro Integral de Formación y Asesoría Académica - CIFAA
@@ -34,7 +34,7 @@ $this->assign('title', 'Verificación de Certificado');
             <div class="card shadow-lg border-0 mb-4">
                 <div class="card-header text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                     <h5 class="mb-0">
-                        <i class="fas fa-search"></i> Buscar Certificado
+                        <i class="fas fa-search"></i> Buscar Certificado o Diplomado
                     </h5>
                 </div>
                 <div class="card-body p-4 bg-white">
@@ -46,12 +46,12 @@ $this->assign('title', 'Verificación de Certificado');
                     
                     <div class="mb-3">
                         <label for="codigo" class="form-label fw-bold">
-                            <i class="fas fa-barcode"></i> Código del Certificado
+                            <i class="fas fa-barcode"></i> Código del Certificado / Diplomado
                         </label>
                         <?= $this->Form->control('codigo', [
                             'type' => 'text',
                             'class' => 'form-control form-control-lg text-uppercase',
-                            'placeholder' => 'Ej: CER-2025-E650ADCCAA',
+                            'placeholder' => 'Ej: CER-2025-XXXXXX o DIP-2025-XXXXXX',
                             'required' => true,
                             'label' => false,
                             'value' => $codigo ?? '',
@@ -60,13 +60,13 @@ $this->assign('title', 'Verificación de Certificado');
                         ]) ?>
                         <div class="form-text">
                             <i class="fas fa-info-circle"></i> 
-                            Ingrese el código que aparece en el certificado (formato: CER-YYYY-XXXXXXXXXX)
+                            Ingrese el código que aparece en el documento (CER-XXXX para certificados, DIP-XXXX para diplomados)
                         </div>
                     </div>
                     
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-check-circle"></i> Verificar Certificado
+                            <i class="fas fa-check-circle"></i> Verificar Documento
                         </button>
                     </div>
                     

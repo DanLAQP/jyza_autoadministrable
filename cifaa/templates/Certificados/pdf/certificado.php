@@ -335,8 +335,8 @@
                     <div class="codigo-box">Código: <?= h($certificado->codigo) ?></div>
                 </div>
                 
-                <!-- Título principal CERTIFICADO -->
-                <div class="title">CERTIFICADO</div>
+                <!-- Título principal -->
+                <div class="title"><?= $esDiplomado ? 'DIPLOMADO' : 'CERTIFICADO' ?></div>
                 
                 <!-- OTORGADO A -->
                 <div class="otorgado">OTORGADO A:</div>

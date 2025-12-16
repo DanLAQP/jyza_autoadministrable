@@ -61,8 +61,16 @@ class LeccionesController extends AppController
             ]
         ]);
         
-        // Verificar inscripción
-        $inscrito = $this->verificarInscripcionLeccion($id);
+        // Obtener usuario actual
+        $usuario = $this->getRequest()->getAttribute('identity');
+        
+        // Si es administrador (rol=1), permitir acceso sin restricciones
+        if ($usuario && $usuario->rol == 1) {
+            $inscrito = true; // Admin tiene acceso total
+        } else {
+            // Verificar inscripción para estudiantes y docentes
+            $inscrito = $this->verificarInscripcionLeccion($id);
+        }
         
         if (!$inscrito) {
             // Obtener usuario actual

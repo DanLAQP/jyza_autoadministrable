@@ -200,7 +200,130 @@ class CertificadosController extends AppController
         ])->order(['titulo' => 'ASC'])
           ->all();
 
-        $this->set(compact('certificado', 'users', 'cursos'));
+        $esDiplomado = false; // Variable para diferenciar en el template PDF
+        $this->set(compact('certificado', 'users', 'cursos', 'esDiplomado'));
+    }
+
+    /**
+     * Generar Diplomado method
+     * Método idéntico a generar() pero cambia el título de "CERTIFICADO" a "DIPLOMADO" en el PDF
+     */
+    public function generarDiplomado()
+    {
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
+        }
+
+        $certificado = $this->Certificados->newEmptyEntity();
+        
+        if ($this->request->is('post')) {
+            $data = $this->request->getData();
+            
+            // Procesar módulos desde el formulario dinámico
+            $modulosArray = [];
+            if (!empty($data['modulo_tema']) && is_array($data['modulo_tema'])) {
+                $numeroRomano = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+                foreach ($data['modulo_tema'] as $index => $tema) {
+                    if (!empty($tema)) {
+                        $modulosArray[] = [
+                            'numero' => $numeroRomano[$index] ?? ($index + 1),
+                            'tema' => $tema
+                        ];
+                    }
+                }
+            }
+            
+            // Generar código único (DIP en lugar de CER)
+            $codigo = 'DIP-' . date('Y') . '-' . strtoupper(substr(md5(uniqid()), 0, 10));
+            
+            // Formatear fechas si vienen del datepicker
+            $fechaInicio = null;
+            $fechaFin = null;
+            
+            if (!empty($data['fecha_inicio'])) {
+                if ($data['fecha_inicio'] instanceof \Cake\I18n\FrozenDate) {
+                    $fechaInicio = $data['fecha_inicio']->format('d \d\e F \d\e Y');
+                } elseif (is_string($data['fecha_inicio'])) {
+                    try {
+                        $date = new \DateTime($data['fecha_inicio']);
+                        $meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                                  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+                        $fechaInicio = $date->format('d') . ' de ' . $meses[(int)$date->format('m') - 1] . ' de ' . $date->format('Y');
+                    } catch (\Exception $e) {
+                        $fechaInicio = $data['fecha_inicio'];
+                    }
+                }
+            }
+            
+            if (!empty($data['fecha_fin'])) {
+                if ($data['fecha_fin'] instanceof \Cake\I18n\FrozenDate) {
+                    $fechaFin = $data['fecha_fin']->format('d \d\e F \d\e Y');
+                } elseif (is_string($data['fecha_fin'])) {
+                    try {
+                        $date = new \DateTime($data['fecha_fin']);
+                        $meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                                  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+                        $fechaFin = $date->format('d') . ' de ' . $meses[(int)$date->format('m') - 1] . ' de ' . $date->format('Y');
+                    } catch (\Exception $e) {
+                        $fechaFin = $data['fecha_fin'];
+                    }
+                }
+            }
+            
+            // Preparar datos del diplomado (guardar con tipo_documento)
+            $certificadoData = [
+                'user_id' => !empty($data['user_id']) ? $data['user_id'] : null,
+                'curso_id' => !empty($data['curso_id']) ? $data['curso_id'] : null,
+                'nombre_completo' => trim($data['nombre_completo'] ?? ''),
+                'nombre_curso' => trim($data['nombre_curso'] ?? ''),
+                'horas' => (int)($data['horas'] ?? 0),
+                'nota_final' => !empty($data['nota_final']) ? $data['nota_final'] : null,
+                'duracion_meses' => !empty($data['duracion_meses']) ? (int)$data['duracion_meses'] : null,
+                'fecha_inicio' => $fechaInicio,
+                'fecha_fin' => $fechaFin,
+                'modulos' => !empty($modulosArray) ? json_encode($modulosArray, JSON_UNESCAPED_UNICODE) : null,
+                'fecha_emision' => date('Y-m-d'),
+                'codigo' => $codigo,
+                'estado' => 'activo'
+            ];
+            
+            $certificado = $this->Certificados->patchEntity($certificado, $certificadoData);
+            
+            // Marcar como diplomado en sesión para el PDF
+            $this->request->getSession()->write('esDiplomado', true);
+            
+            if ($this->Certificados->save($certificado)) {
+                $this->log("Diplomado generado exitosamente. ID: {$certificado->id}, Codigo: {$codigo}", 'info');
+                $this->Flash->success(__('Diplomado generado exitosamente. Código: {0}', $codigo));
+                $this->request->getSession()->delete('esDiplomado');
+                return $this->redirect(['action' => 'index']);
+            } else {
+                $errors = $certificado->getErrors();
+                $this->log("ERROR al guardar diplomado. Errores: " . json_encode($errors), 'error');
+                $this->Flash->error(__('Error al guardar el diplomado. Revise los datos ingresados.'));
+                $this->request->getSession()->delete('esDiplomado');
+            }
+        }
+        
+        // Cargar listas para los dropdowns del formulario
+        $users = $this->Certificados->Users->find('list', [
+            'keyField' => 'id',
+            'valueField' => function ($user) {
+                return $user->username . ' (DNI: ' . ($user->dni ?? 'N/A') . ')';
+            }
+        ])->where(['rol' => 3])
+          ->order(['username' => 'ASC'])
+          ->all();
+          
+        $cursos = $this->Certificados->Cursos->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'titulo'
+        ])->order(['titulo' => 'ASC'])
+          ->all();
+
+        $esDiplomado = true; // Variable para mostrar "DIPLOMADO" en lugar de "CERTIFICADO"
+        $this->set(compact('certificado', 'users', 'cursos', 'esDiplomado'));
+        $this->render('generar'); // Usa la misma vista que generar
     }
 
     /**
@@ -228,6 +351,47 @@ class CertificadosController extends AppController
         $certificados = $this->paginate($query);
 
         $this->set(compact('certificados', 'termino'));
+    }
+
+    /**
+     * Diplomados method
+     * Lista únicamente los diplomados (certificados con código DIP-)
+     * Reutiliza el mismo template del index para mantener consistencia visual
+     */
+    public function diplomados()
+    {
+        // Filtrar solo diplomados por el prefijo del código
+        $query = $this->Certificados->find()
+            ->contain(['Users', 'Cursos'])
+            ->where(['Certificados.codigo LIKE' => 'DIP-%'])
+            ->order(['Certificados.created' => 'DESC']);
+
+        // Filtro por estado (activo/anulado/todos)
+        $filtroEstado = $this->request->getQuery('estado', 'activo');
+        if ($filtroEstado !== 'todos') {
+            $query->where(['Certificados.estado' => $filtroEstado]);
+        }
+
+        // Filtro de búsqueda
+        $termino = $this->request->getQuery('termino');
+        if (!empty($termino)) {
+            $query->where([
+                'OR' => [
+                    'Certificados.codigo LIKE' => '%' . $termino . '%',
+                    'Certificados.nombre_completo LIKE' => '%' . $termino . '%',
+                    'Certificados.nombre_curso LIKE' => '%' . $termino . '%',
+                    'Users.username LIKE' => '%' . $termino . '%',
+                    'Cursos.titulo LIKE' => '%' . $termino . '%'
+                ]
+            ]);
+        }
+
+        $certificados = $this->paginate($query);
+
+        // Pasar variables al template (reutiliza el template index)
+        $this->set(compact('certificados', 'filtroEstado', 'termino'));
+        $this->set('esDiplomado', true); // Variable para personalizar títulos en la vista
+        $this->viewBuilder()->setTemplate('index'); // Usa el mismo template del index
     }
 
     /**
@@ -333,21 +497,25 @@ class CertificadosController extends AppController
         
         $this->log("URL de verificación generada: {$verificarUrl}", 'debug');
         
-        // PASO 4.4: Renderizar HTML del certificado
+        // PASO 4.4: Determinar si es CERTIFICADO o DIPLOMADO según el código
+        $esDiplomado = strpos($certificado->codigo, 'DIP-') === 0;
+        
+        // PASO 4.5: Renderizar HTML del certificado/diplomado
         $html = $this->viewBuilder()
             ->setClassName('Cake\View\View')
             ->setTemplatePath('Certificados/pdf')
             ->setTemplate('certificado')
             ->setLayout('ajax')
-            ->setOption('serialize', ['certificado', 'logoBase64', 'firmaBase64', 'verificarUrl'])
+            ->setOption('serialize', ['certificado', 'logoBase64', 'firmaBase64', 'verificarUrl', 'esDiplomado'])
             ->setVar('certificado', $certificado)
             ->setVar('logoBase64', $logoBase64)
             ->setVar('firmaBase64', $firmaBase64)
             ->setVar('verificarUrl', $verificarUrl)
+            ->setVar('esDiplomado', $esDiplomado)
             ->build()
             ->render();
 
-        // PASO 4.5: Generar PDF en memoria
+        // PASO 4.6: Generar PDF en memoria
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
@@ -355,7 +523,8 @@ class CertificadosController extends AppController
         $pdfOutput = $dompdf->output();
 
         // PASO 5: Guardar PDF en el servidor para uso futuro
-        $filename = 'certificado_' . $certificado->codigo . '.pdf';
+        $tipoDoc = $esDiplomado ? 'diplomado' : 'certificado';
+        $filename = $tipoDoc . '_' . $certificado->codigo . '.pdf';
         $dirPath = WWW_ROOT . 'uploads' . DS . 'certificados';
         
         // Crear directorio si no existe

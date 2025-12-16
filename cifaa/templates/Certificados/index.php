@@ -2,21 +2,26 @@
 /**
  * @var \App\View\AppView $this
  * @var iterable<\App\Model\Entity\Certificado> $certificados
+ * @var bool $esDiplomado Variable para saber si estamos listando diplomados
  */
+$tipoDocumento = isset($esDiplomado) && $esDiplomado ? 'Diplomados' : 'Certificados';
+$iconoTipo = isset($esDiplomado) && $esDiplomado ? 'medal' : 'certificate';
+$colorTipo = isset($esDiplomado) && $esDiplomado ? 'warning' : 'info';
+$accionGenerar = isset($esDiplomado) && $esDiplomado ? 'generarDiplomado' : 'generar';
 ?>
 <div class="container mt-4 mb-4">
     <div class="row mb-4">
         <div class="col-md-8">
-            <h2 class="text-info d-inline-block">
-                <i class="fas fa-certificate"></i> Gestión de Certificados
+            <h2 class="text-<?= $colorTipo ?> d-inline-block">
+                <i class="fas fa-<?= $iconoTipo ?>"></i> Gestión de <?= $tipoDocumento ?>
             </h2>
-            <p class="text-muted">Administra los certificados emitidos a los estudiantes</p>
+            <p class="text-muted">Administra los <?= strtolower($tipoDocumento) ?> emitidos a los estudiantes</p>
         </div>
         <div class="col-md-4 text-end">
             <?= $this->Html->link(
-                '<i class="fas fa-plus"></i> Generar Nuevo Certificado',
-                ['action' => 'generar'],
-                ['class' => 'btn btn-info btn-lg', 'escape' => false]
+                '<i class="fas fa-plus"></i> Generar Nuevo ' . rtrim($tipoDocumento, 's'),
+                ['action' => $accionGenerar],
+                ['class' => 'btn btn-' . $colorTipo . ' btn-lg', 'escape' => false]
             ) ?>
         </div>
     </div>
@@ -113,6 +118,16 @@
                                 <td><?= h($certificado->fecha_emision->format('d/m/Y')) ?></td>
                                 <td>
                                     <code class="text-warning"><?= h($certificado->codigo) ?></code>
+                                    <?php
+                                    // Badge para identificar el tipo de documento
+                                    $esCertificado = strpos($certificado->codigo, 'CER-') === 0;
+                                    $esDiploma = strpos($certificado->codigo, 'DIP-') === 0;
+                                    ?>
+                                    <?php if ($esCertificado): ?>
+                                        <br><span class="badge bg-info mt-1" style="font-size: 0.7em;"><i class="fas fa-certificate"></i> Certificado</span>
+                                    <?php elseif ($esDiploma): ?>
+                                        <br><span class="badge bg-warning mt-1" style="font-size: 0.7em;"><i class="fas fa-medal"></i> Diplomado</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group">

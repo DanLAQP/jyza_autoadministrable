@@ -2,18 +2,20 @@
 /**
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Certificado $certificado
+ * @var bool $esDiplomado
  */
-$this->assign('title', 'Generar Certificado Personalizado');
+$tipoDocumento = isset($esDiplomado) && $esDiplomado ? 'Diplomado' : 'Certificado';
+$this->assign('title', 'Generar ' . $tipoDocumento . ' Personalizado');
 ?>
 
 <div class="container-fluid mt-4">
     <div class="card shadow-sm border-0">
         <div class="card-header bg-gradient-info text-white">
             <h3 class="card-title mb-0">
-                <i class="fas fa-certificate"></i> Generar Certificado Personalizado
+                <i class="fas fa-certificate"></i> Generar <?= $tipoDocumento ?> Personalizado
             </h3>
             <p class="mb-0 mt-2 small">
-                <i class="fas fa-info-circle"></i> Complete todos los datos del certificado. Los campos marcados con <span class="text-warning">*</span> son requeridos.
+                <i class="fas fa-info-circle"></i> Complete todos los datos del <?= strtolower($tipoDocumento) ?>. Los campos marcados con <span class="text-warning">*</span> son requeridos.
             </p>
         </div>
         <div class="card-body">
@@ -24,7 +26,7 @@ $this->assign('title', 'Generar Certificado Personalizado');
                 <div class="col-lg-6">
                     <div class="card border-primary">
                         <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0"><i class="fas fa-user-graduate"></i> Información del Certificado</h5>
+                            <h5 class="mb-0"><i class="fas fa-user-graduate"></i> Información del <?= $tipoDocumento ?></h5>
                         </div>
                         <div class="card-body">
                             <!-- Nombre Completo del Estudiante -->
@@ -189,7 +191,7 @@ $this->assign('title', 'Generar Certificado Personalizado');
                             ['class' => 'btn btn-secondary btn-lg', 'escape' => false]
                         ) ?>
                         <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-file-pdf"></i> Generar Certificado
+                            <i class="fas fa-file-pdf"></i> Generar <?= $tipoDocumento ?>
                         </button>
                     </div>
                 </div>

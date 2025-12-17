@@ -184,12 +184,45 @@
                         <p>Contenidos Lección</p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'index']) ?>" class="nav-link">
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
                         <i class="fas fa-certificate nav-icon"></i>
-                        <p>Certificados</p>
+                        <p>
+                            Certificados
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'index']) ?>" class="nav-link">
+                                <i class="fas fa-award nav-icon"></i>
+                                <p>Listar Certificados</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'diplomados']) ?>" class="nav-link">
+                                <i class="fas fa-medal nav-icon"></i>
+                                <p>Listar Diplomados</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <hr class="dropdown-divider" style="border-top: 1px solid rgba(255,255,255,0.1); margin: 0.5rem 0;">
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'generar']) ?>" class="nav-link">
+                                <i class="fas fa-plus-circle nav-icon"></i>
+                                <p>Generar Certificado</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'generarDiplomado']) ?>" class="nav-link">
+                                <i class="fas fa-plus-square nav-icon"></i>
+                                <p>Generar Diplomado</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
+                <!-- Opción de Titulares eliminada - gestión interna automática -->
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="fas fa-user-check nav-icon"></i>

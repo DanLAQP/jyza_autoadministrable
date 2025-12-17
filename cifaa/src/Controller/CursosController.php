@@ -95,21 +95,33 @@ class CursosController extends AppController
             return $this->redirect(['action' => 'student']);
         }
 
+        // Obtener filtro de estado desde URL (por defecto: activos y publicados)
+        $filtroEstado = $this->request->getQuery('estado', 'activo');
+        
         $query = $this->Cursos->find()
             ->contain(['Users']);
 
-        // Filtro de búsqueda (Lógica unificada con Matrícula)
+        // Aplicar filtro por estado
+        if ($filtroEstado === 'todos') {
+            // Mostrar todos los cursos
+        } elseif ($filtroEstado === 'inactivo') {
+            $query->where(['Cursos.estado' => 'inactivo']);
+        } else {
+            // Activos: publicado, activo, borrador
+            $query->where(['Cursos.estado IN' => ['activo', 'publicado', 'borrador']]);
+        }
+
+        // Filtro de búsqueda por término
         $termino = $this->request->getQuery('termino');
         if (!empty($termino)) {
             $query->where([
-                'Cursos.estado IN' => ['activo', 'publicado'],
                 'Cursos.titulo LIKE' => '%' . $termino . '%'
             ]);
         }
 
         $cursos = $this->paginate($query);
 
-        $this->set(compact('cursos', 'termino'));
+        $this->set(compact('cursos', 'termino', 'filtroEstado'));
     }
 
     /**
@@ -330,11 +342,11 @@ class CursosController extends AppController
             
             $curso = $this->Cursos->patchEntity($curso, $data);
             if ($this->Cursos->save($curso)) {
-                $this->Flash->success(__('The curso has been saved.'));
+                $this->Flash->success(__('El curso ha sido actualizado correctamente.'));
 
-                return $this->redirect(['action' => 'index']);
+                return $this->redirect(['action' => 'view', $curso->id]);
             }
-            $this->Flash->error(__('The curso could not be saved. Please, try again.'));
+            $this->Flash->error(__('El curso no pudo ser guardado. Por favor, inténtelo nuevamente.'));
         }
         $users = $this->Cursos->Users->find('list')->all();
         $this->set(compact('curso', 'users'));
@@ -374,13 +386,44 @@ class CursosController extends AppController
         
         $this->request->allowMethod(['post', 'delete']);
         $curso = $this->Cursos->get($id);
-        if ($this->Cursos->delete($curso)) {
-            $this->Flash->success(__('The curso has been deleted.'));
+        
+        // Soft delete: cambiar estado a 'inactivo'
+        $curso->estado = 'inactivo';
+        
+        if ($this->Cursos->save($curso)) {
+            $this->Flash->success(__('Curso desactivado correctamente. Puede reactivarlo desde el filtro de inactivos.'));
         } else {
-            $this->Flash->error(__('The curso could not be deleted. Please, try again.'));
+            $this->Flash->error(__('No se pudo desactivar el curso. Por favor, inténtelo nuevamente.'));
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+
+    /**
+     * Reactivar curso inactivo
+     */
+    public function reactivar($id = null)
+    {
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
+        }
+        
+        $this->request->allowMethod(['post', 'put']);
+        $curso = $this->Cursos->get($id);
+        
+        if ($curso->estado === 'inactivo') {
+            $curso->estado = 'publicado';
+            
+            if ($this->Cursos->save($curso)) {
+                $this->Flash->success(__('Curso reactivado correctamente.'));
+            } else {
+                $this->Flash->error(__('No se pudo reactivar el curso.'));
+            }
+        } else {
+            $this->Flash->warning(__('El curso ya está activo.'));
+        }
+        
+        return $this->redirect(['action' => 'index', '?' => ['estado' => 'inactivo']]);
     }
 
     /**
@@ -606,6 +649,52 @@ class CursosController extends AppController
         
         $this->response = $this->response->withType('application/json')
             ->withStringBody(json_encode($resultados, JSON_UNESCAPED_UNICODE));
+        
+        return $this->response;
+    }
+
+    /**
+     * Obtener módulos de un curso (AJAX)
+     * Usado para cargar automáticamente los módulos al seleccionar un curso en certificados
+     *
+     * @param int $id ID del curso
+     * @return \Cake\Http\Response JSON con módulos del curso
+     */
+    public function getModulos($id = null)
+    {
+        // Deshabilitar renderizado de vista
+        $this->autoRender = false;
+        
+        $modulos = [];
+        
+        if ($id) {
+            try {
+                $modulosTable = $this->fetchTable('Modulos');
+                $modulos = $modulosTable->find()
+                    ->select(['id', 'titulo', 'posicion'])
+                    ->where(['curso_id' => $id])
+                    ->order(['posicion' => 'ASC', 'id' => 'ASC'])
+                    ->toArray();
+            } catch (\Exception $e) {
+                $this->response = $this->response
+                    ->withType('application/json')
+                    ->withStringBody(json_encode([
+                        'error' => true,
+                        'message' => $e->getMessage(),
+                        'modulos' => []
+                    ], JSON_UNESCAPED_UNICODE));
+                return $this->response;
+            }
+        }
+        
+        $response = [
+            'success' => true,
+            'modulos' => $modulos
+        ];
+        
+        $this->response = $this->response
+            ->withType('application/json')
+            ->withStringBody(json_encode($response, JSON_UNESCAPED_UNICODE));
         
         return $this->response;
     }

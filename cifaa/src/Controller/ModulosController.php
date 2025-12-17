@@ -225,10 +225,13 @@ class ModulosController extends AppController
         
         $this->request->allowMethod(['post', 'delete']);
         $modulo = $this->Modulos->get($id);
+        
+        // NOTA: Modulos no tiene campo estado, aplicar eliminación física
+        // Si se desea soft delete, agregar campo 'estado' a la tabla modulos
         if ($this->Modulos->delete($modulo)) {
-            $this->Flash->success(__('The modulo has been deleted.'));
+            $this->Flash->success(__('Módulo eliminado correctamente.'));
         } else {
-            $this->Flash->error(__('The modulo could not be deleted. Please, try again.'));
+            $this->Flash->error(__('No se pudo eliminar el módulo. Verifique las dependencias.'));
         }
 
         return $this->redirect(['action' => 'index']);

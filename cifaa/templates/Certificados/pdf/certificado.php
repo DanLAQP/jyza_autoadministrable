@@ -335,8 +335,8 @@
                     <div class="codigo-box">Código: <?= h($certificado->codigo) ?></div>
                 </div>
                 
-                <!-- Título principal CERTIFICADO -->
-                <div class="title">CERTIFICADO</div>
+                <!-- Título principal -->
+                <div class="title"><?= $esDiplomado ? 'DIPLOMADO' : 'CERTIFICADO' ?></div>
                 
                 <!-- OTORGADO A -->
                 <div class="otorgado">OTORGADO A:</div>
@@ -413,7 +413,7 @@ if (!empty($modulos) && is_array($modulos)):
                 
                 <!-- Título -->
                 <div class="modulos-title">
-                    CERTIFICADO EN <?= strtoupper(h($certificado->nombre_curso ?: $certificado->curso->titulo)) ?>
+                    <?= $esDiplomado ? 'DIPLOMADO' : 'CERTIFICADO' ?> EN <?= strtoupper(h($certificado->nombre_curso ?: $certificado->curso->titulo)) ?>
                 </div>
                 
                 <!-- Subtítulo -->
@@ -443,7 +443,7 @@ if (!empty($modulos) && is_array($modulos)):
                 <div class="page2-footer">
                     <?php if (!empty($certificado->duracion_meses) || !empty($certificado->nota_final)): ?>
                     <div style="margin-bottom: 3mm; font-size: 9pt;">
-                        <strong>CÓDIGO DEL CERTIFICADO: <?= h($certificado->codigo) ?></strong>
+                        <strong>CÓDIGO DEL <?= $esDiplomado ? 'DIPLOMADO' : 'CERTIFICADO' ?>: <?= h($certificado->codigo) ?></strong>
                         <?php if (!empty($certificado->duracion_meses)): ?>
                         &nbsp;&nbsp;|&nbsp;&nbsp; <strong>DURACIÓN:</strong> <?= h($certificado->duracion_meses) ?> <?= $certificado->duracion_meses == 1 ? 'MES' : 'MESES' ?>
                         <?php endif; ?>

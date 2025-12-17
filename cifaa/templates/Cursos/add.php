@@ -72,10 +72,17 @@ $usuario = $this->getRequest()->getAttribute('identity');
         </div>
         <!-- Campo: Miniatura (Imagen) -->
         <div class="col-12 mb-3">
-            <label class="form-label">Miniatura del Curso</label>
+            <label class="form-label">
+                Miniatura del Curso
+                <span class="badge bg-info ms-2">Recomendado: 800x450px (16:9)</span>
+            </label>
             <div class="input-group">
                 <input type="file" class="form-control" id="miniatura" name="miniatura" accept="image/*" />
-                <small class="d-block text-muted mt-2">Tamaño recomendado: 800x450px. Formatos: JPG, PNG, GIF. Máximo: 5MB</small>
+                <small class="d-block text-muted mt-2">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Formatos soportados: JPG, PNG, GIF, WebP. Tamaño máximo: 5MB. 
+                    <strong>Dimensiones recomendadas: 800x450 píxeles (proporción 16:9)</strong>
+                </small>
             </div>
             <div id="preview-miniatura" class="mt-3"></div>
         </div>

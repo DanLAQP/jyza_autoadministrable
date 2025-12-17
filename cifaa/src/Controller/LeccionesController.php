@@ -61,8 +61,16 @@ class LeccionesController extends AppController
             ]
         ]);
         
-        // Verificar inscripción
-        $inscrito = $this->verificarInscripcionLeccion($id);
+        // Obtener usuario actual
+        $usuario = $this->getRequest()->getAttribute('identity');
+        
+        // Si es administrador (rol=1), permitir acceso sin restricciones
+        if ($usuario && $usuario->rol == 1) {
+            $inscrito = true; // Admin tiene acceso total
+        } else {
+            // Verificar inscripción para estudiantes y docentes
+            $inscrito = $this->verificarInscripcionLeccion($id);
+        }
         
         if (!$inscrito) {
             // Obtener usuario actual
@@ -261,10 +269,12 @@ class LeccionesController extends AppController
         
         $this->request->allowMethod(['post', 'delete']);
         $leccione = $this->Lecciones->get($id);
+        
+        // NOTA: Lecciones no tiene campo estado, aplicar eliminación física
         if ($this->Lecciones->delete($leccione)) {
-            $this->Flash->success(__('The leccione has been deleted.'));
+            $this->Flash->success(__('Lección eliminada correctamente.'));
         } else {
-            $this->Flash->error(__('The leccione could not be deleted. Please, try again.'));
+            $this->Flash->error(__('No se pudo eliminar la lección. Verifique las dependencias.'));
         }
 
         return $this->redirect(['action' => 'index']);

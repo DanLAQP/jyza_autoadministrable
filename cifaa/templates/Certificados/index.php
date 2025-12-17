@@ -2,51 +2,120 @@
 /**
  * @var \App\View\AppView $this
  * @var iterable<\App\Model\Entity\Certificado> $certificados
+ * @var bool $esDiplomado Variable para saber si estamos listando diplomados
  */
+$tipoDocumento = isset($esDiplomado) && $esDiplomado ? 'Diplomados' : 'Certificados';
+$iconoTipo = isset($esDiplomado) && $esDiplomado ? 'medal' : 'certificate';
+$colorTipo = isset($esDiplomado) && $esDiplomado ? 'warning' : 'info';
+$accionGenerar = isset($esDiplomado) && $esDiplomado ? 'generarDiplomado' : 'generar';
 ?>
 <div class="container mt-4 mb-4">
     <div class="row mb-4">
-        <div class="col-md-8">
-            <h2 class="text-info d-inline-block">
-                <i class="fas fa-certificate"></i> Gestión de Certificados
+        <div class="col-md-6">
+            <h2 class="text-<?= $colorTipo ?> d-inline-block">
+                <i class="fas fa-<?= $iconoTipo ?>"></i> Gestión de <?= $tipoDocumento ?>
             </h2>
-            <p class="text-muted">Administra los certificados emitidos a los estudiantes</p>
+            <p class="text-muted">Administra los <?= strtolower($tipoDocumento) ?> emitidos a los estudiantes</p>
         </div>
-        <div class="col-md-4 text-end">
-            <?= $this->Html->link(
-                '<i class="fas fa-plus"></i> Generar Nuevo Certificado',
-                ['action' => 'generar'],
-                ['class' => 'btn btn-info btn-lg', 'escape' => false]
-            ) ?>
+        <div class="col-md-6 text-end">
+            <div class="btn-group" role="group">
+                <?= $this->Html->link(
+                    '<i class="fas fa-certificate"></i> Ver Certificados',
+                    ['action' => 'index'],
+                    ['class' => 'btn btn-outline-info' . (!isset($esDiplomado) || !$esDiplomado ? ' active' : ''), 'escape' => false]
+                ) ?>
+                <?= $this->Html->link(
+                    '<i class="fas fa-medal"></i> Ver Diplomados',
+                    ['action' => 'diplomados'],
+                    ['class' => 'btn btn-outline-warning' . (isset($esDiplomado) && $esDiplomado ? ' active' : ''), 'escape' => false]
+                ) ?>
+            </div>
+            
+            <!-- Mostrar solo el botón correspondiente según el tipo -->
+            <?php if (isset($esDiplomado) && $esDiplomado): ?>
+                <?= $this->Html->link(
+                    '<i class="fas fa-plus-square"></i> Generar Diplomado',
+                    ['action' => 'generarDiplomado'],
+                    ['class' => 'btn btn-warning ms-2', 'escape' => false]
+                ) ?>
+            <?php else: ?>
+                <?= $this->Html->link(
+                    '<i class="fas fa-plus-circle"></i> Generar Certificado',
+                    ['action' => 'generar'],
+                    ['class' => 'btn btn-info ms-2', 'escape' => false]
+                ) ?>
+            <?php endif; ?>
         </div>
     </div>
 
-    <!-- Buscador estándar -->
+    <!-- Buscador y Filtros -->
     <div class="row mb-4">
         <div class="col-md-6">
             <?= $this->Form->create(null, ['type' => 'get']) ?>
             <div class="input-group">
+                <input type="hidden" name="estado" value="<?= h($filtroEstado ?? 'activo') ?>">
                 <?= $this->Form->control('termino', [
                     'label' => false, 
-                    'placeholder' => 'Buscar por nombre del estudiante...',
+                    'placeholder' => 'Buscar por nombre, curso o código...',
                     'class' => 'form-control',
-                    'value' => $this->request->getQuery('termino')
+                    'value' => $this->request->getQuery('termino'),
+                    'templates' => [
+                        'inputContainer' => '{{content}}'
+                    ]
                 ]) ?>
-                <?= $this->Form->button('<i class="fas fa-search"></i>', [
-                    'class' => 'btn btn-primary', 
-                    'escape' => false
-                ]) ?>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
                 <?php if (!empty($this->request->getQuery('termino'))): ?>
                     <?= $this->Html->link(
                         '<i class="fas fa-times"></i>', 
-                        ['action' => 'index'], 
-                        ['class' => 'btn btn-secondary', 'escape' => false, 'title' => 'Limpiar']
+                        ['action' => isset($esDiplomado) && $esDiplomado ? 'diplomados' : 'index', '?' => ['estado' => $filtroEstado ?? 'activo']], 
+                        ['class' => 'btn btn-secondary', 'escape' => false, 'title' => 'Limpiar búsqueda']
                     ) ?>
                 <?php endif; ?>
             </div>
             <?= $this->Form->end() ?>
         </div>
+        <div class="col-md-6">
+            <div class="btn-group w-100" role="group" aria-label="Filtro de estado">
+                <?= $this->Html->link(
+                    '<i class="fas fa-check-circle"></i> Activos',
+                    ['action' => isset($esDiplomado) && $esDiplomado ? 'diplomados' : 'index', '?' => ['estado' => 'activo']],
+                    [
+                        'class' => 'btn ' . (($filtroEstado ?? 'activo') === 'activo' ? 'btn-success' : 'btn-outline-success'),
+                        'escape' => false
+                    ]
+                ) ?>
+                <?= $this->Html->link(
+                    '<i class="fas fa-ban"></i> Anulados',
+                    ['action' => isset($esDiplomado) && $esDiplomado ? 'diplomados' : 'index', '?' => ['estado' => 'anulado']],
+                    [
+                        'class' => 'btn ' . (($filtroEstado ?? 'activo') === 'anulado' ? 'btn-warning' : 'btn-outline-warning'),
+                        'escape' => false
+                    ]
+                ) ?>
+                <?= $this->Html->link(
+                    '<i class="fas fa-list"></i> Todos',
+                    ['action' => isset($esDiplomado) && $esDiplomado ? 'diplomados' : 'index', '?' => ['estado' => 'todos']],
+                    [
+                        'class' => 'btn ' . (($filtroEstado ?? 'activo') === 'todos' ? 'btn-secondary' : 'btn-outline-secondary'),
+                        'escape' => false
+                    ]
+                ) ?>
+            </div>
+        </div>
     </div>
+    
+    <!-- Indicador de filtro activo -->
+    <?php if (isset($filtroEstado) && $filtroEstado !== 'activo'): ?>
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-filter"></i> Mostrando <?= strtolower($tipoDocumento) ?>: <strong><?= ucfirst($filtroEstado) ?></strong>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <!-- Tabla de certificados -->
     <div class="row">
@@ -113,9 +182,20 @@
                                 <td><?= h($certificado->fecha_emision->format('d/m/Y')) ?></td>
                                 <td>
                                     <code class="text-warning"><?= h($certificado->codigo) ?></code>
+                                    <?php
+                                    // Badge para identificar el tipo de documento
+                                    $esCertificado = strpos($certificado->codigo, 'CER-') === 0;
+                                    $esDiploma = strpos($certificado->codigo, 'DIP-') === 0;
+                                    ?>
+                                    <?php if ($esCertificado): ?>
+                                        <br><span class="badge bg-info mt-1" style="font-size: 0.7em;"><i class="fas fa-certificate"></i> Certificado</span>
+                                    <?php elseif ($esDiploma): ?>
+                                        <br><span class="badge bg-warning mt-1" style="font-size: 0.7em;"><i class="fas fa-medal"></i> Diplomado</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group">
+                                        <!-- Botón de descargar (siempre visible) -->
                                         <?= $this->Html->link(
                                             '<i class="fas fa-download"></i>',
                                             ['action' => 'descargar', $certificado->id],
@@ -126,17 +206,35 @@
                                                 'data-bs-toggle' => 'tooltip'
                                             ]
                                         ) ?>
-                                        <?= $this->Form->postLink(
-                                            '<i class="fas fa-trash"></i>',
-                                            ['action' => 'delete', $certificado->id],
-                                            [
-                                                'confirm' => __('¿Estás seguro de eliminar el certificado {0}?', $certificado->codigo),
-                                                'escape' => false,
-                                                'class' => 'btn btn-sm btn-danger',
-                                                'title' => 'Eliminar',
-                                                'data-bs-toggle' => 'tooltip'
-                                            ]
-                                        ) ?>
+                                        
+                                        <!-- Botones según el estado -->
+                                        <?php if ($certificado->estado === 'activo'): ?>
+                                            <!-- Si está activo, mostrar botón de anular -->
+                                            <?= $this->Form->postLink(
+                                                '<i class="fas fa-ban"></i>',
+                                                ['action' => 'anular', $certificado->id],
+                                                [
+                                                    'confirm' => __('¿Está seguro de anular el certificado {0}? Esta acción marca el certificado como inválido.', $certificado->codigo),
+                                                    'escape' => false,
+                                                    'class' => 'btn btn-sm btn-warning',
+                                                    'title' => 'Anular certificado',
+                                                    'data-bs-toggle' => 'tooltip'
+                                                ]
+                                            ) ?>
+                                        <?php elseif ($certificado->estado === 'anulado'): ?>
+                                            <!-- Si está anulado, mostrar botón de restaurar -->
+                                            <?= $this->Form->postLink(
+                                                '<i class="fas fa-undo"></i>',
+                                                ['action' => 'restaurar', $certificado->id],
+                                                [
+                                                    'confirm' => __('¿Desea restaurar el certificado {0}? Volverá a estar activo y válido.', $certificado->codigo),
+                                                    'escape' => false,
+                                                    'class' => 'btn btn-sm btn-info',
+                                                    'title' => 'Restaurar certificado',
+                                                    'data-bs-toggle' => 'tooltip'
+                                                ]
+                                            ) ?>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                             </tr>

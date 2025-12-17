@@ -12,29 +12,79 @@
             <?= $this->Html->link(__('Añadir Usuario'), ['action' => 'add'], ['class' => 'btn btn-info openModal']) ?>
         </div>
     </div>
-    <!-- Buscador AJAX en Tiempo Real -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <label for="buscar-usuario-ajax" class="form-label fw-bold">
-                        <i class="fas fa-search text-primary"></i> Búsqueda en Tiempo Real
-                    </label>
-                    <input 
-                        type="text" 
-                        id="buscar-usuario-ajax" 
-                        class="form-control form-control-lg" 
-                        placeholder="Escriba nombre de usuario, DNI o nombre completo (mín. 2 caracteres)..."
-                        autocomplete="off"
-                    >
-                    <small class="form-text text-muted">
-                        <i class="fas fa-info-circle"></i> Búsqueda automática mientras escribes. Busca por username, DNI o nombre completo.
-                    </small>
-                    
-                    <!-- Lista de resultados AJAX -->
-                    <div id="resultados-usuarios-ajax" class="list-group mt-3" style="display: none; max-height: 400px; overflow-y: auto;"></div>
+
+    <!-- Filtros y Búsqueda -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <!-- Búsqueda por término -->
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <?= $this->Form->create(null, ['type' => 'get', 'class' => 'd-flex']) ?>
+                    <div class="input-group">
+                        <input type="text" name="termino" class="form-control" 
+                               placeholder="Buscar por usuario o DNI..." 
+                               value="<?= h($this->request->getQuery('termino')) ?>">
+                        <input type="hidden" name="estado" value="<?= h($filtroEstado) ?>">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                        <?php if (!empty($this->request->getQuery('termino'))): ?>
+                            <?= $this->Html->link(
+                                '<i class="fas fa-times"></i>',
+                                ['action' => 'index', '?' => ['estado' => $filtroEstado]],
+                                ['class' => 'btn btn-secondary', 'escape' => false, 'title' => 'Limpiar búsqueda']
+                            ) ?>
+                        <?php endif; ?>
+                    </div>
+                    <?= $this->Form->end() ?>
+                </div>
+                
+                <!-- Filtro por estado -->
+                <div class="col-md-6">
+                    <div class="btn-group float-end" role="group" aria-label="Filtro por estado">
+                        <?= $this->Html->link(
+                            '<i class="fas fa-check-circle"></i> Activos',
+                            ['action' => 'index', '?' => ['estado' => 'activo']],
+                            [
+                                'class' => 'btn ' . ($filtroEstado === 'activo' ? 'btn-success' : 'btn-outline-success'),
+                                'escape' => false,
+                                'title' => 'Ver solo usuarios activos'
+                            ]
+                        ) ?>
+                        
+                        <?= $this->Html->link(
+                            '<i class="fas fa-ban"></i> Inactivos',
+                            ['action' => 'index', '?' => ['estado' => 'inactivo']],
+                            [
+                                'class' => 'btn ' . ($filtroEstado === 'inactivo' ? 'btn-danger' : 'btn-outline-danger'),
+                                'escape' => false,
+                                'title' => 'Ver usuarios desactivados'
+                            ]
+                        ) ?>
+                        
+                        <?= $this->Html->link(
+                            '<i class="fas fa-list"></i> Todos',
+                            ['action' => 'index', '?' => ['estado' => 'todos']],
+                            [
+                                'class' => 'btn ' . ($filtroEstado === 'todos' ? 'btn-secondary' : 'btn-outline-secondary'),
+                                'escape' => false,
+                                'title' => 'Ver todos los usuarios'
+                            ]
+                        ) ?>
+                    </div>
                 </div>
             </div>
+            
+            <!-- Indicador de filtro activo -->
+            <?php if ($filtroEstado !== 'activo'): ?>
+                <div class="alert alert-info mt-3 mb-0">
+                    <i class="fas fa-info-circle"></i> 
+                    Mostrando usuarios: <strong><?= ucfirst($filtroEstado) ?></strong>
+                    <?php if ($filtroEstado === 'inactivo'): ?>
+                        <span class="ms-2 text-muted">(Usuarios desactivados pueden ser reactivados)</span>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
     <div class="row">
@@ -52,28 +102,58 @@
                                     <th><?= $this->Paginator->sort('username', 'Usuario') ?></th>
                                     <th><?= $this->Paginator->sort('dni', 'DNI') ?></th>
                                     <th><?= $this->Paginator->sort('rol', 'Rol') ?></th>
+                                    <th>Titular</th>
                                     <th><?= $this->Paginator->sort('estado', 'Estado') ?></th>
                                     <th><?= $this->Paginator->sort('created', 'Creado') ?></th>
-                                    <th><?= $this->Paginator->sort('modified', 'Modificado') ?></th>
                                     <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($users as $user): ?>
-                                <tr>
+                                <tr class="<?= $user->estado === 'inactivo' ? 'table-secondary text-muted' : '' ?>">
                                     <td><?= $this->Number->format($user->id) ?></td>
-                                    <td><?= h($user->username) ?></td>
-                                    <td><?= h($user->dni) ?></td>
-                                    <td><?= $roles[$user->rol] ?? 'Desconocido' ?></td>
                                     <td>
-                                        <?php if ($user->estado === 'activo'): ?>
-                                            <span class="badge bg-success">Activo</span>
-                                        <?php else: ?>
-                                            <span class="badge bg-danger">Inactivo</span>
+                                        <i class="fas fa-user"></i> <?= h($user->username) ?>
+                                        <?php if ($user->estado === 'inactivo'): ?>
+                                            <span class="badge bg-danger ms-2">DESACTIVADO</span>
+                                        <?php endif; ?>
+                                        <?php if ($user->id == 1): ?>
+                                            <span class="badge bg-warning text-dark ms-2"><i class="fas fa-shield-alt"></i> PROTEGIDO</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td><?= h($user->created) ?></td>
-                                    <td><?= h($user->modified) ?></td>
+                                    <td>
+                                        <?php if ($user->dni): ?>
+                                            <span class="badge bg-secondary"><?= h($user->dni) ?></span>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-<?= $user->rol == 1 ? 'danger' : ($user->rol == 2 ? 'warning text-dark' : 'info') ?>">
+                                            <?= $roles[$user->rol] ?? 'Desconocido' ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <?php if ($user->titular_id && isset($user->titulare)): ?>
+                                            <span class="badge bg-success" title="<?= h($user->titulare->nombre_completo) ?>">
+                                                <i class="fas fa-check-circle"></i> Vinculado
+                                            </span>
+                                        <?php elseif ($user->rol == 3): ?>
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-exclamation-triangle"></i> Sin vincular
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($user->estado === 'activo'): ?>
+                                            <span class="badge bg-success"><i class="fas fa-check-circle"></i> Activo</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary"><i class="fas fa-ban"></i> Inactivo</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?= h($user->created->format('d/m/Y')) ?></td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
                                             <?= $this->Html->link(
@@ -81,11 +161,40 @@
                                                 ['action' => 'view', $user->id],
                                                 ['escape' => false, 'title' => 'Ver', 'class' => 'btn btn-info openModal']
                                             ) ?>
-                                            <?= $this->Html->link(
-                                                '<i class="fas fa-edit"></i>',
-                                                ['action' => 'edit', $user->id],
-                                                ['escape' => false, 'title' => 'Editar', 'class' => 'btn btn-warning openModal']
-                                            ) ?>
+                                            
+                                            <?php if ($user->estado === 'activo'): ?>
+                                                <!-- Usuario activo: mostrar editar y desactivar -->
+                                                <?= $this->Html->link(
+                                                    '<i class="fas fa-edit"></i>',
+                                                    ['action' => 'edit', $user->id],
+                                                    ['escape' => false, 'title' => 'Editar', 'class' => 'btn btn-warning openModal']
+                                                ) ?>
+                                                
+                                                <?php if ($user->id != 1): // Proteger admin principal ?>
+                                                    <?= $this->Form->postLink(
+                                                        '<i class="fas fa-ban"></i>',
+                                                        ['action' => 'delete', $user->id],
+                                                        [
+                                                            'confirm' => '¿Está seguro de desactivar este usuario? Podrá reactivarlo desde el filtro de inactivos.',
+                                                            'class' => 'btn btn-danger',
+                                                            'escape' => false,
+                                                            'title' => 'Desactivar usuario'
+                                                        ]
+                                                    ) ?>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <!-- Usuario inactivo: mostrar reactivar -->
+                                                <?= $this->Form->postLink(
+                                                    '<i class="fas fa-redo"></i> Reactivar',
+                                                    ['action' => 'reactivar', $user->id],
+                                                    [
+                                                        'confirm' => '¿Está seguro de reactivar este usuario?',
+                                                        'class' => 'btn btn-success',
+                                                        'escape' => false,
+                                                        'title' => 'Reactivar usuario'
+                                                    ]
+                                                ) ?>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
@@ -94,18 +203,38 @@
                         </table>
                     </div>
                     <!-- Paginación -->
-                    <div class="mt-3">
-                        <nav aria-label="Paginación">
+                    <div class="mt-4">
+                        <nav aria-label="Paginación de usuarios">
                             <ul class="pagination justify-content-center">
                                 <?php
-                                echo $this->Paginator->first('<i class="fas fa-step-backward"></i> Primera', ['class' => 'page-link']);
-                                echo $this->Paginator->prev('<i class="fas fa-chevron-left"></i> Anterior', ['class' => 'page-link']);
-                                echo $this->Paginator->numbers(['class' => 'page-link']);
-                                echo $this->Paginator->next('Siguiente <i class="fas fa-chevron-right"></i>', ['class' => 'page-link']);
-                                echo $this->Paginator->last('Última <i class="fas fa-step-forward"></i>', ['class' => 'page-link']);
+                                echo $this->Paginator->first(
+                                    '<i class="fas fa-angle-double-left"></i>',
+                                    ['escape' => false, 'class' => 'page-link', 'title' => 'Primera página']
+                                );
+                                echo $this->Paginator->prev(
+                                    '<i class="fas fa-chevron-left"></i> Anterior',
+                                    ['escape' => false, 'class' => 'page-link']
+                                );
+                                echo $this->Paginator->numbers([
+                                    'modulus' => 3,
+                                    'first' => 1,
+                                    'last' => 1
+                                ]);
+                                echo $this->Paginator->next(
+                                    'Siguiente <i class="fas fa-chevron-right"></i>',
+                                    ['escape' => false, 'class' => 'page-link']
+                                );
+                                echo $this->Paginator->last(
+                                    '<i class="fas fa-angle-double-right"></i>',
+                                    ['escape' => false, 'class' => 'page-link', 'title' => 'Última página']
+                                );
                                 ?>
                             </ul>
                         </nav>
+                        <p class="text-center text-muted small">
+                            <i class="fas fa-info-circle"></i>
+                            <?= $this->Paginator->counter('Página {{page}} de {{pages}}, mostrando {{current}} usuario(s) de {{count}} totales') ?>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -206,5 +335,37 @@ document.addEventListener('DOMContentLoaded', function() {
     
     #resultados-usuarios-ajax .list-group-item:hover {
         background-color: #f0f0f0;
+    }
+    
+    /* Estilos de paginación mejorados */
+    .pagination {
+        gap: 5px;
+    }
+    
+    .pagination .page-link {
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 2px solid #dee2e6;
+    }
+    
+    .pagination .page-link:hover {
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+    }
+    
+    .pagination .active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+    }
+    
+    .pagination .disabled .page-link {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 </style>

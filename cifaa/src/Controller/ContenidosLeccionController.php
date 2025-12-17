@@ -365,10 +365,12 @@ class ContenidosLeccionController extends AppController
         
         $this->request->allowMethod(['post', 'delete']);
         $contenidosLeccion = $this->ContenidosLeccion->get($id);
+        
+        // ContenidosLeccion: eliminación física
         if ($this->ContenidosLeccion->delete($contenidosLeccion)) {
-            $this->Flash->success(__('The contenidos leccion has been deleted.'));
+            $this->Flash->success(__('Contenido de lección eliminado correctamente.'));
         } else {
-            $this->Flash->error(__('The contenidos leccion could not be deleted. Please, try again.'));
+            $this->Flash->error(__('No se pudo eliminar el contenido. Verifique las dependencias.'));
         }
 
         return $this->redirect(['action' => 'index']);

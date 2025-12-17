@@ -8,25 +8,28 @@ use Cake\ORM\Entity;
 /**
  * Certificado Entity
  *
+ * NUEVA ARQUITECTURA: Los certificados pertenecen a TITULARES, no a USERS
+ *
  * @property int $id
- * @property int|null $user_id
+ * @property int $titular_id Nueva FK a titulares (identidad certificable)
+ * @property int|null $user_id_legacy DEPRECATED - Mantener solo para referencia histórica
  * @property int|null $curso_id
- * @property string|null $nombre_completo
- * @property string|null $nombre_curso
+ * @property string|null $nombre_completo Snapshot del nombre del titular
+ * @property string|null $nombre_curso Snapshot del nombre del curso
  * @property int $horas
  * @property float|null $nota_final
  * @property int|null $duracion_meses
  * @property string|null $fecha_inicio
  * @property string|null $fecha_fin
- * @property string|null $modulos
+ * @property string|null $modulos JSON con módulos del curso
  * @property \Cake\I18n\Date $fecha_emision
- * @property string $codigo
+ * @property string $codigo CER-YYYY-XXXX o DIP-YYYY-XXXX
  * @property string|null $archivo_pdf
- * @property string $estado
+ * @property string $estado activo/anulado
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  *
- * @property \App\Model\Entity\User $user
+ * @property \App\Model\Entity\Titular $titular Titular certificado (OBLIGATORIO)
  * @property \App\Model\Entity\Curso $curso
  */
 class Certificado extends Entity
@@ -41,7 +44,8 @@ class Certificado extends Entity
      * @var array<string, bool>
      */
     protected array $_accessible = [
-        'user_id' => true,
+        'titular_id' => true,  // NUEVO - Obligatorio
+        'user_id_legacy' => true,  // DEPRECATED
         'curso_id' => true,
         'nombre_completo' => true,
         'nombre_curso' => true,
@@ -57,7 +61,7 @@ class Certificado extends Entity
         'estado' => true,
         'created' => true,
         'modified' => true,
-        'user' => true,
+        'titular' => true,  // NUEVO
         'curso' => true,
     ];
 }

@@ -1,0 +1,1602 @@
+================================================================================
+         ARQUITECTURA DE REFACTORIZACIÓN: SISTEMA DE TITULARES
+================================================================================
+
+Fecha: 15 de diciembre de 2025
+Sistema: Centro Integral de Formación y Asesoría Académica (CIFAA)
+Objetivo: Separar identidad certificable de usuarios del sistema
+Impacto: CRÍTICO - Cambio arquitectónico mayor
+
+================================================================================
+RESUMEN EJECUTIVO
+================================================================================
+
+PROBLEMA ACTUAL:
+- Certificados vinculados directamente a users
+- No se puede certificar sin crear usuario
+- Dependencia circular: certificado necesita user, user necesita certificado
+
+SOLUCIÓN PROPUESTA:
+- Tabla intermedia: titulares (identidad certificable mínima)
+- Certificados pertenecen a titulares
+- Usuarios se vinculan a titulares (opcional)
+- Certificados existen independientemente de usuarios del sistema
+
+BENEFICIOS:
+✓ Certificar sin crear usuarios
+✓ Usuarios heredan certificados al vincularse
+✓ Verificación pública robusta
+✓ Datos certificados inmutables por usuarios
+✓ Modelo escalable y producción-ready
+
+
+================================================================================
+I. CREACIÓN DE NUEVAS TABLAS
+================================================================================
+
+═══════════════════════════════════════════════════════════════════════════════
+1. TABLA TITULARES (NUEVA - OBLIGATORIA)
+═══════════════════════════════════════════════════════════════════════════════
+
+PROPÓSITO:
+---------------------------------------------------------------------------
+Representar la identidad certificable mínima de una persona física.
+Esta tabla NO es parte de la lógica de sistema, es solo IDENTIDAD.
+
+ESTRUCTURA SQL:
+---------------------------------------------------------------------------
+CREATE TABLE titulares (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    dni VARCHAR(20) NOT NULL UNIQUE,
+    nombres VARCHAR(100) NOT NULL,
+    apellidos VARCHAR(100) NOT NULL,
+    created DATETIME DEFAULT CURRENT_TIMESTAMP,
+    modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_dni (dni),
+    INDEX idx_nombres_apellidos (nombres, apellidos)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CAMPOS OBLIGATORIOS:
+---------------------------------------------------------------------------
+✓ id           → Clave primaria
+✓ dni          → Identificador único de persona (UNIQUE, NOT NULL)
+✓ nombres      → Nombres completos de la persona
+✓ apellidos    → Apellidos completos de la persona
+✓ created      → Timestamp de creación
+✓ modified     → Timestamp de última modificación
+
+CAMPOS PROHIBIDOS (NO AGREGAR):
+---------------------------------------------------------------------------
+✗ email        → Pertenece a users, no a identidad certificable
+✗ telefono     → Contacto del sistema, no del certificado
+✗ password     → Es de autenticación, no de identidad
+✗ rol          → Es lógica de sistema, no de persona
+✗ estado       → Es control de sistema, no de identidad
+✗ direccion    → Opcional en users, no necesario en certificados
+
+REGLAS DE NEGOCIO:
+---------------------------------------------------------------------------
+1. DNI debe ser único en toda la tabla (índice UNIQUE)
+2. Un titular puede existir sin usuario vinculado
+3. Un titular puede tener múltiples certificados
+4. Los datos del titular son INMUTABLES desde el perfil de usuario
+5. Solo admin puede corregir errores de tipeo en titular
+
+EJEMPLO DE REGISTROS:
+---------------------------------------------------------------------------
+id  | dni        | nombres          | apellidos       | created
+----|------------|------------------|-----------------|--------------------
+1   | 12345678   | Juan Carlos      | Pérez García    | 2025-01-15 10:30:00
+2   | 87654321   | María Elena      | Rodríguez López | 2025-01-16 14:20:00
+3   | 11223344   | Pedro Antonio    | Sánchez Díaz    | 2025-01-17 09:15:00
+
+
+═══════════════════════════════════════════════════════════════════════════════
+2. MODIFICACIÓN TABLA USERS (EXISTENTE)
+═══════════════════════════════════════════════════════════════════════════════
+
+PROPÓSITO:
+---------------------------------------------------------------------------
+Vincular usuarios del sistema con su identidad certificable.
+Un usuario es una cuenta del sistema, un titular es una persona real.
+
+CAMBIOS SQL:
+---------------------------------------------------------------------------
+ALTER TABLE users 
+ADD COLUMN titular_id INT NULL AFTER id,
+ADD CONSTRAINT fk_users_titular 
+    FOREIGN KEY (titular_id) 
+    REFERENCES titulares(id) 
+    ON DELETE RESTRICT 
+    ON UPDATE CASCADE,
+ADD UNIQUE KEY uk_titular_id (titular_id);
+
+ESTRUCTURA ACTUALIZADA:
+---------------------------------------------------------------------------
+users:
+- id (PK)
+- titular_id (FK → titulares.id, NULLABLE, UNIQUE)  ← NUEVO
+- username
+- email
+- password
+- rol (1=admin, 2=docente, 3=estudiante)
+- dni
+- estado (activo/inactivo)
+- created
+- modified
+- ... otros campos ...
+
+REGLAS DE VINCULACIÓN:
+---------------------------------------------------------------------------
+1. titular_id es NULLABLE:
+   - Admin técnico puede no tener titular
+   - Cuentas de sistema pueden no tener titular
+   
+2. titular_id es UNIQUE:
+   - Un titular solo puede estar vinculado a UN usuario
+   - Evita duplicación de cuentas para la misma persona
+   
+3. FK con ON DELETE RESTRICT:
+   - No se puede eliminar titular si tiene usuario vinculado
+   - Protege integridad referencial
+   
+4. Estudiantes DEBEN tener titular:
+   - Validación en aplicación: rol=3 requiere titular_id NOT NULL
+   - Admin valida esto al crear usuario estudiante
+
+CASOS DE USO:
+---------------------------------------------------------------------------
+CASO 1: Usuario Administrador
+users.id = 1
+users.username = "admin"
+users.titular_id = NULL  ← No necesita titular
+users.rol = 1
+
+CASO 2: Usuario Estudiante
+users.id = 5
+users.username = "jperez"
+users.titular_id = 1  ← Vinculado a titular DNI 12345678
+users.rol = 3
+
+CASO 3: Titular sin usuario
+titulares.id = 10
+titulares.dni = "99887766"
+(No existe users.titular_id = 10)
+→ Persona certificada pero sin cuenta en el sistema
+
+
+═══════════════════════════════════════════════════════════════════════════════
+3. MODIFICACIÓN TABLA CERTIFICADOS (EXISTENTE)
+═══════════════════════════════════════════════════════════════════════════════
+
+PROPÓSITO:
+---------------------------------------------------------------------------
+Cambiar la verdad lógica: certificados pertenecen a TITULARES, no a USERS.
+
+CAMBIOS SQL:
+---------------------------------------------------------------------------
+-- PASO 1: Agregar nueva columna
+ALTER TABLE certificados 
+ADD COLUMN titular_id INT NULL AFTER id;
+
+-- PASO 2: Migrar datos (ver sección II de este documento)
+-- ... proceso de migración ...
+
+-- PASO 3: Hacer obligatorio y crear FK
+ALTER TABLE certificados 
+MODIFY COLUMN titular_id INT NOT NULL,
+ADD CONSTRAINT fk_certificados_titular 
+    FOREIGN KEY (titular_id) 
+    REFERENCES titulares(id) 
+    ON DELETE RESTRICT 
+    ON UPDATE CASCADE;
+
+-- PASO 4 (OPCIONAL): Deprecar user_id
+-- No eliminar aún, mantener para referencia histórica
+ALTER TABLE certificados 
+ADD COLUMN user_id_legacy INT NULL COMMENT 'Deprecated - use titular_id';
+
+ESTRUCTURA ACTUALIZADA:
+---------------------------------------------------------------------------
+certificados:
+- id (PK)
+- titular_id (FK → titulares.id, NOT NULL)  ← NUEVO - OBLIGATORIO
+- user_id (DEPRECATED - mantener temporalmente)
+- curso_id
+- codigo (CER-YYYY-XXXXXXXXXX)
+- nombre_completo (snapshot)
+- nombre_curso (snapshot)
+- horas
+- fecha_emision
+- fecha_inicio
+- fecha_fin
+- duracion_meses
+- nota_final
+- modulos (JSON)
+- estado (activo/anulado)
+- created
+- modified
+
+NUEVA VERDAD LÓGICA:
+---------------------------------------------------------------------------
+ANTES (incorrecto):
+certificado → user → persona
+
+AHORA (correcto):
+certificado → titular (persona real)
+user → titular (opcional)
+
+IMPLICACIONES:
+---------------------------------------------------------------------------
+✓ Certificado puede existir sin usuario
+✓ Certificado no cambia si usuario edita perfil
+✓ Múltiples certificados pueden tener mismo titular
+✓ Usuario puede ver certificados al vincularse a titular
+✓ Verificación pública usa titular, no usuario
+
+EJEMPLO DE REGISTROS:
+---------------------------------------------------------------------------
+id | titular_id | user_id | codigo            | nombre_completo
+---|------------|---------|-------------------|------------------
+1  | 1          | 5       | CER-2025-ABC123   | Juan Carlos Pérez
+2  | 1          | 5       | DIP-2025-XYZ789   | Juan Carlos Pérez
+3  | 2          | NULL    | CER-2025-DEF456   | María Elena Rodríguez
+
+Nota: En el ejemplo, certificado id=3 no tiene usuario vinculado,
+      pero sí tiene titular (persona certificada).
+
+
+================================================================================
+II. MIGRACIÓN DE DATOS EXISTENTES (PROCESO CRÍTICO)
+================================================================================
+
+═══════════════════════════════════════════════════════════════════════════════
+4. MIGRACIÓN: CERTIFICADOS → TITULARES
+═══════════════════════════════════════════════════════════════════════════════
+
+OBJETIVO:
+---------------------------------------------------------------------------
+Crear titulares a partir de certificados existentes.
+NINGÚN certificado puede quedar huérfano.
+
+DATOS FUENTE:
+---------------------------------------------------------------------------
+Certificados actuales tienen:
+- nombre_completo (texto snapshot)
+- posiblemente user_id (FK a users)
+- users.dni (si existe relación)
+
+ALGORITMO DE MIGRACIÓN:
+---------------------------------------------------------------------------
+PASO 1: Obtener lista de certificados existentes
+
+SELECT 
+    c.id as certificado_id,
+    c.nombre_completo,
+    c.user_id,
+    u.dni,
+    u.username
+FROM certificados c
+LEFT JOIN users u ON c.user_id = u.id
+ORDER BY c.id;
+
+PASO 2: Por cada certificado, procesar
+
+Para cada registro:
+
+A) Extraer DNI:
+   - Si existe users.dni → usar ese
+   - Si no existe → generar DNI temporal: "TEMP-{certificado_id}"
+   
+B) Separar nombre completo en nombres y apellidos:
+   - Si "Juan Carlos Pérez García" → nombres="Juan Carlos", apellidos="Pérez García"
+   - Usar lógica: primeras 2 palabras = nombres, resto = apellidos
+   
+C) Buscar titular existente:
+   SELECT id FROM titulares WHERE dni = ?
+   
+D) Si NO existe titular:
+   INSERT INTO titulares (dni, nombres, apellidos, created, modified)
+   VALUES (?, ?, ?, NOW(), NOW());
+   
+E) Actualizar certificado:
+   UPDATE certificados 
+   SET titular_id = ?
+   WHERE id = ?;
+
+CÓDIGO PHP (MIGRACIÓN CONTROLADA):
+---------------------------------------------------------------------------
+<?php
+// Script de migración: migrate_certificados_to_titulares.php
+
+public function migrarCertificadosATitulares()
+{
+    $certificadosTable = $this->fetchTable('Certificados');
+    $titularesTable = $this->fetchTable('Titulares');
+    $usersTable = $this->fetchTable('Users');
+    
+    $certificados = $certificadosTable->find()
+        ->contain(['Users'])
+        ->all();
+    
+    $migrados = 0;
+    $creados = 0;
+    $errores = [];
+    
+    foreach ($certificados as $certificado) {
+        try {
+            // 1. Obtener DNI
+            $dni = null;
+            if ($certificado->has('user') && !empty($certificado->user->dni)) {
+                $dni = $certificado->user->dni;
+            } else {
+                $dni = 'TEMP-' . $certificado->id;
+            }
+            
+            // 2. Separar nombres y apellidos
+            $nombreCompleto = $certificado->nombre_completo;
+            $partes = explode(' ', $nombreCompleto);
+            $cantidadPalabras = count($partes);
+            
+            if ($cantidadPalabras >= 3) {
+                $nombres = implode(' ', array_slice($partes, 0, 2));
+                $apellidos = implode(' ', array_slice($partes, 2));
+            } else if ($cantidadPalabras == 2) {
+                $nombres = $partes[0];
+                $apellidos = $partes[1];
+            } else {
+                $nombres = $nombreCompleto;
+                $apellidos = 'N/A';
+            }
+            
+            // 3. Buscar o crear titular
+            $titular = $titularesTable->find()
+                ->where(['dni' => $dni])
+                ->first();
+            
+            if (!$titular) {
+                $titular = $titularesTable->newEntity([
+                    'dni' => $dni,
+                    'nombres' => $nombres,
+                    'apellidos' => $apellidos
+                ]);
+                
+                if ($titularesTable->save($titular)) {
+                    $creados++;
+                } else {
+                    $errores[] = "Error al crear titular para certificado {$certificado->id}";
+                    continue;
+                }
+            }
+            
+            // 4. Actualizar certificado
+            $certificado->titular_id = $titular->id;
+            if ($certificadosTable->save($certificado)) {
+                $migrados++;
+            } else {
+                $errores[] = "Error al actualizar certificado {$certificado->id}";
+            }
+            
+        } catch (\Exception $e) {
+            $errores[] = "Excepción en certificado {$certificado->id}: " . $e->getMessage();
+        }
+    }
+    
+    return [
+        'migrados' => $migrados,
+        'titulares_creados' => $creados,
+        'errores' => $errores
+    ];
+}
+
+VALIDACIÓN POST-MIGRACIÓN:
+---------------------------------------------------------------------------
+-- Verificar que todos los certificados tienen titular
+SELECT COUNT(*) FROM certificados WHERE titular_id IS NULL;
+-- Resultado esperado: 0
+
+-- Verificar titulares creados
+SELECT COUNT(*) FROM titulares;
+-- Debe coincidir con personas únicas en certificados
+
+-- Ver certificados por titular
+SELECT 
+    t.id,
+    t.dni,
+    t.nombres,
+    t.apellidos,
+    COUNT(c.id) as total_certificados
+FROM titulares t
+LEFT JOIN certificados c ON t.id = c.titular_id
+GROUP BY t.id
+ORDER BY total_certificados DESC;
+
+
+═══════════════════════════════════════════════════════════════════════════════
+5. MIGRACIÓN: USERS → TITULARES
+═══════════════════════════════════════════════════════════════════════════════
+
+OBJETIVO:
+---------------------------------------------------------------------------
+Vincular usuarios existentes (especialmente estudiantes) a sus titulares.
+
+ALGORITMO DE MIGRACIÓN:
+---------------------------------------------------------------------------
+PASO 1: Listar usuarios estudiantes con DNI
+
+SELECT id, username, dni, email
+FROM users
+WHERE rol = 3 AND dni IS NOT NULL;
+
+PASO 2: Por cada usuario
+
+A) Buscar titular por DNI:
+   SELECT id FROM titulares WHERE dni = ?
+   
+B) Si existe titular:
+   - Verificar que no esté vinculado a otro usuario
+   - Si está libre: vincular
+   UPDATE users SET titular_id = ? WHERE id = ?
+   
+C) Si NO existe titular:
+   - Crear titular mínimo
+   INSERT INTO titulares (dni, nombres, apellidos)
+   VALUES (?, 'N/A', 'N/A');
+   - Vincular usuario
+   UPDATE users SET titular_id = ? WHERE id = ?
+
+CÓDIGO PHP (MIGRACIÓN):
+---------------------------------------------------------------------------
+<?php
+// Script: migrate_users_to_titulares.php
+
+public function vincularUsuariosATitulares()
+{
+    $usersTable = $this->fetchTable('Users');
+    $titularesTable = $this->fetchTable('Titulares');
+    
+    // Solo estudiantes con DNI
+    $usuarios = $usersTable->find()
+        ->where([
+            'rol' => 3,
+            'dni IS NOT' => null
+        ])
+        ->all();
+    
+    $vinculados = 0;
+    $creados = 0;
+    $omitidos = 0;
+    $errores = [];
+    
+    foreach ($usuarios as $usuario) {
+        try {
+            // 1. Buscar titular por DNI
+            $titular = $titularesTable->find()
+                ->where(['dni' => $usuario->dni])
+                ->first();
+            
+            if ($titular) {
+                // 2. Verificar que titular no esté ya vinculado
+                $yaVinculado = $usersTable->find()
+                    ->where(['titular_id' => $titular->id])
+                    ->first();
+                
+                if ($yaVinculado) {
+                    $omitidos++;
+                    $errores[] = "Usuario {$usuario->id} omitido: titular ya vinculado a otro usuario";
+                    continue;
+                }
+                
+                // 3. Vincular
+                $usuario->titular_id = $titular->id;
+                if ($usersTable->save($usuario)) {
+                    $vinculados++;
+                }
+                
+            } else {
+                // 4. Crear titular mínimo
+                $titular = $titularesTable->newEntity([
+                    'dni' => $usuario->dni,
+                    'nombres' => 'Por definir',
+                    'apellidos' => 'Por definir'
+                ]);
+                
+                if ($titularesTable->save($titular)) {
+                    $usuario->titular_id = $titular->id;
+                    if ($usersTable->save($usuario)) {
+                        $vinculados++;
+                        $creados++;
+                    }
+                }
+            }
+            
+        } catch (\Exception $e) {
+            $errores[] = "Error usuario {$usuario->id}: " . $e->getMessage();
+        }
+    }
+    
+    return [
+        'vinculados' => $vinculados,
+        'titulares_creados' => $creados,
+        'omitidos' => $omitidos,
+        'errores' => $errores
+    ];
+}
+
+VALIDACIÓN POST-MIGRACIÓN:
+---------------------------------------------------------------------------
+-- Estudiantes sin titular (requiere atención)
+SELECT id, username, dni 
+FROM users 
+WHERE rol = 3 AND titular_id IS NULL;
+
+-- Titulares con múltiples usuarios (error de datos)
+SELECT titular_id, COUNT(*) as usuarios
+FROM users
+WHERE titular_id IS NOT NULL
+GROUP BY titular_id
+HAVING usuarios > 1;
+-- Resultado esperado: 0 filas
+
+
+================================================================================
+III. NUEVOS FLUJOS FUNCIONALES
+================================================================================
+
+═══════════════════════════════════════════════════════════════════════════════
+6. GENERACIÓN DE CERTIFICADOS/DIPLOMADOS (FLUJO REFACTORIZADO)
+═══════════════════════════════════════════════════════════════════════════════
+
+FLUJO ANTIGUO (INCORRECTO):
+---------------------------------------------------------------------------
+Admin → Formulario → Selecciona User → Genera certificado → user_id
+
+Problemas:
+✗ Requiere crear usuario previo
+✗ Certificado depende de usuario del sistema
+✗ No se puede certificar sin dar acceso al sistema
+
+FLUJO NUEVO (CORRECTO):
+---------------------------------------------------------------------------
+Admin → Formulario → Ingresa DNI → Sistema busca/crea titular → Genera certificado
+
+PASO 1: Interfaz del Formulario
+---------------------------------------------------------------------------
+Campos del formulario:
+
+SECCIÓN TITULAR (NUEVO - OBLIGATORIO):
+┌─────────────────────────────────────────────────────────────────┐
+│ DNI del Titular *                                               │
+│ [__________________]  [Buscar]                                  │
+│                                                                 │
+│ ○ Titular existente encontrado:                                │
+│   Nombre: Juan Carlos Pérez García                             │
+│   Certificados previos: 2                                       │
+│                                                                 │
+│ ○ Titular nuevo:                                               │
+│   Nombres: [_________________________] *                       │
+│   Apellidos: [_________________________] *                     │
+└─────────────────────────────────────────────────────────────────┘
+
+SECCIÓN CERTIFICADO:
+- Nombre del Curso *
+- Horas *
+- Fecha Inicio
+- Fecha Fin
+- Duración (meses)
+- Nota Final
+- Módulos (I, II, III, IV)
+
+PASO 2: Lógica del Controlador (generar() / generarDiplomado())
+---------------------------------------------------------------------------
+<?php
+public function generar()
+{
+    if ($this->request->is('post')) {
+        $data = $this->request->getData();
+        
+        // PASO CRÍTICO: Gestionar titular
+        $titularId = $this->gestionarTitular($data['dni'], $data);
+        
+        if (!$titularId) {
+            $this->Flash->error('Error al procesar datos del titular');
+            return;
+        }
+        
+        // Generar código
+        $prefijo = 'CER-'; // o 'DIP-' para diplomados
+        $codigo = $prefijo . date('Y') . '-' . strtoupper(substr(md5(uniqid(rand(), true)), 0, 10));
+        
+        // Crear certificado
+        $certificado = $this->Certificados->newEmptyEntity();
+        $certificadoData = [
+            'titular_id' => $titularId,  // ← NUEVO
+            'curso_id' => $data['curso_id'],
+            'codigo' => $codigo,
+            // Snapshots para inmutabilidad
+            'nombre_completo' => $data['nombre_completo'],
+            'nombre_curso' => $data['nombre_curso'],
+            'horas' => $data['horas'],
+            'fecha_emision' => date('Y-m-d'),
+            'fecha_inicio' => $data['fecha_inicio'] ?? null,
+            'fecha_fin' => $data['fecha_fin'] ?? null,
+            'duracion_meses' => $data['duracion_meses'] ?? null,
+            'nota_final' => $data['nota_final'] ?? null,
+            'modulos' => json_encode($data['modulos'] ?? []),
+            'estado' => 'activo'
+        ];
+        
+        $certificado = $this->Certificados->patchEntity($certificado, $certificadoData);
+        
+        if ($this->Certificados->save($certificado)) {
+            $this->Flash->success("Certificado generado: {$codigo}");
+            return $this->redirect(['action' => 'index']);
+        }
+    }
+    
+    // Cargar datos para formulario
+    $this->set('cursos', $this->Certificados->Cursos->find('list'));
+}
+
+/**
+ * Método auxiliar: Gestionar titular (buscar o crear)
+ */
+private function gestionarTitular($dni, $data)
+{
+    $titularesTable = $this->fetchTable('Titulares');
+    
+    // 1. Buscar por DNI
+    $titular = $titularesTable->find()
+        ->where(['dni' => $dni])
+        ->first();
+    
+    // 2. Si existe, retornar su ID
+    if ($titular) {
+        return $titular->id;
+    }
+    
+    // 3. Si no existe, crear nuevo
+    $nuevoTitular = $titularesTable->newEntity([
+        'dni' => $dni,
+        'nombres' => $data['nombres_titular'],
+        'apellidos' => $data['apellidos_titular']
+    ]);
+    
+    if ($titularesTable->save($nuevoTitular)) {
+        return $nuevoTitular->id;
+    }
+    
+    return null;
+}
+
+PASO 3: Vista del Formulario (AJAX para búsqueda)
+---------------------------------------------------------------------------
+<script>
+// Búsqueda de titular por DNI
+document.getElementById('dni-input').addEventListener('blur', function() {
+    const dni = this.value;
+    
+    fetch('/titulares/buscar/' + dni)
+        .then(response => response.json())
+        .then(data => {
+            if (data.encontrado) {
+                // Mostrar datos del titular existente
+                document.getElementById('titular-existente').style.display = 'block';
+                document.getElementById('titular-nuevo').style.display = 'none';
+                document.getElementById('titular-nombre').textContent = 
+                    data.nombres + ' ' + data.apellidos;
+                document.getElementById('titular-certificados').textContent = 
+                    data.total_certificados;
+            } else {
+                // Mostrar campos para nuevo titular
+                document.getElementById('titular-existente').style.display = 'none';
+                document.getElementById('titular-nuevo').style.display = 'block';
+            }
+        });
+});
+</script>
+
+RESULTADO:
+---------------------------------------------------------------------------
+✓ Se puede certificar sin crear usuario
+✓ Titular se reutiliza si ya existe (por DNI)
+✓ Certificados múltiples para mismo titular automáticamente vinculados
+✓ No se crean usuarios fantasma
+
+
+═══════════════════════════════════════════════════════════════════════════════
+7. CREACIÓN DE USUARIO (FLUJO REFACTORIZADO)
+═══════════════════════════════════════════════════════════════════════════════
+
+FLUJO ANTIGUO:
+---------------------------------------------------------------------------
+Admin → /users/add → Ingresa datos → Crea usuario con DNI
+
+FLUJO NUEVO (CORRECTO):
+---------------------------------------------------------------------------
+Admin → /users/add → Ingresa DNI → Sistema busca titular → Vincula o crea
+
+PASO 1: Formulario actualizado
+---------------------------------------------------------------------------
+<form>
+    <!-- Paso 1: Identificación -->
+    <label>DNI * (identificador único)</label>
+    <input type="text" name="dni" required />
+    <button type="button" id="buscar-titular">Verificar DNI</button>
+    
+    <div id="resultado-titular" style="display:none;">
+        <!-- Se muestra si existe titular -->
+        <div class="alert alert-info">
+            ✓ Titular encontrado: <strong id="titular-info"></strong>
+            <br>Certificados asociados: <span id="total-certs"></span>
+        </div>
+    </div>
+    
+    <!-- Paso 2: Datos de acceso -->
+    <label>Username *</label>
+    <input type="text" name="username" required />
+    
+    <label>Email *</label>
+    <input type="email" name="email" required />
+    
+    <label>Password *</label>
+    <input type="password" name="password" required />
+    
+    <label>Rol *</label>
+    <select name="rol" required>
+        <option value="3">Estudiante</option>
+        <option value="2">Docente</option>
+        <option value="1">Administrador</option>
+    </select>
+    
+    <button type="submit">Crear Usuario</button>
+</form>
+
+PASO 2: Controlador actualizado
+---------------------------------------------------------------------------
+<?php
+public function add()
+{
+    $user = $this->Users->newEmptyEntity();
+    
+    if ($this->request->is('post')) {
+        $data = $this->request->getData();
+        
+        // PASO CRÍTICO: Gestionar vinculación con titular
+        $titularId = $this->vincularATitular($data['dni']);
+        
+        if (!$titularId) {
+            $this->Flash->error('Error al procesar titular');
+            return;
+        }
+        
+        // Validar unicidad de vinculación
+        $yaVinculado = $this->Users->find()
+            ->where(['titular_id' => $titularId])
+            ->first();
+        
+        if ($yaVinculado) {
+            $this->Flash->error("Ese DNI ya está vinculado al usuario: {$yaVinculado->username}");
+            return;
+        }
+        
+        // Crear usuario con vinculación
+        $userData = [
+            'titular_id' => $titularId,  // ← NUEVO
+            'username' => $data['username'],
+            'email' => $data['email'],
+            'password' => $data['password'],
+            'rol' => $data['rol'],
+            'dni' => $data['dni'],
+            'estado' => 'activo'
+        ];
+        
+        // Validación adicional: estudiantes DEBEN tener titular
+        if ($userData['rol'] == 3 && empty($titularId)) {
+            $this->Flash->error('Estudiantes deben tener titular vinculado');
+            return;
+        }
+        
+        $user = $this->Users->patchEntity($user, $userData);
+        
+        if ($this->Users->save($user)) {
+            $this->Flash->success('Usuario creado y vinculado a titular');
+            return $this->redirect(['action' => 'index']);
+        }
+    }
+    
+    $this->set(compact('user'));
+}
+
+/**
+ * Vincular usuario a titular existente o crear titular mínimo
+ */
+private function vincularATitular($dni)
+{
+    $titularesTable = $this->fetchTable('Titulares');
+    
+    // Buscar titular
+    $titular = $titularesTable->find()
+        ->where(['dni' => $dni])
+        ->first();
+    
+    if ($titular) {
+        return $titular->id;
+    }
+    
+    // Si no existe, crear titular mínimo
+    // (El admin deberá completar nombres/apellidos después)
+    $titular = $titularesTable->newEntity([
+        'dni' => $dni,
+        'nombres' => 'Por completar',
+        'apellidos' => 'Por completar'
+    ]);
+    
+    if ($titularesTable->save($titular)) {
+        return $titular->id;
+    }
+    
+    return null;
+}
+
+PASO 3: AJAX para verificación previa
+---------------------------------------------------------------------------
+<script>
+document.getElementById('buscar-titular').addEventListener('click', function() {
+    const dni = document.querySelector('input[name="dni"]').value;
+    
+    fetch('/titulares/verificar/' + dni)
+        .then(response => response.json())
+        .then(data => {
+            const resultado = document.getElementById('resultado-titular');
+            
+            if (data.existe) {
+                resultado.style.display = 'block';
+                document.getElementById('titular-info').textContent = 
+                    data.nombres + ' ' + data.apellidos;
+                document.getElementById('total-certs').textContent = 
+                    data.total_certificados;
+                
+                // Verificar si ya está vinculado
+                if (data.usuario_vinculado) {
+                    alert('ADVERTENCIA: Este DNI ya está vinculado al usuario: ' + 
+                          data.usuario_vinculado);
+                }
+            } else {
+                resultado.style.display = 'none';
+                alert('DNI no encontrado. Se creará nuevo titular al guardar.');
+            }
+        });
+});
+</script>
+
+RESULTADO:
+---------------------------------------------------------------------------
+✓ Usuario hereda certificados existentes al vincularse
+✓ Se evita duplicación de cuentas (UNIQUE titular_id)
+✓ Validación: estudiante siempre tiene titular
+✓ Admin recibe feedback antes de guardar
+
+
+═══════════════════════════════════════════════════════════════════════════════
+8. INSCRIPCIONES (VALIDACIÓN ACTUALIZADA)
+═══════════════════════════════════════════════════════════════════════════════
+
+CAMBIO PRINCIPAL:
+---------------------------------------------------------------------------
+Antes de inscribir, validar que users.titular_id NO sea NULL.
+
+CONTROLADOR ACTUALIZADO:
+---------------------------------------------------------------------------
+<?php
+public function add()
+{
+    $inscripcion = $this->Inscripciones->newEmptyEntity();
+    
+    if ($this->request->is('post')) {
+        $data = $this->request->getData();
+        
+        // VALIDACIÓN CRÍTICA: Usuario debe tener titular
+        $user = $this->Inscripciones->Users->get($data['usuario_id']);
+        
+        if (empty($user->titular_id)) {
+            $this->Flash->error(
+                'El usuario no tiene titular vinculado. ' .
+                'Debe vincular titular antes de inscribir.'
+            );
+            
+            // Ofrecer vinculación inmediata
+            $this->set('usuario_sin_titular', $user);
+            return;
+        }
+        
+        // Validar duplicados
+        $existe = $this->Inscripciones->find()
+            ->where([
+                'usuario_id' => $data['usuario_id'],
+                'curso_id' => $data['curso_id']
+            ])
+            ->first();
+        
+        if ($existe) {
+            $this->Flash->error('El usuario ya está inscrito en este curso');
+            return;
+        }
+        
+        // Crear inscripción
+        $inscripcion = $this->Inscripciones->patchEntity($inscripcion, $data);
+        
+        if ($this->Inscripciones->save($inscripcion)) {
+            $this->Flash->success('Inscripción creada exitosamente');
+            return $this->redirect(['action' => 'index']);
+        }
+    }
+    
+    // Cargar solo usuarios CON titular
+    $users = $this->Inscripciones->Users->find('list')
+        ->where([
+            'rol' => 3,
+            'estado' => 'activo',
+            'titular_id IS NOT' => null  // ← FILTRO NUEVO
+        ])
+        ->all();
+    
+    $cursos = $this->Inscripciones->Cursos->find('list')
+        ->where(['estado' => 'activo'])
+        ->all();
+    
+    $this->set(compact('inscripcion', 'users', 'cursos'));
+}
+
+VISTA: Advertencia para usuarios sin titular
+---------------------------------------------------------------------------
+<?php if (isset($usuario_sin_titular)): ?>
+<div class="alert alert-warning">
+    <h4>⚠ Usuario sin titular vinculado</h4>
+    <p>
+        El usuario <strong><?= $usuario_sin_titular->username ?></strong> 
+        no tiene titular asociado.
+    </p>
+    <p>
+        <strong>Opciones:</strong>
+    </p>
+    <ul>
+        <li>
+            <a href="<?= $this->Url->build([
+                'controller' => 'Users',
+                'action' => 'vincularTitular',
+                $usuario_sin_titular->id
+            ]) ?>" class="btn btn-primary">
+                Vincular Titular Ahora
+            </a>
+        </li>
+        <li>
+            O cancele y vincule más tarde desde gestión de usuarios
+        </li>
+    </ul>
+</div>
+<?php endif; ?>
+
+RESULTADO:
+---------------------------------------------------------------------------
+✓ Solo estudiantes con titular pueden inscribirse
+✓ Admin recibe advertencia clara si falta titular
+✓ Flujo guiado para completar vinculación
+
+
+═══════════════════════════════════════════════════════════════════════════════
+9. MIS CERTIFICADOS (ESTUDIANTE) - CRITERIO ACTUALIZADO
+═══════════════════════════════════════════════════════════════════════════════
+
+CAMBIO PRINCIPAL:
+---------------------------------------------------------------------------
+Listar certificados por titular_id, no por user_id.
+
+CONTROLADOR ACTUALIZADO:
+---------------------------------------------------------------------------
+<?php
+public function misCertificados()
+{
+    $user = $this->Authentication->getIdentity();
+    
+    if (!$user) {
+        return $this->redirect(['controller' => 'Users', 'action' => 'login']);
+    }
+    
+    // VALIDACIÓN: Usuario debe tener titular
+    if (empty($user->titular_id)) {
+        $this->Flash->warning(
+            'Tu cuenta no está vinculada a un titular. ' .
+            'Contacta al administrador para completar tu perfil.'
+        );
+        $this->set('certificados', []);
+        return;
+    }
+    
+    // NUEVA CONSULTA: Por titular_id
+    $query = $this->Certificados->find()
+        ->contain(['Cursos'])
+        ->where(['Certificados.titular_id' => $user->titular_id])
+        ->order(['Certificados.created' => 'DESC']);
+    
+    // Filtro de búsqueda
+    $termino = $this->request->getQuery('termino');
+    if (!empty($termino)) {
+        $query->where(['Cursos.titulo LIKE' => '%' . $termino . '%']);
+    }
+    
+    $certificados = $this->paginate($query);
+    
+    $this->set(compact('certificados', 'termino'));
+}
+
+VISTA: Mensaje si no tiene titular
+---------------------------------------------------------------------------
+<?php if (empty($certificados) && empty($termino)): ?>
+<div class="alert alert-info">
+    <h4><i class="fas fa-info-circle"></i> Sin certificados</h4>
+    
+    <?php if (empty($usuario->titular_id)): ?>
+        <p>
+            Tu cuenta no está vinculada a un titular certificable.
+            <br>
+            <strong>Contacta al administrador</strong> para completar tu perfil.
+        </p>
+    <?php else: ?>
+        <p>
+            Aún no tienes certificados emitidos.
+            <br>
+            Completa tus cursos para obtener tu certificado.
+        </p>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
+
+RESULTADO:
+---------------------------------------------------------------------------
+✓ Estudiante ve TODOS sus certificados (incluso anteriores a tener cuenta)
+✓ Certificados no dependen de cuándo se creó el usuario
+✓ Heredan certificados al vincularse a titular
+
+
+═══════════════════════════════════════════════════════════════════════════════
+10. VERIFICACIÓN PÚBLICA (INMUTABILIDAD GARANTIZADA)
+═══════════════════════════════════════════════════════════════════════════════
+
+CAMBIO PRINCIPAL:
+---------------------------------------------------------------------------
+Verificación usa titular, no usuario. Datos son inmutables.
+
+CONTROLADOR ACTUALIZADO:
+---------------------------------------------------------------------------
+<?php
+public function verificar($codigo = null)
+{
+    $this->viewBuilder()->setLayout('default');
+    
+    $certificado = null;
+    $mensaje = null;
+    $tipo = null;
+    
+    if ($this->request->is('post')) {
+        $codigo = $this->request->getData('codigo');
+    }
+    
+    if (!empty($codigo)) {
+        $codigo = strtoupper(trim($codigo));
+        
+        try {
+            // NUEVA CONSULTA: Incluye titular
+            $certificado = $this->Certificados->find()
+                ->where(['codigo' => $codigo])
+                ->contain(['Titulares', 'Cursos'])  // ← Cambio: Titulares, no Users
+                ->first();
+            
+            if ($certificado) {
+                // Detectar tipo
+                $esDiplomado = strpos($certificado->codigo, 'DIP-') === 0;
+                $tipoDoc = $esDiplomado ? 'Diplomado' : 'Certificado';
+                
+                if ($certificado->estado === 'activo') {
+                    $mensaje = $tipoDoc . ' válido y activo';
+                    $tipo = 'success';
+                } else {
+                    $mensaje = 'Este ' . strtolower($tipoDoc) . ' ha sido anulado';
+                    $tipo = 'warning';
+                }
+                
+                // Log de verificación
+                $this->log("Verificación: {$codigo} - Titular: {$certificado->titular->dni}", 'info');
+            } else {
+                $mensaje = 'Código no encontrado';
+                $tipo = 'error';
+            }
+        } catch (\Exception $e) {
+            $mensaje = 'Error al verificar';
+            $tipo = 'error';
+            $this->log("Error verificación: " . $e->getMessage(), 'error');
+        }
+    }
+    
+    $this->set(compact('certificado', 'codigo', 'mensaje', 'tipo'));
+}
+
+VISTA ACTUALIZADA:
+---------------------------------------------------------------------------
+<?php if ($tipo === 'success'): ?>
+<div class="card border-success">
+    <div class="card-header bg-success text-white">
+        <h5>✓ <?= $mensaje ?></h5>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <tr>
+                <th>Código:</th>
+                <td><code><?= h($certificado->codigo) ?></code></td>
+            </tr>
+            <tr>
+                <th>DNI Titular:</th>
+                <td><?= h($certificado->titular->dni) ?></td>
+            </tr>
+            <tr>
+                <th>Titular:</th>
+                <td>
+                    <strong>
+                        <?= h($certificado->titular->nombres) ?> 
+                        <?= h($certificado->titular->apellidos) ?>
+                    </strong>
+                </td>
+            </tr>
+            <tr>
+                <th>Curso:</th>
+                <td><?= h($certificado->nombre_curso) ?></td>
+            </tr>
+            <tr>
+                <th>Horas:</th>
+                <td><?= h($certificado->horas) ?> hrs</td>
+            </tr>
+            <tr>
+                <th>Fecha de Emisión:</th>
+                <td><?= h($certificado->fecha_emision->format('d/m/Y')) ?></td>
+            </tr>
+            <tr>
+                <th>Estado:</th>
+                <td><span class="badge bg-success">ACTIVO</span></td>
+            </tr>
+        </table>
+        
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-shield-check"></i>
+            Este documento es oficial y fue emitido por CIFAA.
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+RESULTADO:
+---------------------------------------------------------------------------
+✓ Certificado verificable sin usuario asociado
+✓ Datos mostrados son de titular (inmutables)
+✓ Usuario no puede alterar datos del certificado
+✓ Verificación robusta e independiente del sistema
+
+
+================================================================================
+IV. AJUSTES DE PERMISOS Y EDICIÓN
+================================================================================
+
+═══════════════════════════════════════════════════════════════════════════════
+11. RESTRICCIONES DE EDICIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+REGLA CRÍTICA:
+---------------------------------------------------------------------------
+Datos del titular son INMUTABLES desde el perfil de usuario.
+Solo admin puede corregir errores.
+
+ESTUDIANTE - PERFIL:
+---------------------------------------------------------------------------
+PUEDE EDITAR:
+✓ Email
+✓ Password
+✓ Teléfono (si existe en users)
+✓ Dirección (si existe en users)
+
+NO PUEDE EDITAR:
+✗ DNI (vinculado a titular)
+✗ Nombres del titular
+✗ Apellidos del titular
+✗ Username (puede ser restringido)
+
+Formulario /users/edit/[ID] para estudiantes:
+---------------------------------------------------------------------------
+<form>
+    <!-- Datos de identidad (READONLY) -->
+    <div class="alert alert-info">
+        <h5>Datos de Identidad (No modificables)</h5>
+        <p><strong>DNI:</strong> <?= h($user->titular->dni) ?></p>
+        <p>
+            <strong>Nombre:</strong> 
+            <?= h($user->titular->nombres) ?> <?= h($user->titular->apellidos) ?>
+        </p>
+        <small>
+            Si detecta un error, contacte al administrador.
+        </small>
+    </div>
+    
+    <!-- Datos modificables -->
+    <label>Email *</label>
+    <input type="email" name="email" value="<?= h($user->email) ?>" required />
+    
+    <label>Nueva Contraseña</label>
+    <input type="password" name="password" placeholder="Dejar en blanco para mantener" />
+    
+    <button type="submit">Actualizar Perfil</button>
+</form>
+
+ADMIN - GESTIÓN DE TITULARES:
+---------------------------------------------------------------------------
+PUEDE:
+✓ Corregir DNI del titular (con validaciones)
+✓ Corregir nombres/apellidos
+✓ Ver certificados asociados
+✓ Desvincular titular de usuario (casos especiales)
+
+Formulario /titulares/edit/[ID] (solo admin):
+---------------------------------------------------------------------------
+<form>
+    <div class="alert alert-warning">
+        <strong>⚠ ADVERTENCIA:</strong>
+        Modificar estos datos afecta a todos los certificados asociados.
+        Solo corregir si hay errores de tipeo.
+    </div>
+    
+    <label>DNI</label>
+    <input type="text" name="dni" value="<?= h($titular->dni) ?>" />
+    
+    <label>Nombres</label>
+    <input type="text" name="nombres" value="<?= h($titular->nombres) ?>" />
+    
+    <label>Apellidos</label>
+    <input type="text" name="apellidos" value="<?= h($titular->apellidos) ?>" />
+    
+    <hr>
+    
+    <h5>Información de vinculación</h5>
+    <p>
+        <strong>Usuario vinculado:</strong>
+        <?php if ($titular->user): ?>
+            <?= h($titular->user->username) ?>
+            <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'view', $titular->user->id]) ?>">
+                Ver perfil
+            </a>
+        <?php else: ?>
+            <em>Sin usuario vinculado</em>
+        <?php endif; ?>
+    </p>
+    
+    <p>
+        <strong>Certificados emitidos:</strong> 
+        <?= $titular->certificados_count ?>
+        <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'index', '?' => ['titular_id' => $titular->id]]) ?>">
+            Ver certificados
+        </a>
+    </p>
+    
+    <button type="submit" class="btn btn-warning">
+        Actualizar Titular
+    </button>
+</form>
+
+
+================================================================================
+V. ACCIONES ADMIN NUEVAS
+================================================================================
+
+═══════════════════════════════════════════════════════════════════════════════
+12. GESTIÓN DE TITULARES (CONTROLADOR NUEVO)
+═══════════════════════════════════════════════════════════════════════════════
+
+OBJETIVO:
+---------------------------------------------------------------------------
+Permitir al admin gestionar titulares de forma mínima pero efectiva.
+
+RUTAS NECESARIAS:
+---------------------------------------------------------------------------
+GET  /titulares                  → index (listar)
+GET  /titulares/view/[ID]        → view (detalles)
+GET  /titulares/edit/[ID]        → edit (corrección)
+POST /titulares/buscar/[DNI]     → buscar (AJAX)
+GET  /titulares/verificar/[DNI]  → verificar (AJAX)
+
+CONTROLADOR COMPLETO:
+---------------------------------------------------------------------------
+<?php
+// src/Controller/TitularesController.php
+
+namespace App\Controller;
+
+class TitularesController extends AppController
+{
+    /**
+     * Listar titulares (solo admin)
+     */
+    public function index()
+    {
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
+        }
+        
+        $query = $this->Titulares->find()
+            ->select([
+                'Titulares.id',
+                'Titulares.dni',
+                'Titulares.nombres',
+                'Titulares.apellidos',
+                'Titulares.created',
+                'certificados_count' => $query->func()->count('Certificados.id'),
+                'user_id' => 'Users.id',
+                'username' => 'Users.username'
+            ])
+            ->leftJoinWith('Certificados')
+            ->leftJoinWith('Users')
+            ->group('Titulares.id')
+            ->order(['Titulares.created' => 'DESC']);
+        
+        // Filtro de búsqueda
+        $termino = $this->request->getQuery('termino');
+        if (!empty($termino)) {
+            $query->where([
+                'OR' => [
+                    'Titulares.dni LIKE' => '%' . $termino . '%',
+                    'Titulares.nombres LIKE' => '%' . $termino . '%',
+                    'Titulares.apellidos LIKE' => '%' . $termino . '%'
+                ]
+            ]);
+        }
+        
+        $titulares = $this->paginate($query);
+        
+        $this->set(compact('titulares', 'termino'));
+    }
+    
+    /**
+     * Ver detalles de un titular
+     */
+    public function view($id = null)
+    {
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
+        }
+        
+        $titular = $this->Titulares->get($id, [
+            'contain' => [
+                'Users',
+                'Certificados' => [
+                    'sort' => ['Certificados.created' => 'DESC']
+                ]
+            ]
+        ]);
+        
+        $this->set(compact('titular'));
+    }
+    
+    /**
+     * Editar titular (corrección de errores)
+     */
+    public function edit($id = null)
+    {
+        if ($redirect = $this->requiereAdministrador()) {
+            return $redirect;
+        }
+        
+        $titular = $this->Titulares->get($id, [
+            'contain' => ['Users', 'Certificados']
+        ]);
+        
+        if ($this->request->is(['patch', 'post', 'put'])) {
+            $titular = $this->Titulares->patchEntity($titular, $this->request->getData());
+            
+            if ($this->Titulares->save($titular)) {
+                $this->Flash->success('Titular actualizado correctamente');
+                return $this->redirect(['action' => 'view', $id]);
+            }
+            $this->Flash->error('Error al actualizar titular');
+        }
+        
+        $this->set(compact('titular'));
+    }
+    
+    /**
+     * Buscar titular por DNI (AJAX)
+     */
+    public function buscar($dni = null)
+    {
+        $this->request->allowMethod(['get']);
+        $this->viewBuilder()->setClassName('Json');
+        
+        if (empty($dni)) {
+            return $this->response->withType('application/json')
+                ->withStringBody(json_encode(['error' => 'DNI requerido']));
+        }
+        
+        $titular = $this->Titulares->find()
+            ->where(['dni' => $dni])
+            ->first();
+        
+        if ($titular) {
+            // Contar certificados
+            $totalCertificados = $this->Titulares->Certificados->find()
+                ->where(['titular_id' => $titular->id])
+                ->count();
+            
+            $response = [
+                'encontrado' => true,
+                'id' => $titular->id,
+                'dni' => $titular->dni,
+                'nombres' => $titular->nombres,
+                'apellidos' => $titular->apellidos,
+                'total_certificados' => $totalCertificados
+            ];
+        } else {
+            $response = ['encontrado' => false];
+        }
+        
+        $this->set('response', $response);
+        $this->viewBuilder()->setOption('serialize', 'response');
+    }
+    
+    /**
+     * Verificar titular (incluye usuario vinculado) - AJAX
+     */
+    public function verificar($dni = null)
+    {
+        $this->request->allowMethod(['get']);
+        $this->viewBuilder()->setClassName('Json');
+        
+        $titular = $this->Titulares->find()
+            ->where(['dni' => $dni])
+            ->contain(['Users'])
+            ->first();
+        
+        if ($titular) {
+            $response = [
+                'existe' => true,
+                'id' => $titular->id,
+                'nombres' => $titular->nombres,
+                'apellidos' => $titular->apellidos,
+                'usuario_vinculado' => $titular->has('user') ? $titular->user->username : null,
+                'total_certificados' => $this->Titulares->Certificados->find()
+                    ->where(['titular_id' => $titular->id])
+                    ->count()
+            ];
+        } else {
+            $response = ['existe' => false];
+        }
+        
+        $this->set('response', $response);
+        $this->viewBuilder()->setOption('serialize', 'response');
+    }
+}
+
+
+================================================================================
+VI. RESULTADO FINAL
+================================================================================
+
+═══════════════════════════════════════════════════════════════════════════════
+ARQUITECTURA LOGRADA
+═══════════════════════════════════════════════════════════════════════════════
+
+ANTES (Problemático):
+---------------------------------------------------------------------------
+┌──────────┐
+│   USER   │──┐
+└──────────┘  │
+              ├─→ ┌─────────────┐
+              │   │ CERTIFICADO │
+              └─→ └─────────────┘
+
+Problemas:
+✗ Certificado depende de user
+✗ No se puede certificar sin crear usuario
+✗ Datos mutables por usuario
+✗ Certificados huérfanos si se elimina user
+
+AHORA (Correcto):
+---------------------------------------------------------------------------
+                  ┌──────────┐
+            ┌────→│ TITULAR  │←────┐
+            │     └──────────┘     │
+            │                      │
+            │                      │
+┌──────────┐                  ┌─────────────┐
+│   USER   │                  │ CERTIFICADO │
+└──────────┘                  └─────────────┘
+
+Beneficios:
+✓ Certificado independiente de usuario
+✓ Usuario hereda certificados al vincularse
+✓ Datos inmutables
+✓ Sin certificados huérfanos
+
+
+═══════════════════════════════════════════════════════════════════════════════
+FLUJOS GARANTIZADOS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. CERTIFICAR SIN USUARIO
+---------------------------------------------------------------------------
+   Admin → Ingresa DNI → Sistema busca/crea titular → Genera certificado
+   
+   Resultado: Certificado existe, usuario NO existe
+
+2. USUARIO HEREDA CERTIFICADOS
+---------------------------------------------------------------------------
+   Admin → Crea usuario con DNI → Sistema vincula a titular → 
+   Usuario ve certificados previos
+   
+   Resultado: Certificados antiguos aparecen en "Mis Certificados"
+
+3. VERIFICACIÓN ROBUSTA
+---------------------------------------------------------------------------
+   Público → Ingresa código → Sistema muestra datos de titular →
+   Datos inmutables
+   
+   Resultado: Verificación independiente de usuarios del sistema
+
+4. SIN USUARIOS FANTASMA
+---------------------------------------------------------------------------
+   Sistema solo crea usuarios cuando admin lo solicita explícitamente
+   
+   Resultado: Base de datos limpia, sin cuentas innecesarias
+
+5. DATOS INMUTABLES
+---------------------------------------------------------------------------
+   Usuario NO puede editar DNI/nombres/apellidos del titular
+   
+   Resultado: Certificados siempre muestran datos originales
+
+
+═══════════════════════════════════════════════════════════════════════════════
+MODELO ESTABLE PARA PRODUCCIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ Separación clara: identidad vs cuenta de sistema
+✓ Integridad referencial garantizada
+✓ Migraciones reversibles (user_id preservado)
+✓ Certificados verificables públicamente
+✓ Escalabilidad: miles de certificados, pocos usuarios
+✓ Cumplimiento normativo: datos certificados inmutables
+✓ Auditoría completa: logs de verificación y emisión
+
+
+================================================================================
+SCRIPTS DE MIGRACIÓN RECOMENDADOS
+================================================================================
+
+1. Orden de ejecución:
+   a) Crear tabla titulares
+   b) Agregar titular_id a users y certificados
+   c) Migrar certificados → titulares
+   d) Migrar users → titulares
+   e) Validar integridad
+   f) Hacer titular_id obligatorio en certificados
+
+2. Backup previo:
+   mysqldump cifaa > backup_pre_titulares.sql
+
+3. Rollback si falla:
+   DROP TABLE titulares;
+   ALTER TABLE users DROP COLUMN titular_id;
+   ALTER TABLE certificados DROP COLUMN titular_id;
+
+
+================================================================================
+FIN DE LA ARQUITECTURA
+================================================================================
+
+Este documento describe la refactorización completa del sistema.
+La implementación debe seguirse en el orden exacto especificado.
+No saltear pasos de migración o se perderá integridad referencial.

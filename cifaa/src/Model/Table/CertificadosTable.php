@@ -48,10 +48,12 @@ class CertificadosTable extends Table
 
         $this->addBehavior('Timestamp');
 
-        $this->belongsTo('Users', [
-            'foreignKey' => 'user_id',
-            'joinType' => 'LEFT',
+        // NUEVA ARQUITECTURA: Certificados pertenecen a TITULARES
+        $this->belongsTo('Titulares', [
+            'foreignKey' => 'titular_id',
+            'joinType' => 'INNER',  // Obligatorio (NOT NULL en DB)
         ]);
+        
         $this->belongsTo('Cursos', [
             'foreignKey' => 'curso_id',
             'joinType' => 'LEFT',
@@ -66,9 +68,16 @@ class CertificadosTable extends Table
      */
     public function validationDefault(Validator $validator): Validator
     {
+        // NUEVO: titular_id es obligatorio
         $validator
-            ->integer('user_id')
-            ->allowEmptyString('user_id');
+            ->integer('titular_id')
+            ->requirePresence('titular_id', 'create')
+            ->notEmptyString('titular_id');
+
+        // DEPRECATED: user_id_legacy es opcional
+        $validator
+            ->integer('user_id_legacy')
+            ->allowEmptyString('user_id_legacy');
 
         $validator
             ->integer('curso_id')
@@ -77,12 +86,14 @@ class CertificadosTable extends Table
         $validator
             ->scalar('nombre_completo')
             ->maxLength('nombre_completo', 255)
-            ->allowEmptyString('nombre_completo');
+            ->requirePresence('nombre_completo', 'create')
+            ->notEmptyString('nombre_completo');
 
         $validator
             ->scalar('nombre_curso')
             ->maxLength('nombre_curso', 255)
-            ->allowEmptyString('nombre_curso');
+            ->requirePresence('nombre_curso', 'create')
+            ->notEmptyString('nombre_curso');
 
         $validator
             ->integer('horas')
@@ -145,21 +156,13 @@ class CertificadosTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        // Make user_id and curso_id optional - only validate if provided
-        $rules->add(
-            function ($entity, $options) {
-                if (empty($entity->user_id)) {
-                    return true;
-                }
-                return $this->Users->exists(['id' => $entity->user_id]);
-            },
-            'validUser',
-            [
-                'errorField' => 'user_id',
-                'message' => 'El usuario especificado no existe'
-            ]
-        );
+        // NUEVO: titular_id debe existir en tabla titulares (obligatorio)
+        $rules->add($rules->existsIn(['titular_id'], 'Titulares'), [
+            'errorField' => 'titular_id',
+            'message' => 'El titular especificado no existe.'
+        ]);
         
+        // curso_id es opcional, solo validar si está presente
         $rules->add(
             function ($entity, $options) {
                 if (empty($entity->curso_id)) {
@@ -174,7 +177,11 @@ class CertificadosTable extends Table
             ]
         );
         
-        $rules->add($rules->isUnique(['codigo']), ['errorField' => 'codigo', 'message' => 'Este codigo de certificado ya existe.']);
+        // Código debe ser único
+        $rules->add($rules->isUnique(['codigo']), [
+            'errorField' => 'codigo', 
+            'message' => 'Este código de certificado ya existe.'
+        ]);
 
         return $rules;
     }

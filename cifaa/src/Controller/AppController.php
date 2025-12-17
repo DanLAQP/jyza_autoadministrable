@@ -78,6 +78,11 @@ class AppController extends Controller
             return false;
         }
         
+        // El administrador (rol = 1) tiene acceso a todos los cursos
+        if ($usuario->rol == 1) {
+            return true;
+        }
+        
         // Convertir a int si es necesario
         $cursoId = (int) $cursoId;
         
@@ -107,6 +112,11 @@ class AppController extends Controller
         
         if (!$usuario) {
             return false;
+        }
+        
+        // El administrador (rol = 1) tiene acceso a todos los módulos
+        if ($usuario->rol == 1) {
+            return true;
         }
         
         // Convertir a int si es necesario
@@ -140,6 +150,11 @@ class AppController extends Controller
             return false;
         }
         
+        // El administrador (rol = 1) tiene acceso a todas las lecciones
+        if ($usuario->rol == 1) {
+            return true;
+        }
+        
         // Convertir a int si es necesario
         $leccionId = (int) $leccionId;
         
@@ -162,6 +177,15 @@ class AppController extends Controller
         parent::beforeFilter($event);
         // Permitir acciones sin autenticación
         $this->Authentication->addUnauthenticatedActions(['login', 'logout']);
+        
+        // Validar que usuarios inactivos no puedan acceder al sistema
+        $identity = $this->Authentication->getIdentity();
+        if ($identity && isset($identity->estado) && $identity->estado === 'inactivo') {
+            // Usuario inactivo intentando acceder: cerrar sesión
+            $this->Authentication->logout();
+            $this->Flash->error(__('Su cuenta ha sido desactivada. Por favor, contacte al administrador del sistema.'));
+            return $this->redirect(['controller' => 'Users', 'action' => 'login']);
+        }
     }
 
     // =========================================================================

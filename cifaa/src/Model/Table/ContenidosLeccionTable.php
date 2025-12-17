@@ -63,13 +63,13 @@ class ContenidosLeccionTable extends Table
     {
         $validator
             ->integer('leccion_id')
-            ->notEmptyString('leccion_id');
+            ->notEmptyString('leccion_id', 'La lección es requerida');
 
         $validator
             ->scalar('tipo')
             ->maxLength('tipo', 50)
             ->requirePresence('tipo', 'create')
-            ->notEmptyString('tipo');
+            ->notEmptyString('tipo', 'El tipo de contenido es requerido');
 
         $validator
             ->scalar('contenido')
@@ -82,7 +82,7 @@ class ContenidosLeccionTable extends Table
 
         $validator
             ->integer('posicion')
-            ->notEmptyString('posicion');
+            ->notEmptyString('posicion', 'La posición es requerida');
 
         return $validator;
     }

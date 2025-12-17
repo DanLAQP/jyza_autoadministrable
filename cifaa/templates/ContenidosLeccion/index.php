@@ -96,13 +96,40 @@
                                             $fullPath = $contenido->archivo;
                                             $fileName = basename($fullPath);
                                             $ext = pathinfo($fileName, PATHINFO_EXTENSION);
+                                            
+                                            // Truncar nombre si es muy largo
                                             if (strlen($fileName) > 40) {
                                                 $base = pathinfo($fileName, PATHINFO_FILENAME);
                                                 $short = mb_substr($base, 0, 40);
-                                                $fileName = $short . (strlen($base) > 40 ? '...' : '') . ($ext ? ".{$ext}" : '');
+                                                $displayName = $short . (strlen($base) > 40 ? '...' : '') . ($ext ? ".{$ext}" : '');
+                                            } else {
+                                                $displayName = $fileName;
                                             }
+                                            
+                                            // Determinar icono según tipo de archivo
+                                            $icon = match($ext) {
+                                                'pdf' => 'fa-file-pdf text-danger',
+                                                'doc', 'docx' => 'fa-file-word text-primary',
+                                                'xls', 'xlsx' => 'fa-file-excel text-success',
+                                                'jpg', 'jpeg', 'png', 'gif', 'webp' => 'fa-image text-info',
+                                                'mp4', 'webm' => 'fa-video text-warning',
+                                                default => 'fa-file text-secondary'
+                                            };
+                                            
+                                            $isViewable = in_array($ext, ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp']);
                                         ?>
-                                        <span title="<?= h($fullPath) ?>"><?= h($fileName) ?></span>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fas <?= $icon ?>"></i>
+                                            <?php if ($isViewable): ?>
+                                                <a href="<?= $this->Url->assetUrl($fullPath) ?>" target="_blank" title="Ver archivo" class="text-info">
+                                                    <?= h($displayName) ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <a href="<?= $this->Url->assetUrl($fullPath) ?>" download="<?= h($fileName) ?>" title="Descargar archivo" class="text-info">
+                                                    <?= h($displayName) ?>
+                                                </a>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
                                     <td><span class="badge bg-secondary"><?= $this->Number->format($contenido->posicion) ?></span></td>
                                     <td><?= h($contenido->created) ?></td>
@@ -118,13 +145,13 @@
                                                 <?= $this->Html->link(
                                                     '<i class="fas fa-edit"></i>',
                                                     ['action' => 'edit', $contenido->id],
-                                                    ['class' => 'btn btn-warning', 'title' => 'Editar', 'escape' => false]
+                                                    ['class' => 'btn btn-warning openModal', 'title' => 'Editar', 'escape' => false]
                                                 ) ?>
-                                                <?= $this->Form->postLink(
+                                                <!-- <?= $this->Form->postLink(
                                                     '<i class="fas fa-trash"></i>',
                                                     ['action' => 'delete', $contenido->id],
                                                     ['confirm' => '¿Estás seguro?', 'class' => 'btn btn-danger', 'title' => 'Eliminar', 'escape' => false]
-                                                ) ?>
+                                                ) ?> -->
                                             <?php endif; ?>
                                         </div>
                                     </td>

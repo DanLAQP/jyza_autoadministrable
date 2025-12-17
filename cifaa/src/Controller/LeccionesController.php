@@ -104,6 +104,12 @@ class LeccionesController extends AppController
         }
         
         $this->set(compact('leccion'));
+        // Usar un layout diferenciado para solicitudes normales o AJAX
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        } else {
+            $this->viewBuilder()->setLayout('default');
+        }
     }
 
     /**
@@ -150,7 +156,12 @@ class LeccionesController extends AppController
                 }
 
                 if ($cursoId) {
-                    return $this->redirect(['controller' => 'Cursos', 'action' => 'view', $cursoId]);
+                    return $this->redirect([
+                        'controller' => 'Cursos',
+                        'action' => 'view',
+                        $cursoId,
+                        '?' => ['tab' => 'contenido']
+                    ]);
                 }
                 return $this->redirect(['action' => 'index']);
             }
@@ -224,10 +235,27 @@ class LeccionesController extends AppController
             if ($this->Lecciones->save($leccione)) {
                 $this->Flash->success(__('The leccione has been saved.'));
 
-                if ($moduloId) {
-                    return $this->redirect(['controller' => 'Modulos', 'action' => 'view', $moduloId]);
+                // Determinar dónde redirigir basado en el parámetro redirect_to
+                $redirectTo = $this->request->getQuery('redirect_to');
+                
+                // Si viene desde Lecciones/view, redirigir a Lecciones/view
+                if ($redirectTo === 'leccion') {
+                    return $this->redirect(['action' => 'view', $leccione->id]);
                 }
-                return $this->redirect(['action' => 'index']);
+                
+                // Default: redirigir a Cursos/view con tab contenido
+                try {
+                    $modulo = $this->Lecciones->Modulos->get($leccione->modulo_id);
+                    return $this->redirect([
+                        'controller' => 'Cursos',
+                        'action' => 'view',
+                        $modulo->curso_id,
+                        '?' => ['tab' => 'contenido']
+                    ]);
+                } catch (\Exception $e) {
+                    // Fallback si no se encuentra el módulo
+                    return $this->redirect(['action' => 'index']);
+                }
             }
             $this->Flash->error(__('The leccione could not be saved. Please, try again.'));
         }
@@ -270,11 +298,29 @@ class LeccionesController extends AppController
         $this->request->allowMethod(['post', 'delete']);
         $leccione = $this->Lecciones->get($id);
         
+        // Obtener el curso_id a través del módulo antes de eliminar
+        try {
+            $modulo = $this->Lecciones->Modulos->get($leccione->modulo_id);
+            $cursoId = $modulo->curso_id;
+        } catch (\Exception $e) {
+            $cursoId = null;
+        }
+        
         // NOTA: Lecciones no tiene campo estado, aplicar eliminación física
         if ($this->Lecciones->delete($leccione)) {
             $this->Flash->success(__('Lección eliminada correctamente.'));
         } else {
             $this->Flash->error(__('No se pudo eliminar la lección. Verifique las dependencias.'));
+        }
+        
+        // Redirigir al curso si se pudo obtener el cursoId
+        if ($cursoId) {
+            return $this->redirect([
+                'controller' => 'Cursos',
+                'action' => 'view',
+                $cursoId,
+                '?' => ['tab' => 'contenido']
+            ]);
         }
 
         return $this->redirect(['action' => 'index']);

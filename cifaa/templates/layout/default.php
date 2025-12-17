@@ -274,9 +274,10 @@
     <!-- /.content-header -->
 
     <!-- Mensajes Flash -->
-    <div class="container-fluid mt-3">
+    <!-- <div class="container-fluid mt-3">
+        <?php echo ""; ?> 
         <?= $this->Flash->render() ?>
-    </div>
+    </div> -->
 
     <!-- Main content -->
 <section class="content">
@@ -470,6 +471,15 @@
     });
 });
 
+// Función global para cerrar modales
+window.closeModal = function() {
+    if (typeof $ !== 'undefined' && $.fn.modal) {
+        $('#modalSm').modal('hide');
+        $('#modalMd').modal('hide');
+        $('#modalLg').modal('hide');
+        $('#modalXl').modal('hide');
+    }
+};
 
     </script>
 

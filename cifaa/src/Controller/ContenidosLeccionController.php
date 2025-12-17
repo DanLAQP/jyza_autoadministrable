@@ -175,21 +175,17 @@ class ContenidosLeccionController extends AppController
             if ($this->ContenidosLeccion->save($contenidosLeccion)) {
                 $this->Flash->success(__('El contenido ha sido guardado.'));
 
-                // Obtener curso_id del request
-                $cursoId = $this->request->getQuery('curso_id');
+                // Obtener leccion_id para redirigir a la lección
+                $leccionId = $contenidosLeccion->leccion_id;
                 
-                if (!$cursoId && $contenidosLeccion->leccion_id) {
+                if ($leccionId) {
                     try {
-                        $leccion = $this->ContenidosLeccion->Lecciones->get($contenidosLeccion->leccion_id, ['contain' => ['Modulos']]);
-                        if ($leccion->modulo) {
-                            $cursoId = $leccion->modulo->curso_id;
-                        }
+                        $leccion = $this->ContenidosLeccion->Lecciones->get($leccionId);
+                        return $this->redirect(['controller' => 'Lecciones', 'action' => 'view', $leccionId]);
                     } catch (\Exception $e) { }
                 }
-
-                if ($cursoId) {
-                    return $this->redirect(['controller' => 'Cursos', 'action' => 'view', $cursoId]);
-                }
+                
+                // Fallback: redirigir al index
                 return $this->redirect(['action' => 'index']);
             }
             $this->Flash->error(__('El contenido no pudo ser guardado. Por favor, intenta nuevamente.'));
@@ -262,10 +258,10 @@ class ContenidosLeccionController extends AppController
         if ($this->request->is(['patch', 'post', 'put'])) {
             $data = $this->request->getData();
             
-            // Manejo de subida de archivo
-            if ($this->request->getUploadedFile('archivo')) {
-                $file = $this->request->getUploadedFile('archivo');
-                
+            // Manejo de subida de archivo (opcional, solo si se proporciona)
+            $uploadedFile = $this->request->getUploadedFile('archivo');
+            
+            if ($uploadedFile && $uploadedFile->getSize() > 0) {
                 // Validar tipo de archivo
                 $allowedMimes = [
                     'application/pdf' => '.pdf',
@@ -281,7 +277,7 @@ class ContenidosLeccionController extends AppController
                     'video/webm' => '.webm',
                 ];
                 
-                $clientMediaType = $file->getClientMediaType();
+                $clientMediaType = $uploadedFile->getClientMediaType();
                 
                 if (isset($allowedMimes[$clientMediaType])) {
                     // Eliminar archivo anterior si existe
@@ -303,35 +299,68 @@ class ContenidosLeccionController extends AppController
                     $filePath = $uploadDir . DS . $filename;
                     
                     // Guardar archivo
-                    $file->moveTo($filePath);
+                    $uploadedFile->moveTo($filePath);
                     $data['archivo'] = 'uploads/contenidos_leccion/' . $filename;
                 } else {
-                    $this->Flash->error(__('Tipo de archivo no permitido.'));
+                    // Tipo de archivo no permitido
+                    $contenidosLeccion->setErrors(['archivo' => ['El tipo de archivo no es permitido. Formatos soportados: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, GIF, WEBP, MP4, WEBM']]);
                     $lecciones = $this->ContenidosLeccion->Lecciones->find('list', limit: 200)->all();
                     $this->set(compact('contenidosLeccion', 'lecciones', 'leccionId'));
+                    
+                    // Si es AJAX, retornar HTML con errores
+                    $isAjax = $this->request->is('ajax') || 
+                              $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest';
+                    if ($isAjax) {
+                        $this->viewBuilder()->setLayout('ajax');
+                    }
                     return;
                 }
+            } else {
+                // Si no se proporciona archivo, no lo actualizar
+                unset($data['archivo']);
             }
             
             $contenidosLeccion = $this->ContenidosLeccion->patchEntity($contenidosLeccion, $data);
             if ($this->ContenidosLeccion->save($contenidosLeccion)) {
                 $this->Flash->success(__('El contenido ha sido guardado.'));
 
-                // Obtener curso_id del request
-                $cursoIdParam = $this->request->getQuery('curso_id');
-                
-                if ($cursoIdParam) {
-                    return $this->redirect(['action' => 'index', '?' => ['curso_id' => $cursoIdParam]]);
+                // Detectar AJAX
+                $isAjax = $this->request->is('ajax') || 
+                          $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest' ||
+                          $this->request->getQuery('_ajax') === '1' ||
+                          $this->request->getData('_ajax') === '1';
+
+                // Si es AJAX, retornar JSON con redirect
+                if ($isAjax) {
+                    $leccionId = $contenidosLeccion->leccion_id;
+                    return $this->response->withType('application/json')->withStringBody(
+                        json_encode([
+                            'success' => true, 
+                            'message' => 'El contenido ha sido guardado.',
+                            'redirect' => $this->Url->build(['controller' => 'Lecciones', 'action' => 'view', $leccionId])
+                        ])
+                    );
                 }
-                return $this->redirect(['action' => 'index']);
+
+                // Obtener curso_id del request o redirigir a la lección
+                $leccionId = $contenidosLeccion->leccion_id;
+                return $this->redirect(['controller' => 'Lecciones', 'action' => 'view', $leccionId]);
             }
-            $this->Flash->error(__('El contenido no pudo ser guardado. Por favor, intenta nuevamente.'));
+            
+            // Si falla, en AJAX mostrar la vista con errores (no JSON)
+            // Esto permite que el modal muestre los errores en el formulario
         }
         
         $lecciones = $this->ContenidosLeccion->Lecciones->find('list', limit: 200)->all();
         $this->set(compact('contenidosLeccion', 'lecciones', 'leccionId'));
         // Usar un layout diferenciado para solicitudes normales o AJAX
-        if ($this->request->is('ajax')) {
+        // Detectar AJAX por: X-Requested-With header, _ajax parameter, o método POST/PUT
+        $isAjax = $this->request->is('ajax') || 
+                  $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest' ||
+                  $this->request->getQuery('_ajax') === '1' ||
+                  $this->request->getData('_ajax') === '1';
+        
+        if ($isAjax) {
             $this->viewBuilder()->setLayout('ajax');
         } else {
             $this->viewBuilder()->setLayout('default');

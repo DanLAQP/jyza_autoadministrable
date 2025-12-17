@@ -17,6 +17,9 @@ if (empty($curso)) {
 }
 
 $identity = $this->getRequest()->getAttribute('identity');
+
+// Detectar qué pestaña mostrar por defecto
+$tabActiva = $this->request->getQuery('tab') === 'contenido' ? 'contenido' : 'presentacion';
 ?>
 
 <div class="container py-4">
@@ -44,55 +47,16 @@ $identity = $this->getRequest()->getAttribute('identity');
                 <?php endif; ?>
             </div>
 
-            <!-- Barra de Acciones de Edición (Solo Admin) -->
-            <?php if (!empty($identity) && $identity->rol == 1): ?>
-            <div class="btn-group w-100 mb-2" role="group">
-                <?= $this->Html->link(
-                    '<i class="fas fa-edit me-1"></i> Editar Curso',
-                    ['action' => 'edit', $curso->id],
-                    ['class' => 'btn btn-warning openModal', 'escape' => false]
-                ) ?>
-            </div>
-            
-            <!-- Botón Desactivar/Reactivar Curso (Solo Admin) -->
-            <div class="mb-3">
-                <?php if ($curso->estado !== 'inactivo'): ?>
-                    <?= $this->Form->postLink(
-                        '<i class="fas fa-ban me-1"></i> Desactivar Curso',
-                        ['action' => 'delete', $curso->id],
-                        [
-                            'confirm' => '¿Está seguro de desactivar este curso? Podrá reactivarlo después.',
-                            'class' => 'btn btn-danger w-100',
-                            'escape' => false
-                        ]
-                    ) ?>
-                <?php else: ?>
-                    <div class="alert alert-warning mb-2">
-                        <i class="fas fa-exclamation-triangle me-1"></i> Este curso está inactivo
-                    </div>
-                    <?= $this->Form->postLink(
-                        '<i class="fas fa-redo me-1"></i> Reactivar Curso',
-                        ['action' => 'reactivar', $curso->id],
-                        [
-                            'confirm' => '¿Está seguro de reactivar este curso?',
-                            'class' => 'btn btn-success w-100',
-                            'escape' => false
-                        ]
-                    ) ?>
-                <?php endif; ?>
-            </div>
-            <?php endif; ?>
-
             <!-- Tabs Presentación / Contenido -->
             <ul class="nav nav-tabs mt-3" id="cursoTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="presentacion-tab" data-bs-toggle="tab"
+                    <button class="nav-link <?= $tabActiva === 'presentacion' ? 'active' : '' ?>" id="presentacion-tab" data-bs-toggle="tab"
                             data-bs-target="#presentacion" type="button" role="tab">
                         <i class="fas fa-info-circle me-1"></i> Presentación
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="contenido-tab" data-bs-toggle="tab"
+                    <button class="nav-link <?= $tabActiva === 'contenido' ? 'active' : '' ?>" id="contenido-tab" data-bs-toggle="tab"
                             data-bs-target="#contenido" type="button" role="tab">
                         <i class="fas fa-book-open me-1"></i> Contenido
                     </button>
@@ -101,7 +65,7 @@ $identity = $this->getRequest()->getAttribute('identity');
 
             <div class="tab-content border-start border-end border-bottom p-3 bg-dark rounded-bottom" id="cursoTabsContent">
                 <!-- TAB 1: Presentación -->
-                <div class="tab-pane fade show active" id="presentacion" role="tabpanel">
+                <div class="tab-pane fade <?= $tabActiva === 'presentacion' ? 'show active' : '' ?>" id="presentacion" role="tabpanel">
                     <h5 class="text-info"><i class="fas fa-file-alt me-2"></i>Descripción</h5>
                     <p class="mb-3 text-light">
                         <?= $this->Text->autoParagraph(h($curso->descripcion)) ?>
@@ -131,17 +95,17 @@ $identity = $this->getRequest()->getAttribute('identity');
                 </div>
 
                 <!-- TAB 2: Contenido (Módulos + Lecciones) -->
-                <div class="tab-pane fade" id="contenido" role="tabpanel">
+                <div class="tab-pane fade <?= $tabActiva === 'contenido' ? 'show active' : '' ?>" id="contenido" role="tabpanel">
                     <?php if (!empty($curso->modulos)): ?>
                         <div class="accordion accordion-flush" id="modulosAccordion">
                             <?php foreach ($curso->modulos as $index => $modulo): ?>
                                 <div class="accordion-item bg-dark border-secondary">
                                     <h2 class="accordion-header" id="heading<?= $modulo->id ?>">
-                                        <button class="accordion-button bg-dark text-light <?= $index === 0 ? '' : 'collapsed' ?>"
+                                        <button class="accordion-button bg-dark text-light collapsed"
                                                 type="button"
                                                 data-bs-toggle="collapse"
                                                 data-bs-target="#collapse<?= $modulo->id ?>"
-                                                aria-expanded="<?= $index === 0 ? 'true' : 'false' ?>"
+                                                aria-expanded="false"
                                                 style="display: flex; align-items: center; justify-content: space-between;">
                                             <div class="d-flex align-items-center flex-grow-1">
                                                 <span class="me-2 badge bg-info"><?= $modulo->posicion ?></span>
@@ -165,7 +129,7 @@ $identity = $this->getRequest()->getAttribute('identity');
                                             </div>
                                         </button>
                                     </h2>
-                                    <div id="collapse<?= $modulo->id ?>" class="accordion-collapse collapse <?= $index === 0 ? 'show' : '' ?>"
+                                    <div id="collapse<?= $modulo->id ?>" class="accordion-collapse collapse"
                                          aria-labelledby="heading<?= $modulo->id ?>"
                                          data-bs-parent="#modulosAccordion">
                                         <div class="accordion-body p-0 bg-dark">
@@ -229,6 +193,15 @@ $identity = $this->getRequest()->getAttribute('identity');
                                                         </li>
                                                     <?php endforeach; ?>
                                                 </ul>
+                                                <?php if (!empty($identity) && $identity->rol == 1): ?>
+                                                    <p class="text-muted small p-3 mb-0 border-top border-secondary">
+                                                        <?= $this->Html->link(
+                                                            '<i class="fas fa-plus me-1"></i>Agregar lección',
+                                                            ['controller' => 'Lecciones', 'action' => 'add', '?' => ['modulo_id' => $modulo->id]],
+                                                            ['class' => 'text-info openModal', 'escape' => false]
+                                                        ) ?>
+                                                    </p>
+                                                <?php endif; ?>
                                             <?php else: ?>
                                                 <p class="text-muted small p-3 mb-0">
                                                     <i class="fas fa-info-circle me-1"></i>Sin lecciones aún.
@@ -246,15 +219,28 @@ $identity = $this->getRequest()->getAttribute('identity');
                                 </div>
                             <?php endforeach; ?>
                         </div>
-                    <?php else: ?>
-                        <div class="alert alert-info mb-0">
-                            <i class="fas fa-info-circle me-2"></i>Este curso todavía no tiene módulos.
-                            <?php if (!empty($identity) && $identity->rol == 1): ?>
+                        <?php if (!empty($identity) && $identity->rol == 1): ?>
+                            <p class="text-muted small mt-3 p-3 mb-0">
                                 <?= $this->Html->link(
-                                    'Crear el primer módulo',
+                                    '<i class="fas fa-plus me-1"></i>Agregar módulo',
                                     ['controller' => 'Modulos', 'action' => 'add', '?' => ['curso_id' => $curso->id]],
-                                    ['class' => 'alert-link']
+                                    ['class' => 'text-info openModal', 'escape' => false]
                                 ) ?>
+                            </p>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <div class="text-center py-5">
+                            <i class="fas fa-folder-open text-muted" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
+                            <h6 class="text-muted mb-3">Este curso todavía no tiene módulos</h6>
+                            <?php if (!empty($identity) && $identity->rol == 1): ?>
+                                <p class="small text-muted mb-3">Comienza a crear el contenido de tu curso agregando el primer módulo.</p>
+                                <?= $this->Html->link(
+                                    '<i class="fas fa-plus me-2"></i>Crear primer módulo',
+                                    ['controller' => 'Modulos', 'action' => 'add', '?' => ['curso_id' => $curso->id]],
+                                    ['class' => 'btn btn-sm btn-info openModal', 'escape' => false]
+                                ) ?>
+                            <?php else: ?>
+                                <p class="small text-muted mb-0">El instructor aún no ha agregado contenido a este curso.</p>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
@@ -381,7 +367,27 @@ $identity = $this->getRequest()->getAttribute('identity');
                                 ['controller' => 'Modulos', 'action' => 'add', '?' => ['curso_id' => $curso->id]],
                                 ['class' => 'btn btn-sm btn-success openModal', 'escape' => false]
                             ) ?>
-                            
+                            <?php if ($curso->estado !== 'inactivo'): ?>
+                                <?= $this->Form->postLink(
+                                    '<i class="fas fa-ban me-1"></i> Desactivar',
+                                    ['action' => 'delete', $curso->id],
+                                    [
+                                        'confirm' => '¿Está seguro de desactivar este curso? Podrá reactivarlo después.',
+                                        'class' => 'btn btn-sm btn-danger',
+                                        'escape' => false
+                                    ]
+                                ) ?>
+                            <?php else: ?>
+                                <?= $this->Form->postLink(
+                                    '<i class="fas fa-redo me-1"></i> Reactivar',
+                                    ['action' => 'reactivar', $curso->id],
+                                    [
+                                        'confirm' => '¿Está seguro de reactivar este curso?',
+                                        'class' => 'btn btn-sm btn-success',
+                                        'escape' => false
+                                    ]
+                                ) ?>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
                 </div>

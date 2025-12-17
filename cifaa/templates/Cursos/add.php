@@ -58,6 +58,7 @@ $usuario = $this->getRequest()->getAttribute('identity');
                     'avanzado' => 'Avanzado',
                 ],
                 'default' => 'basico',
+                'empty' => false,
                 'required' => true
             ]) ?>
         </div>
@@ -97,6 +98,7 @@ $usuario = $this->getRequest()->getAttribute('identity');
                     'inactivo' => 'Inactivo',
                 ],
                 'default' => 'activo',
+                'empty' => false,
                 'required' => true
             ]) ?>
         </div>

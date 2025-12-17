@@ -15,7 +15,7 @@
                     <?= $this->Html->link(
                         '<i class="fas fa-plus"></i> Nuevo Curso',
                         ['action' => 'add'],
-                        ['class' => 'btn openModal', 'style' => 'background-color: #5dade2; color: #ffffff; font-weight: bold;', 'escape' => false]
+                        ['class' => 'btn btn-info btn-sm openModal', 'escape' => false]
                     ) ?>
                 <?php endif; ?>
             </div>
@@ -32,7 +32,7 @@
                 <div class="col-md-6 mb-3 mb-md-0">
                     <?= $this->Form->create(null, ['type' => 'get', 'class' => 'd-flex']) ?>
                     <div class="input-group">
-                        <input type="text" name="termino" class="form-control" 
+                        <input type="text" name="termino" id="termino-busqueda" class="form-control" 
                                placeholder="Buscar curso por título..." 
                                value="<?= h($this->request->getQuery('termino')) ?>">
                         <input type="hidden" name="estado" value="<?= h($filtroEstado ?? 'activo') ?>">
@@ -52,12 +52,12 @@
                 
                 <!-- Filtro por estado -->
                 <div class="col-md-6">
-                    <div class="btn-group float-end" role="group" aria-label="Filtro por estado">
+                    <div class="btn-group float-end filter-btn-group" role="group" aria-label="Filtro por estado">
                         <?= $this->Html->link(
                             '<i class="fas fa-check-circle"></i> Activos',
                             ['action' => 'index', '?' => ['estado' => 'activo']],
                             [
-                                'class' => 'btn ' . (($filtroEstado ?? 'activo') === 'activo' ? 'btn-success' : 'btn-outline-success'),
+                                'class' => 'btn btn-sm ' . (($filtroEstado ?? 'activo') === 'activo' ? 'btn-success' : 'btn-outline-success'),
                                 'escape' => false,
                                 'title' => 'Ver cursos activos'
                             ]
@@ -67,7 +67,7 @@
                             '<i class="fas fa-ban"></i> Inactivos',
                             ['action' => 'index', '?' => ['estado' => 'inactivo']],
                             [
-                                'class' => 'btn ' . (($filtroEstado ?? 'activo') === 'inactivo' ? 'btn-danger' : 'btn-outline-danger'),
+                                'class' => 'btn btn-sm ' . (($filtroEstado ?? 'activo') === 'inactivo' ? 'btn-danger' : 'btn-outline-danger'),
                                 'escape' => false,
                                 'title' => 'Ver cursos desactivados'
                             ]
@@ -77,7 +77,7 @@
                             '<i class="fas fa-list"></i> Todos',
                             ['action' => 'index', '?' => ['estado' => 'todos']],
                             [
-                                'class' => 'btn ' . (($filtroEstado ?? 'activo') === 'todos' ? 'btn-secondary' : 'btn-outline-secondary'),
+                                'class' => 'btn btn-sm ' . (($filtroEstado ?? 'activo') === 'todos' ? 'btn-secondary' : 'btn-outline-secondary'),
                                 'escape' => false,
                                 'title' => 'Ver todos los cursos'
                             ]
@@ -88,7 +88,7 @@
             
             <!-- Indicador de filtro activo -->
             <?php if (isset($filtroEstado) && $filtroEstado !== 'activo'): ?>
-                <div class="alert alert-info mt-3 mb-0">
+                <div class="alert alert-info mt-2 mb-0 filter-alert">
                     <i class="fas fa-info-circle"></i> 
                     Mostrando cursos: <strong><?= ucfirst($filtroEstado) ?></strong>
                     <?php if ($filtroEstado === 'inactivo'): ?>
@@ -110,7 +110,7 @@
             </div>
         <?php else: ?>
             <?php foreach ($cursos as $curso): ?>
-                <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="col-lg-3 col-md-6 col-sm-12">
                     <div class="card h-100 shadow-sm border-0 hover-card <?= $curso->estado === 'inactivo' ? 'curso-inactivo' : '' ?>" style="transition: transform 0.3s, box-shadow 0.3s;">
                         <?php if ($curso->estado === 'inactivo'): ?>
                             <div class="ribbon ribbon-top-right"><span>INACTIVO</span></div>
@@ -118,40 +118,40 @@
                         
                         <!-- Miniatura (Optimizado: 800x450px - Aspect Ratio 16:9) -->
                         <?php if (!empty($curso->miniatura)): ?>
-                            <img src="<?= $curso->miniatura ?>" class="card-img-top <?= $curso->estado === 'inactivo' ? 'opacity-50' : '' ?>" alt="<?= h($curso->titulo) ?>" style="height: 225px; object-fit: cover; aspect-ratio: 16/9;">
+                            <img src="<?= $curso->miniatura ?>" class="card-img-top <?= $curso->estado === 'inactivo' ? 'opacity-50' : '' ?>" alt="<?= h($curso->titulo) ?>">
                         <?php else: ?>
-                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center <?= $curso->estado === 'inactivo' ? 'opacity-50' : '' ?>" style="height: 225px; aspect-ratio: 16/9;">
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center <?= $curso->estado === 'inactivo' ? 'opacity-50' : '' ?>">
                                 <i class="fas fa-image fa-3x text-muted"></i>
                             </div>
                         <?php endif; ?>
 
-                        <div class="card-body d-flex flex-column p-2">
+                        <div class="card-body d-flex flex-column p-1">
                             <!-- Título -->
-                            <h5 class="card-title <?= $curso->estado === 'inactivo' ? 'text-muted' : 'text-info' ?>">
+                            <h6 class="card-title <?= $curso->estado === 'inactivo' ? 'text-muted' : 'text-info' ?>" style="margin-bottom: 4px; font-size: 0.95rem;">
                                 <?= h($curso->titulo) ?>
                                 <?php if ($curso->estado === 'inactivo'): ?>
                                     <span class="badge bg-danger ms-2">DESACTIVADO</span>
                                 <?php endif; ?>
-                            </h5>
+                            </h6>
 
                             <!-- Instructor -->
                             <?php if ($curso->hasValue('user')): ?>
-                                <p class="card-text small mb-1" style="color: #b8b8b8; font-size: 0.8rem;">
+                                <p class="card-text small mb-1" style="color: #b8b8b8; font-size: 0.75rem; margin-bottom: 2px !important;">
                                     <i class="fas fa-user-tie"></i> 
                                     <?= $this->Html->link($curso->user->username, ['controller' => 'Users', 'action' => 'view', $curso->user->id], ['style' => 'color: #5dade2; text-decoration: none;']) ?>
                                 </p>
                             <?php endif; ?>
 
                             <!-- Descripción -->
-                            <p class="card-text flex-grow-1" style="color: #c5c5c5; font-size: 0.8rem; margin-bottom: 8px; line-height: 1.3;">
+                            <p class="card-text flex-grow-1" style="color: #c5c5c5; font-size: 0.75rem; margin-bottom: 4px; line-height: 1.2;">
                                 <?= substr(h($curso->descripcion), 0, 80) ?>...
                             </p>
 
                             <!-- Metadata -->
-                            <div class="mb-2">
+                            <div class="mb-1">
                                 <div class="row g-1">
                                     <div class="col-6">
-                                        <span class="badge w-100 text-center" style="background-color: #0f3460; color: #5dade2; border: 1px solid #5dade2; font-size: 0.7rem;">
+                                        <span class="badge w-100 text-center" style="background-color: #0f3460; color: #5dade2; border: 1px solid #5dade2; font-size: 0.65rem;">
                                             <i class="fas fa-graduation-cap"></i> <?= ucfirst(h($curso->nivel)) ?>
                                         </span>
                                     </div>
@@ -179,18 +179,18 @@
                                     $estadoTexto = ucfirst($curso->estado);
                                 }
                             ?>
-                            <p class="text-sm mb-3">
-                                <span class="badge bg-<?= $estadoClass ?>">
+                            <p class="text-sm mb-2" style="margin-bottom: 4px !important;">
+                                <span class="badge bg-<?= $estadoClass ?>" style="font-size: 0.7rem;">
                                     <i class="fas fa-<?= $estadoIcon ?>"></i> <?= $estadoTexto ?>
                                 </span>
                             </p>
 
                             <!-- Botones de Acción -->
-                            <div class="btn-group w-100 gap-1" role="group" style="gap: 5px !important;">
+                            <div class="btn-group w-100 gap-1" role="group" style="gap: 2px !important;">
                                 <?= $this->Html->link(
                                     '<i class="fas fa-eye"></i>',
                                     ['action' => 'view', $curso->id],
-                                    ['class' => 'btn btn-sm flex-grow-1 btn-action-view', 'style' => 'background-color: #5dade2; color: #ffffff; border: none; font-size: 1rem; padding: 5px;', 'title' => 'Ver', 'escape' => false]
+                                    ['class' => 'btn btn-sm btn-info', 'style' => 'padding: 3px 5px; font-size: 0.8rem;', 'title' => 'Ver', 'escape' => false]
                                 ) ?>
                                 
                                 <?php if (!empty($usuario) && $usuario->rol == 1): ?>
@@ -199,7 +199,7 @@
                                         <?= $this->Html->link(
                                             '<i class="fas fa-edit"></i>',
                                             ['action' => 'edit', $curso->id],
-                                            ['class' => 'btn btn-sm btn-outline-warning', 'title' => 'Editar', 'escape' => false]
+                                            ['class' => 'btn btn-sm btn-warning openModal', 'style' => 'padding: 3px 5px; font-size: 0.8rem;', 'title' => 'Editar', 'escape' => false]
                                         ) ?>
                                         
                                         <?= $this->Form->postLink(
@@ -208,6 +208,7 @@
                                             [
                                                 'confirm' => '¿Está seguro de desactivar este curso? Podrá reactivarlo después.',
                                                 'class' => 'btn btn-sm btn-danger',
+                                                'style' => 'padding: 3px 5px; font-size: 0.8rem;',
                                                 'title' => 'Desactivar curso',
                                                 'escape' => false
                                             ]
@@ -220,6 +221,7 @@
                                             [
                                                 'confirm' => '¿Está seguro de reactivar este curso?',
                                                 'class' => 'btn btn-sm btn-success w-100',
+                                                'style' => 'padding: 3px 5px; font-size: 0.8rem;',
                                                 'title' => 'Reactivar curso',
                                                 'escape' => false
                                             ]
@@ -230,7 +232,7 @@
                         </div>
 
                         <!-- Footer -->
-                        <div class="card-footer" style="background-color: #0f3460; border-top: 1px solid #5dade2; font-size: 0.75rem; color: #b8b8b8; text-align: center; padding: 6px;">
+                        <div class="card-footer" style="background-color: #0f3460; border-top: 1px solid #5dade2; font-size: 0.7rem; color: #b8b8b8; text-align: center; padding: 4px;">
                             Creado: <?= $curso->created->format('d/m/Y') ?>
                         </div>
                     </div>
@@ -287,6 +289,7 @@
         object-position: center;
         display: block;
         background-color: #0f3460;
+        max-height: 180px;
     }
     
     .btn-group {
@@ -353,8 +356,9 @@
     }
     
     /* Mejora de placeholder */
-    #buscar-curso-ajax::placeholder {
-        color: #606060 !important;
+    #buscar-curso-ajax::placeholder,
+    #termino-busqueda::placeholder {
+        color: #b8b8b8 !important;
         opacity: 1;
     }
     
@@ -395,6 +399,36 @@
     .pagination .disabled .page-link {
         opacity: 0.5;
         cursor: not-allowed;
+    }
+    
+    /* Estilos para botones de filtro condensados */
+    .filter-btn-group {
+        gap: 3px;
+    }
+    
+    .filter-btn-group .btn-sm {
+        padding: 5px 8px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+    
+    .filter-btn-group .btn-sm i {
+        margin-right: 2px;
+    }
+    
+    /* Estilos para el alert de filtro activo */
+    .filter-alert {
+        padding: 6px 12px !important;
+        font-size: 0.85rem;
+        background-color: #0f3460 !important;
+        border-color: #5dade2 !important;
+        color: #5dade2 !important;
+        margin-bottom: 12px;
+    }
+    
+    .filter-alert i {
+        margin-right: 5px;
     }
 </style>
 

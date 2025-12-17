@@ -114,9 +114,6 @@ if (!empty($noInscrito)) {
 $modulo = $leccion->modulo;
 $curso = $modulo->curso;
 $identity = $this->getRequest()->getAttribute('identity');
-
-// Contenido principal = primer contenido, si existe
-$principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion[0] : null;
 ?>
 
 <div class="container py-4">
@@ -203,21 +200,10 @@ $principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion
                                                  class="img-fluid rounded w-100"
                                                  style="max-height: 500px; object-fit: contain; background: #000;">
                                         <?php elseif ($isPdf): ?>
-                                            <div class="ratio ratio-4x3 mb-3">
-                                                <iframe src="<?= $this->Url->assetUrl($cont->archivo) ?>"
-                                                        type="application/pdf"
-                                                        class="rounded"
-                                                        allowfullscreen>
-                                                </iframe>
-                                            </div>
-                                            <div class="text-center mb-3">
-                                                <a href="<?= $this->Url->assetUrl($cont->archivo) ?>" target="_blank" class="btn btn-sm btn-info me-2">
-                                                    <i class="fas fa-external-link-alt me-1"></i>Abrir en pestaña nueva
-                                                </a>
-                                                <a href="<?= $this->Url->assetUrl($cont->archivo) ?>" download class="btn btn-sm btn-success">
-                                                    <i class="fas fa-download me-1"></i>Descargar
-                                                </a>
-                                            </div>
+                                            <embed src="<?= $this->Url->assetUrl($cont->archivo) ?>"
+                                                   type="application/pdf"
+                                                   class="w-100 rounded"
+                                                   style="height: 600px;">
                                         <?php else: ?>
                                             <div class="p-5 text-center">
                                                 <i class="fas fa-file fa-4x text-muted mb-3"></i>
@@ -235,6 +221,20 @@ $principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion
                                     <?php endif; ?>
                                 </div>
                             </div>
+                            
+                            <!-- Descripción del contenido -->
+                            <?php if ($cont->contenido): ?>
+                                <div class="card bg-dark border-secondary">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-info mb-3">
+                                            <i class="fas fa-align-left me-2"></i>Descripción
+                                        </h5>
+                                        <p class="card-text text-light" style="line-height: 1.8;">
+                                            <?= nl2br(h($cont->contenido)) ?>
+                                        </p>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -254,28 +254,6 @@ $principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion
                             <?php endif; ?>
                         </div>
                     </div>
-                </div>
-            <?php endif; ?>
-
-            <!-- Descripción del contenido seleccionado -->
-            <?php if (!empty($leccion->contenidos_leccion)): ?>
-                <div class="tab-content">
-                    <?php foreach ($leccion->contenidos_leccion as $cont): ?>
-                        <div class="tab-pane fade" id="desc-<?= $cont->id ?>" role="tabpanel">
-                            <?php if ($cont->contenido): ?>
-                                <div class="card bg-dark border-secondary">
-                                    <div class="card-body">
-                                        <h5 class="card-title text-info mb-3">
-                                            <i class="fas fa-align-left me-2"></i>Descripción
-                                        </h5>
-                                        <p class="card-text text-light" style="line-height: 1.8;">
-                                            <?= nl2br(h($cont->contenido)) ?>
-                                        </p>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
                 </div>
             <?php endif; ?>
 
@@ -318,19 +296,19 @@ $principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion
                 <div class="d-flex gap-2 mt-3">
                     <?= $this->Html->link(
                         '<i class="fas fa-edit me-1"></i>Editar Lección',
-                        ['action' => 'edit', $leccion->id, '?' => ['redirect_to' => 'leccion']],
+                        ['action' => 'edit', $leccion->id],
                         ['class' => 'btn btn-warning openModal', 'escape' => false]
                     ) ?>
                     <?= $this->Html->link(
                         '<i class="fas fa-plus me-1"></i>Agregar Contenido',
                         ['controller' => 'ContenidosLeccion', 'action' => 'add', '?' => ['leccion_id' => $leccion->id]],
-                        ['class' => 'btn btn-primary openModal', 'escape' => false]
+                        ['class' => 'btn btn-success openModal', 'escape' => false]
                     ) ?>
-                    <!-- <?= $this->Form->postLink(
+                    <?= $this->Form->postLink(
                         '<i class="fas fa-trash me-1"></i>Eliminar',
                         ['action' => 'delete', $leccion->id],
                         ['confirm' => '¿Estás seguro?', 'class' => 'btn btn-danger', 'escape' => false]
-                    ) ?> -->
+                    ) ?>
                 </div>
             <?php endif; ?>
         </div>
@@ -467,7 +445,7 @@ $principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion
                                     <?php if (!empty($identity) && $identity->rol == 1): ?>
                                         <?= $this->Html->link(
                                             '<i class="fas fa-edit"></i>',
-                                            ['controller' => 'ContenidosLeccion', 'action' => 'edit', $cont->id, '?' => ['redirect_to' => 'leccion', 'leccion_id' => $leccion->id]],
+                                            ['controller' => 'ContenidosLeccion', 'action' => 'edit', $cont->id],
                                             ['class' => 'btn btn-outline-warning btn-sm rounded-circle openModal', 'escape' => false, 'title' => 'Editar contenido']
                                         ) ?>
                                     <?php endif; ?>

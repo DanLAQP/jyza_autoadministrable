@@ -8,59 +8,69 @@
  */
 ?>
 
-<div class="container mt-4 mb-4">
-    <div class="row mb-4">
+<div class="container-fluid mt-3 mb-4">
+    <div class="row mb-3">
         <div class="col-12">
-            <h3 class="text-info"><i class="fas fa-chalkboard-teacher"></i> Crear Nueva Lección</h3>
-            <p class="text-muted">Completa los datos para crear una nueva lección</p>
+            <h4 class="text-info mb-1"><i class="fas fa-chalkboard-teacher me-2"></i>Agregar Lección</h4>
         </div>
     </div>
     
     <div class="row">
         <!-- Formulario -->
         <div class="col-lg-7">
-            <div class="card border-0 shadow-sm bg-dark border-info">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Datos de la Lección</h5>
+            <div class="card border-0 shadow-sm bg-dark border-secondary">
+                <div class="card-header bg-dark border-secondary" style="border-bottom: 2px solid #5dade2;">
+                    <h6 class="mb-0 text-info"><i class="fas fa-plus-circle me-2"></i>Datos de la Lección</h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-3">
                     <?= $this->Form->create($leccione, ['novalidate' => true, 'class' => 'form']) ?>
                     
-                    <div class="mb-3">
-                        <?= $this->Form->label('modulo_id', '<i class="fas fa-folder"></i> Módulo *', ['escape' => false]) ?>
-                        <?= $this->Form->select(
-                            'modulo_id',
-                            $modulos,
-                            [
-                                'class' => 'form-select form-select-lg',
-                                'empty' => '-- Selecciona un módulo --',
-                                'required' => true
-                            ]
-                        ) ?>
-                        <small class="form-text text-muted">
-                            <i class="fas fa-info-circle"></i> Selecciona el módulo al que pertenece esta lección
-                        </small>
+                    <div class="mb-2">
+                        <?php if (isset($moduloId)): ?>
+                            <?= $this->Form->label('modulo_id', 'Módulo', ['class' => 'form-label small text-muted']) ?>
+                            <div class="form-control form-control-sm bg-secondary bg-opacity-25 text-light border-secondary" style="padding: 0.4rem 0.75rem;">
+                                <?php
+                                    $nombreModulo = 'Módulo';
+                                    foreach ($modulos as $id => $nombre) {
+                                        if ($id == $moduloId) {
+                                            $nombreModulo = $nombre;
+                                            break;
+                                        }
+                                    }
+                                ?>
+                                <small><strong><?= h($nombreModulo) ?></strong></small>
+                            </div>
+                            <?= $this->Form->hidden('modulo_id', ['value' => $moduloId]) ?>
+                        <?php else: ?>
+                            <?= $this->Form->label('modulo_id', 'Módulo', ['class' => 'form-label small text-muted']) ?>
+                            <?= $this->Form->select(
+                                'modulo_id',
+                                $modulos,
+                                [
+                                    'class' => 'form-select form-select-sm',
+                                    'empty' => '-- Selecciona un módulo --',
+                                    'required' => true
+                                ]
+                            ) ?>
+                        <?php endif; ?>
                     </div>
 
-                    <div class="mb-3">
-                        <?= $this->Form->label('titulo', '<i class="fas fa-heading"></i> Título de la Lección *', ['escape' => false]) ?>
+                    <div class="mb-2">
+                        <?= $this->Form->label('titulo', 'Título', ['class' => 'form-label small text-muted']) ?>
                         <?= $this->Form->text(
                             'titulo',
                             [
-                                'class' => 'form-control form-control-lg',
-                                'placeholder' => 'Ej: Introducción a HTML, Variables en Python, etc.',
+                                'class' => 'form-control form-control-sm',
+                                'placeholder' => 'Ej: Introducción a HTML, Variables...',
                                 'required' => true,
                                 'maxlength' => 255
                             ]
                         ) ?>
-                        <small class="form-text text-muted">
-                            <i class="fas fa-info-circle"></i> Nombre descriptivo de la lección
-                        </small>
                     </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <?= $this->Form->label('tipo_contenido', '<i class="fas fa-film"></i> Tipo de Contenido *', ['escape' => false]) ?>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <?= $this->Form->label('tipo_contenido', 'Tipo Contenido', ['class' => 'form-label small text-muted']) ?>
                             <?= $this->Form->select(
                                 'tipo_contenido',
                                 [
@@ -70,44 +80,38 @@
                                     'quiz' => 'Quiz'
                                 ],
                                 [
-                                    'class' => 'form-select form-select-lg',
-                                    'empty' => '-- Selecciona tipo --',
+                                    'class' => 'form-select form-select-sm',
+                                    'empty' => false,
                                     'required' => true
                                 ]
                             ) ?>
-                            <small class="form-text text-muted">
-                                <i class="fas fa-info-circle"></i> Formato del contenido
-                            </small>
                         </div>
 
-                        <div class="col-md-6">
-                            <?= $this->Form->label('posicion', '<i class="fas fa-sort-numeric-up"></i> Posición *', ['escape' => false]) ?>
+                        <div class="col-md-6 mb-3">
+                            <?= $this->Form->label('posicion', 'Posición', ['class' => 'form-label small text-muted']) ?>
                             <?= $this->Form->number(
                                 'posicion',
                                 [
-                                    'class' => 'form-control form-control-lg',
-                                    'placeholder' => 'Ej: 1',
+                                    'class' => 'form-control form-control-sm',
+                                    'placeholder' => '1',
                                     'required' => true,
                                     'min' => 1
                                 ]
                             ) ?>
-                            <small class="form-text text-muted">
-                                <i class="fas fa-info-circle"></i> Orden en el módulo
-                                <?php if (isset($siguientePosicion)): ?>
-                                    (Sugerido: <?= $siguientePosicion ?>)
-                                <?php endif; ?>
-                            </small>
+                            <?php if (isset($siguientePosicion)): ?>
+                                <small class="text-muted d-block mt-1">Sugerido: <?= $siguientePosicion ?></small>
+                            <?php endif; ?>
                         </div>
                     </div>
 
-                    <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-info btn-lg">
-                            <i class="fas fa-save"></i> Crear Lección
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-sm btn-info flex-grow-1">
+                            <i class="fas fa-save me-1"></i> Guardar
                         </button>
                         <?= $this->Html->link(
-                            '<i class="fas fa-times"></i> Cancelar',
+                            '<i class="fas fa-times me-1"></i>Cancelar',
                             ['action' => 'index', '?' => isset($cursoId) ? ['curso_id' => $cursoId] : []],
-                            ['class' => 'btn btn-secondary btn-lg ms-2', 'escape' => false]
+                            ['class' => 'btn btn-sm btn-secondary', 'escape' => false]
                         ) ?>
                     </div>
 
@@ -120,40 +124,32 @@
         <div class="col-lg-5">
             <div id="lecciones-existentes-container">
                 <?php if (isset($leccionesExistentes) && !$leccionesExistentes->isEmpty()): ?>
-                    <div class="card shadow-sm bg-dark border-secondary">
-                        <div class="card-header bg-secondary text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-list"></i> Lecciones Existentes
-                                <span class="badge bg-light text-dark"><?= $leccionesExistentes->count() ?></span>
-                            </h5>
+                    <div class="card border-0 shadow-sm bg-dark border-secondary">
+                        <div class="card-header bg-dark border-secondary p-2" style="border-bottom: 2px solid #5dade2;">
+                            <h6 class="mb-0 text-info" style="font-size: 0.9rem;">
+                                <i class="fas fa-list me-2"></i>Lecciones (<?= $leccionesExistentes->count() ?>)
+                            </h6>
                         </div>
                         <div class="card-body p-0">
                             <div class="list-group list-group-flush">
                                 <?php foreach ($leccionesExistentes as $lec): ?>
-                                    <div class="list-group-item list-group-item-dark d-flex justify-content-between align-items-start">
-                                        <div class="ms-2 me-auto">
-                                            <div class="fw-bold">
-                                                <span class="badge bg-primary me-2">#<?= $lec->posicion ?></span>
-                                                <?= h($lec->titulo) ?>
-                                            </div>
-                                            <small class="text-muted">
-                                                <i class="fas fa-<?= $lec->tipo_contenido == 'video' ? 'video' : ($lec->tipo_contenido == 'texto' ? 'file-alt' : ($lec->tipo_contenido == 'imagen' ? 'image' : 'question-circle')) ?>"></i>
-                                                <?= ucfirst($lec->tipo_contenido) ?>
-                                            </small>
+                                    <div class="list-group-item bg-dark border-secondary p-2">
+                                        <div class="mb-0">
+                                            <span class="badge bg-info me-2" style="font-size: 0.7rem;"><?= $lec->posicion ?></span>
+                                            <span class="text-light" style="font-size: 0.85rem;"><strong><?= h($lec->titulo) ?></strong></span>
                                         </div>
-                                        <?= $this->Html->link(
-                                            '<i class="fas fa-edit"></i>',
-                                            ['action' => 'edit', $lec->id],
-                                            ['class' => 'btn btn-sm btn-warning', 'escape' => false, 'title' => 'Editar']
-                                        ) ?>
+                                        <small class="text-muted d-block mt-1">
+                                            <i class="fas fa-<?= $lec->tipo_contenido == 'video' ? 'video' : ($lec->tipo_contenido == 'texto' ? 'file-alt' : ($lec->tipo_contenido == 'imagen' ? 'image' : 'question-circle')) ?>"></i>
+                                            <?= ucfirst($lec->tipo_contenido) ?>
+                                        </small>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
                         </div>
                     </div>
                 <?php else: ?>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Selecciona un módulo para ver sus lecciones
+                    <div class="alert alert-secondary bg-dark border-secondary text-muted p-2 mb-0" style="font-size: 0.85rem;">
+                        <i class="fas fa-info-circle me-1"></i>No hay lecciones aún.
                     </div>
                 <?php endif; ?>
             </div>
@@ -172,14 +168,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const moduloId = this.value;
             
             if (!moduloId) {
-                leccionesContainer.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle"></i> Selecciona un módulo para ver sus lecciones</div>';
+                leccionesContainer.innerHTML = '<div class="alert alert-secondary bg-dark border-secondary text-muted p-2 mb-0" style="font-size: 0.85rem;"><i class="fas fa-info-circle me-1"></i>Selecciona un módulo para ver lecciones</div>';
                 return;
             }
             
-            // Mostrar loading
-            leccionesContainer.innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-2">Cargando lecciones...</p></div>';
+            leccionesContainer.innerHTML = '<div class="text-center p-3"><i class="fas fa-spinner fa-spin"></i><p class="mt-2" style="font-size: 0.85rem;">Cargando...</p></div>';
             
-            // Cargar lecciones del módulo
             fetch(`<?= $this->Url->build(['controller' => 'Lecciones', 'action' => 'obtenerPorModulo']) ?>?modulo_id=${moduloId}`)
                 .then(response => {
                     if (!response.ok) {
@@ -188,24 +182,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     return response.json();
                 })
                 .then(data => {
-                    // Actualizar posición sugerida
                     if (posicionInput && data.siguientePosicion) {
                         posicionInput.value = data.siguientePosicion;
                         const smallText = posicionInput.parentElement.querySelector('small');
                         if (smallText) {
-                            smallText.innerHTML = `<i class="fas fa-info-circle"></i> Orden en el módulo (Sugerido: ${data.siguientePosicion})`;
+                            smallText.innerHTML = `Sugerido: ${data.siguientePosicion}`;
                         }
                     }
                     
-                    // Actualizar lista de lecciones
                     if (data.lecciones && data.lecciones.length > 0) {
                         let html = `
-                            <div class="card shadow-sm bg-dark border-secondary">
-                                <div class="card-header bg-secondary text-white">
-                                    <h5 class="mb-0">
-                                        <i class="fas fa-list"></i> Lecciones Existentes
-                                        <span class="badge bg-light text-dark">${data.lecciones.length}</span>
-                                    </h5>
+                            <div class="card border-0 shadow-sm bg-dark border-secondary">
+                                <div class="card-header bg-dark border-secondary p-2" style="border-bottom: 2px solid #5dade2;">
+                                    <h6 class="mb-0 text-info" style="font-size: 0.9rem;">
+                                        <i class="fas fa-list me-2"></i>Lecciones (${data.lecciones.length})
+                                    </h6>
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="list-group list-group-flush">`;
@@ -220,20 +211,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             const icon = iconMap[lec.tipo] || 'book';
                             
                             html += `
-                                <div class="list-group-item list-group-item-dark d-flex justify-content-between align-items-start">
-                                    <div class="ms-2 me-auto">
-                                        <div class="fw-bold">
-                                            <span class="badge bg-primary me-2">#${lec.posicion}</span>
-                                            ${lec.titulo}
-                                        </div>
-                                        <small class="text-muted">
-                                            <i class="fas fa-${icon}"></i>
-                                            ${lec.tipo ? lec.tipo.charAt(0).toUpperCase() + lec.tipo.slice(1) : ''}
-                                        </small>
+                                <div class="list-group-item bg-dark border-secondary p-2">
+                                    <div class="mb-0">
+                                        <span class="badge bg-info me-2" style="font-size: 0.7rem;">${lec.posicion}</span>
+                                        <span class="text-light" style="font-size: 0.85rem;"><strong>${lec.titulo}</strong></span>
                                     </div>
-                                    <a href="<?= $this->Url->build(['action' => 'edit']) ?>/${lec.id}" class="btn btn-sm btn-warning" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
+                                    <small class="text-muted d-block mt-1">
+                                        <i class="fas fa-${icon}"></i>
+                                        ${lec.tipo ? lec.tipo.charAt(0).toUpperCase() + lec.tipo.slice(1) : ''}
+                                    </small>
                                 </div>`;
                         });
                         
@@ -244,14 +230,38 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         leccionesContainer.innerHTML = html;
                     } else {
-                        leccionesContainer.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle"></i> Esta será la primera lección del módulo seleccionado</div>';
+                        leccionesContainer.innerHTML = '<div class="alert alert-secondary bg-dark border-secondary text-muted p-2 mb-0" style="font-size: 0.85rem;"><i class="fas fa-info-circle me-1"></i>No hay lecciones aún</div>';
                     }
                 })
                 .catch(error => {
-                    console.error('Error completo:', error);
-                    leccionesContainer.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error al cargar lecciones: ${error.message}</div>`;
+                    console.error('Error:', error);
+                    leccionesContainer.innerHTML = `<div class="alert alert-danger bg-dark text-danger p-2 mb-0" style="font-size: 0.85rem;"><i class="fas fa-exclamation-triangle me-1"></i>Error al cargar</div>`;
                 });
         });
     }
 });
 </script>
+
+<!-- CSS para mejorar visual -->
+<style>
+    .form-control::placeholder {
+        color: #6c757d !important;
+        opacity: 1;
+    }
+    
+    .form-control:focus::placeholder {
+        color: #6c757d !important;
+    }
+    
+    select.form-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath fill=%22%23495057%22 d=%22M7 10l5 5 5-5z%22/%3E%3C/svg%3E');
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 24px 24px;
+        padding-right: 3rem;
+        cursor: pointer;
+    }
+</style>

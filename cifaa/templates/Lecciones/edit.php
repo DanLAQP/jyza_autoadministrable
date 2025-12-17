@@ -6,46 +6,52 @@
  */
 ?>
 
-<div class="container mt-4 mb-4">
+<div class="container-fluid mt-3 mb-4">
     <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
-            <div class="card border-0 shadow-sm bg-dark">
-                <div class="card-header bg-warning text-dark">
-                    <h4 class="mb-0"><i class="fas fa-edit"></i> Editar Lección</h4>
+        <div class="col-lg-7">
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h4 class="text-warning mb-1"><i class="fas fa-edit me-2"></i>Editar Lección</h4>
                 </div>
-                <div class="card-body">
+            </div>
+            
+            <!-- Formulario -->
+            <div class="card border-0 shadow-sm bg-dark border-secondary">
+                <div class="card-header bg-dark border-secondary" style="border-bottom: 2px solid #5dade2;">
+                    <h6 class="mb-0 text-warning"><i class="fas fa-edit me-2"></i>Datos de la Lección</h6>
+                </div>
+                <div class="card-body p-3">
                     <?= $this->Form->create($leccione, ['novalidate' => true, 'class' => 'form']) ?>
                     
-                    <div class="mb-3">
-                        <?= $this->Form->label('modulo_id', 'Módulo *') ?>
+                    <div class="mb-2">
+                        <?= $this->Form->label('modulo_id', 'Módulo', ['class' => 'form-label small text-muted']) ?>
                         <?= $this->Form->select(
                             'modulo_id',
                             $modulos,
                             [
-                                'class' => 'form-control form-control-lg',
-                                'required' => true
+                                'class' => 'form-select form-select-sm',
+                                'required' => true,
+                                'empty' => false
                             ]
                         ) ?>
-                        <small class="form-text text-muted">Selecciona el módulo al que pertenece esta lección</small>
                     </div>
 
-                    <div class="mb-3">
-                        <?= $this->Form->label('titulo', 'Título de la Lección *') ?>
+                    <div class="mb-2">
+                        <?= $this->Form->label('titulo', 'Título', ['class' => 'form-label small text-muted']) ?>
                         <?= $this->Form->text(
                             'titulo',
                             [
-                                'class' => 'form-control form-control-lg',
-                                'placeholder' => 'Ej: Introducción a HTML',
+                                'class' => 'form-control form-control-sm',
+                                'placeholder' => 'Ej: Introducción a HTML...',
                                 'required' => true,
                                 'maxlength' => 255
                             ]
                         ) ?>
-                        <small class="form-text text-muted">Nombre descriptivo de la lección</small>
                     </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <?= $this->Form->label('tipo_contenido', 'Tipo de Contenido *') ?>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <?= $this->Form->label('tipo_contenido', 'Tipo Contenido', ['class' => 'form-label small text-muted']) ?>
                             <?= $this->Form->select(
                                 'tipo_contenido',
                                 [
@@ -55,44 +61,39 @@
                                     'quiz' => 'Quiz'
                                 ],
                                 [
-                                    'class' => 'form-control form-control-lg',
-                                    'required' => true
+                                    'class' => 'form-select form-select-sm',
+                                    'required' => true,
+                                    'empty' => false
                                 ]
                             ) ?>
-                            <small class="form-text text-muted">Formato del contenido</small>
                         </div>
 
-                        <div class="col-md-6">
-                            <?= $this->Form->label('posicion', 'Posición *') ?>
+                        <div class="col-md-6 mb-3">
+                            <?= $this->Form->label('posicion', 'Posición', ['class' => 'form-label small text-muted']) ?>
                             <?= $this->Form->number(
                                 'posicion',
                                 [
-                                    'class' => 'form-control form-control-lg',
-                                    'placeholder' => 'Ej: 1',
+                                    'class' => 'form-control form-control-sm',
+                                    'placeholder' => '1',
                                     'required' => true,
                                     'min' => 1
                                 ]
                             ) ?>
-                            <small class="form-text text-muted">Orden en el módulo</small>
                         </div>
                     </div>
 
-                    <div class="alert alert-info mb-3">
-                        <small><i class="fas fa-info-circle"></i> Creado: <?= $leccione->created->format('d/m/Y H:i') ?> | Actualizado: <?= $leccione->modified->format('d/m/Y H:i') ?></small>
+                    <div class="alert alert-secondary bg-dark border-secondary text-muted p-2 mb-3" style="font-size: 0.8rem;">
+                        <small><i class="fas fa-info-circle me-1"></i>Creado: <?= $leccione->created->format('d/m/Y H:i') ?> | Actualizado: <?= $leccione->modified->format('d/m/Y H:i') ?></small>
                     </div>
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-center mt-4">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-sm btn-warning flex-grow-1">
+                            <i class="fas fa-save me-1"></i> Guardar Cambios
+                        </button>
                         <?= $this->Html->link(
-                            'Cancelar',
+                            '<i class="fas fa-times me-1"></i>Cancelar',
                             ['action' => 'index'],
-                            ['class' => 'btn btn-secondary btn-lg', 'escape' => false]
-                        ) ?>
-                        <?= $this->Form->submit(
-                            'Guardar Cambios',
-                            [
-                                'class' => 'btn btn-primary btn-lg',
-                                'icon' => '<i class="fas fa-save"></i> '
-                            ]
+                            ['class' => 'btn btn-sm btn-secondary', 'escape' => false]
                         ) ?>
                     </div>
 
@@ -102,3 +103,27 @@
         </div>
     </div>
 </div>
+
+<!-- CSS para mejorar visual -->
+<style>
+    .form-control::placeholder {
+        color: #6c757d !important;
+        opacity: 1;
+    }
+    
+    .form-control:focus::placeholder {
+        color: #6c757d !important;
+    }
+    
+    select.form-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath fill=%22%23495057%22 d=%22M7 10l5 5 5-5z%22/%3E%3C/svg%3E');
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 24px 24px;
+        padding-right: 3rem;
+        cursor: pointer;
+    }
+</style>

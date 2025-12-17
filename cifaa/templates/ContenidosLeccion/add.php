@@ -9,119 +9,121 @@
  */
 ?>
 
-<div class="container mt-4 mb-4">
-    <div class="row mb-4">
+<div class="container-fluid mt-3 mb-4">
+    <div class="row mb-3">
         <div class="col-12">
-            <h3 class="text-success"><i class="fas fa-file-alt"></i> Agregar Nuevo Contenido</h3>
-            <p class="text-muted">Completa los datos para agregar contenido a una lección</p>
+            <h4 class="text-success mb-1"><i class="fas fa-file-alt me-2"></i>Agregar Contenido</h4>
         </div>
     </div>
     
     <div class="row">
         <!-- Formulario -->
         <div class="col-lg-7">
-            <div class="card border-0 shadow-sm bg-dark border-success">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Datos del Contenido</h5>
+            <div class="card border-0 shadow-sm bg-dark border-secondary">
+                <div class="card-header bg-dark border-secondary" style="border-bottom: 2px solid #5dade2;">
+                    <h6 class="mb-0 text-success"><i class="fas fa-plus-circle me-2"></i>Datos del Contenido</h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-3">
                     <?= $this->Form->create($contenidosLeccion, ['type' => 'file', 'novalidate' => true, 'class' => 'form']) ?>
                     
-                    <div class="mb-3">
-                        <?= $this->Form->label('leccion_id', '<i class="fas fa-chalkboard-teacher"></i> Lección *', ['escape' => false]) ?>
-                        <?= $this->Form->select(
-                            'leccion_id',
-                            $lecciones,
-                            [
-                                'class' => 'form-select form-select-lg',
-                                'empty' => '-- Selecciona una lección --',
-                                'required' => true
-                            ]
-                        ) ?>
-                        <small class="form-text text-muted">
-                            <i class="fas fa-info-circle"></i> Selecciona la lección a la que pertenece este contenido
-                        </small>
+                    <div class="mb-2">
+                        <?php if (isset($leccionId)): ?>
+                            <?= $this->Form->label('leccion_id', 'Lección', ['class' => 'form-label small text-muted']) ?>
+                            <div class="form-control form-control-sm bg-secondary bg-opacity-25 text-light border-secondary" style="padding: 0.4rem 0.75rem;">
+                                <?php
+                                    $nombreLeccion = 'Lección';
+                                    foreach ($lecciones as $id => $nombre) {
+                                        if ($id == $leccionId) {
+                                            $nombreLeccion = $nombre;
+                                            break;
+                                        }
+                                    }
+                                ?>
+                                <small><strong><?= h($nombreLeccion) ?></strong></small>
+                            </div>
+                            <?= $this->Form->hidden('leccion_id', ['value' => $leccionId]) ?>
+                        <?php else: ?>
+                            <?= $this->Form->label('leccion_id', 'Lección', ['class' => 'form-label small text-muted']) ?>
+                            <?= $this->Form->select(
+                                'leccion_id',
+                                $lecciones,
+                                [
+                                    'class' => 'form-select form-select-sm',
+                                    'empty' => '-- Selecciona una lección --',
+                                    'required' => true
+                                ]
+                            ) ?>
+                        <?php endif; ?>
                     </div>
 
-                    <div class="mb-3">
-                        <?= $this->Form->label('tipo', '<i class="fas fa-tag"></i> Tipo de Contenido *', ['escape' => false]) ?>
+                    <div class="mb-2">
+                        <?= $this->Form->label('tipo', 'Tipo Contenido', ['class' => 'form-label small text-muted']) ?>
                         <?= $this->Form->select(
                             'tipo',
                             [
-                                'video' => '📹 Video',
-                                'texto' => '📄 Texto',
-                                'imagen' => '🖼️ Imagen',
-                                'pdf' => '📕 Archivo PDF',
-                                'documento' => '📝 Documento Word/Excel'
+                                'video' => 'Video',
+                                'texto' => 'Texto',
+                                'imagen' => 'Imagen',
+                                'pdf' => 'PDF',
+                                'documento' => 'Documento'
                             ],
                             [
-                                'class' => 'form-select form-select-lg',
-                                'empty' => '-- Selecciona tipo --',
+                                'class' => 'form-select form-select-sm',
+                                'empty' => false,
                                 'required' => true
                             ]
                         ) ?>
-                        <small class="form-text text-muted">
-                            <i class="fas fa-info-circle"></i> Tipo de contenido que vas a cargar
-                        </small>
                     </div>
 
-                    <div class="mb-3">
-                        <?= $this->Form->label('contenido', '<i class="fas fa-edit"></i> Contenido (Texto)', ['escape' => false]) ?>
+                    <div class="mb-2">
+                        <?= $this->Form->label('contenido', 'Descripción', ['class' => 'form-label small text-muted']) ?>
                         <?= $this->Form->textarea(
                             'contenido',
                             [
-                                'class' => 'form-control form-control-lg',
-                                'rows' => 6,
-                                'placeholder' => 'Ej: Descripción del contenido, enlace del video (YouTube, Vimeo), etc.'
+                                'class' => 'form-control form-control-sm',
+                                'rows' => 3,
+                                'placeholder' => 'Ej: Link YouTube, descripción, etc.'
                             ]
                         ) ?>
-                        <small class="form-text text-muted">
-                            <i class="fas fa-info-circle"></i> Para videos: link de YouTube o descripción. Para texto: ingresa el contenido aquí
-                        </small>
                     </div>
 
-                    <div class="mb-3">
-                        <?= $this->Form->label('archivo', '<i class="fas fa-paperclip"></i> Archivo', ['escape' => false]) ?>
+                    <div class="mb-2">
+                        <?= $this->Form->label('archivo', 'Archivo', ['class' => 'form-label small text-muted']) ?>
                         <?= $this->Form->file(
                             'archivo',
                             [
-                                'class' => 'form-control form-control-lg',
+                                'class' => 'form-control form-control-sm',
                                 'accept' => '.pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp,.mp4,.webm',
                                 'id' => 'archivo-input'
                             ]
                         ) ?>
-                        <small class="form-text text-muted">
-                            <i class="fas fa-file-upload"></i> Formatos: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, GIF, WEBP, MP4, WEBM (Máx. 50MB)
-                        </small>
+                        <small class="text-muted d-block mt-1">PDF, DOC, XLSX, JPG, PNG, MP4... (Máx. 50MB)</small>
                     </div>
 
                     <div class="mb-3">
-                        <?= $this->Form->label('posicion', '<i class="fas fa-sort-numeric-up"></i> Posición *', ['escape' => false]) ?>
+                        <?= $this->Form->label('posicion', 'Posición', ['class' => 'form-label small text-muted']) ?>
                         <?= $this->Form->number(
                             'posicion',
                             [
-                                'class' => 'form-control form-control-lg',
-                                'placeholder' => 'Ej: 1',
+                                'class' => 'form-control form-control-sm',
+                                'placeholder' => '1',
                                 'required' => true,
                                 'min' => 1
                             ]
                         ) ?>
-                        <small class="form-text text-muted">
-                            <i class="fas fa-info-circle"></i> Orden en el que aparecerá este contenido
-                            <?php if (isset($siguientePosicion)): ?>
-                                (Sugerido: <?= $siguientePosicion ?>)
-                            <?php endif; ?>
-                        </small>
+                        <?php if (isset($siguientePosicion)): ?>
+                            <small class="text-muted d-block mt-1">Sugerido: <?= $siguientePosicion ?></small>
+                        <?php endif; ?>
                     </div>
 
-                    <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-success btn-lg">
-                            <i class="fas fa-save"></i> Guardar Contenido
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-sm btn-success flex-grow-1">
+                            <i class="fas fa-save me-1"></i> Guardar
                         </button>
                         <?= $this->Html->link(
-                            '<i class="fas fa-times"></i> Cancelar',
-                            ['action' => 'index', '?' => isset($cursoId) ? ['curso_id' => $cursoId] : []],
-                            ['class' => 'btn btn-secondary btn-lg ms-2', 'escape' => false]
+                            '<i class="fas fa-times me-1"></i>Cancelar',
+                            ['action' => 'index', '?' => isset($leccionId) ? ['leccion_id' => $leccionId] : []],
+                            ['class' => 'btn btn-sm btn-secondary', 'escape' => false]
                         ) ?>
                     </div>
 
@@ -134,21 +136,19 @@
         <div class="col-lg-5">
             <div id="contenidos-existentes-container">
                 <?php if (isset($contenidosExistentes) && !$contenidosExistentes->isEmpty()): ?>
-                    <div class="card shadow-sm bg-dark border-secondary">
-                        <div class="card-header bg-secondary text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-list"></i> Contenidos Existentes
-                                <span class="badge bg-light text-dark"><?= $contenidosExistentes->count() ?></span>
-                            </h5>
+                    <div class="card border-0 shadow-sm bg-dark border-secondary">
+                        <div class="card-header bg-dark border-secondary p-2" style="border-bottom: 2px solid #5dade2;">
+                            <h6 class="mb-0 text-success" style="font-size: 0.9rem;">
+                                <i class="fas fa-list me-2"></i>Contenidos (<?= $contenidosExistentes->count() ?>)
+                            </h6>
                         </div>
                         <div class="card-body p-0">
                             <div class="list-group list-group-flush">
                                 <?php foreach ($contenidosExistentes as $cont): ?>
-                                    <div class="list-group-item list-group-item-dark d-flex justify-content-between align-items-start">
-                                        <div class="ms-2 me-auto">
-                                            <div class="fw-bold">
-                                                <span class="badge bg-primary me-2">#<?= $cont->posicion ?></span>
-                                                <?php
+                                    <div class="list-group-item bg-dark border-secondary p-2">
+                                        <div class="mb-0">
+                                            <span class="badge bg-success me-2" style="font-size: 0.7rem;"><?= $cont->posicion ?></span>
+                                            <span class="text-light" style="font-size: 0.85rem;"><strong><?php
                                                 $tipoIcon = match($cont->tipo) {
                                                     'video' => 'video',
                                                     'texto' => 'file-alt',
@@ -157,29 +157,17 @@
                                                     'documento' => 'file-word',
                                                     default => 'file'
                                                 };
-                                                ?>
-                                                <i class="fas fa-<?= $tipoIcon ?> text-info"></i>
-                                                <?= ucfirst($cont->tipo) ?>
-                                            </div>
-                                            <?php if ($cont->archivo): ?>
-                                                <small class="text-muted">
-                                                    <i class="fas fa-paperclip"></i> <?= h($cont->archivo) ?>
-                                                </small>
-                                            <?php endif; ?>
+                                            ?>
+                                            <i class="fas fa-<?= $tipoIcon ?> me-1"></i><?= ucfirst($cont->tipo) ?></strong></span>
                                         </div>
-                                        <?= $this->Html->link(
-                                            '<i class="fas fa-edit"></i>',
-                                            ['action' => 'edit', $cont->id],
-                                            ['class' => 'btn btn-sm btn-warning', 'escape' => false, 'title' => 'Editar']
-                                        ) ?>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
                         </div>
                     </div>
                 <?php else: ?>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Selecciona una lección para ver sus contenidos
+                    <div class="alert alert-secondary bg-dark border-secondary text-muted p-2 mb-0" style="font-size: 0.85rem;">
+                        <i class="fas fa-info-circle me-1"></i>No hay contenidos aún.
                     </div>
                 <?php endif; ?>
             </div>
@@ -200,12 +188,12 @@
                 const leccionId = this.value;
                 
                 if (!leccionId) {
-                    contenidosContainer.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle"></i> Selecciona una lección para ver sus contenidos</div>';
+                    contenidosContainer.innerHTML = '<div class="alert alert-secondary bg-dark border-secondary text-muted p-2 mb-0" style="font-size: 0.85rem;"><i class="fas fa-info-circle me-1"></i>Selecciona lección para ver contenidos</div>';
                     return;
                 }
                 
                 // Mostrar loading
-                contenidosContainer.innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-2">Cargando contenidos...</p></div>';
+                contenidosContainer.innerHTML = '<div class="text-center p-3"><i class="fas fa-spinner fa-spin"></i><p class="mt-2" style="font-size: 0.85rem;">Cargando...</p></div>';
                 
                 // Cargar contenidos de la lección
                 fetch(`<?= $this->Url->build(['controller' => 'ContenidosLeccion', 'action' => 'obtenerPorLeccion']) ?>?leccion_id=${leccionId}`)
@@ -221,19 +209,18 @@
                             posicionInput.value = data.siguientePosicion;
                             const smallText = posicionInput.parentElement.querySelector('small');
                             if (smallText) {
-                                smallText.innerHTML = `<i class="fas fa-info-circle"></i> Orden en el que aparecerá este contenido (Sugerido: ${data.siguientePosicion})`;
+                                smallText.innerHTML = `Sugerido: ${data.siguientePosicion}`;
                             }
                         }
                         
                         // Actualizar lista de contenidos
                         if (data.contenidos && data.contenidos.length > 0) {
                             let html = `
-                                <div class="card shadow-sm bg-dark border-secondary">
-                                    <div class="card-header bg-secondary text-white">
-                                        <h5 class="mb-0">
-                                            <i class="fas fa-list"></i> Contenidos Existentes
-                                            <span class="badge bg-light text-dark">${data.contenidos.length}</span>
-                                        </h5>
+                                <div class="card border-0 shadow-sm bg-dark border-secondary">
+                                    <div class="card-header bg-dark border-secondary p-2" style="border-bottom: 2px solid #5dade2;">
+                                        <h6 class="mb-0 text-success" style="font-size: 0.9rem;">
+                                            <i class="fas fa-list me-2"></i>Contenidos (${data.contenidos.length})
+                                        </h6>
                                     </div>
                                     <div class="card-body p-0">
                                         <div class="list-group list-group-flush">`;
@@ -249,18 +236,11 @@
                                 const icon = iconMap[cont.tipo] || 'file';
                                 
                                 html += `
-                                    <div class="list-group-item list-group-item-dark d-flex justify-content-between align-items-start">
-                                        <div class="ms-2 me-auto">
-                                            <div class="fw-bold">
-                                                <span class="badge bg-primary me-2">#${cont.posicion}</span>
-                                                <i class="fas fa-${icon} text-info"></i>
-                                                ${cont.tipo.charAt(0).toUpperCase() + cont.tipo.slice(1)}
-                                            </div>
-                                            ${cont.archivo ? `<small class="text-muted"><i class="fas fa-paperclip"></i> ${cont.archivo}</small>` : ''}
+                                    <div class="list-group-item bg-dark border-secondary p-2">
+                                        <div class="mb-0">
+                                            <span class="badge bg-success me-2" style="font-size: 0.7rem;">${cont.posicion}</span>
+                                            <span class="text-light" style="font-size: 0.85rem;"><strong><i class="fas fa-${icon} me-1"></i>${cont.tipo.charAt(0).toUpperCase() + cont.tipo.slice(1)}</strong></span>
                                         </div>
-                                        <a href="<?= $this->Url->build(['action' => 'edit']) ?>/${cont.id}" class="btn btn-sm btn-warning" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
                                     </div>`;
                             });
                             
@@ -271,18 +251,17 @@
                             
                             contenidosContainer.innerHTML = html;
                         } else {
-                            contenidosContainer.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle"></i> Este será el primer contenido de la lección seleccionada</div>';
+                            contenidosContainer.innerHTML = '<div class="alert alert-secondary bg-dark border-secondary text-muted p-2 mb-0" style="font-size: 0.85rem;"><i class="fas fa-info-circle me-1"></i>No hay contenidos aún</div>';
                         }
                     })
                     .catch(error => {
-                        console.error('Error completo:', error);
-                        contenidosContainer.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error al cargar contenidos: ${error.message}</div>`;
+                        console.error('Error:', error);
+                        contenidosContainer.innerHTML = `<div class="alert alert-danger bg-dark text-danger p-2 mb-0" style="font-size: 0.85rem;"><i class="fas fa-exclamation-triangle me-1"></i>Error al cargar</div>`;
                     });
             });
         }
         
         // Validación de archivo
-        
         archivo?.addEventListener('change', function() {
             if (this.files.length > 0) {
                 const file = this.files[0];
@@ -301,3 +280,27 @@
         });
     });
 </script>
+
+<!-- CSS para mejorar visual -->
+<style>
+    .form-control::placeholder {
+        color: #6c757d !important;
+        opacity: 1;
+    }
+    
+    .form-control:focus::placeholder {
+        color: #6c757d !important;
+    }
+    
+    select.form-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath fill=%22%23495057%22 d=%22M7 10l5 5 5-5z%22/%3E%3C/svg%3E');
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 24px 24px;
+        padding-right: 3rem;
+        cursor: pointer;
+    }
+</style>

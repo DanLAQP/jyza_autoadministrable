@@ -118,7 +118,12 @@ class ModulosController extends AppController
                 }
                 
                 if ($cursoId) {
-                    return $this->redirect(['controller' => 'Cursos', 'action' => 'view', $cursoId]);
+                    return $this->redirect([
+                        'controller' => 'Cursos',
+                        'action' => 'view',
+                        $cursoId,
+                        '?' => ['tab' => 'contenido']
+                    ]);
                 }
                 return $this->redirect(['action' => 'index']);
             }
@@ -184,7 +189,13 @@ class ModulosController extends AppController
             if ($this->Modulos->save($modulo)) {
                 $this->Flash->success(__('The modulo has been saved.'));
 
-                return $this->redirect(['action' => 'index']);
+                // Redirigir al curso con la pestaña de contenido
+                return $this->redirect([
+                    'controller' => 'Cursos',
+                    'action' => 'view',
+                    $modulo->curso_id,
+                    '?' => ['tab' => 'contenido']
+                ]);
             }
             $this->Flash->error(__('The modulo could not be saved. Please, try again.'));
         }
@@ -225,6 +236,7 @@ class ModulosController extends AppController
         
         $this->request->allowMethod(['post', 'delete']);
         $modulo = $this->Modulos->get($id);
+        $cursoId = $modulo->curso_id;
         
         // NOTA: Modulos no tiene campo estado, aplicar eliminación física
         // Si se desea soft delete, agregar campo 'estado' a la tabla modulos
@@ -234,6 +246,12 @@ class ModulosController extends AppController
             $this->Flash->error(__('No se pudo eliminar el módulo. Verifique las dependencias.'));
         }
 
-        return $this->redirect(['action' => 'index']);
+        // Redirigir al curso con la pestaña de contenido
+        return $this->redirect([
+            'controller' => 'Cursos',
+            'action' => 'view',
+            $cursoId,
+            '?' => ['tab' => 'contenido']
+        ]);
     }
 }

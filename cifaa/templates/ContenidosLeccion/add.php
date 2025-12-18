@@ -12,7 +12,7 @@
 <div class="container-fluid mt-3 mb-4">
     <div class="row mb-3">
         <div class="col-12">
-            <h4 class="text-success mb-1"><i class="fas fa-file-alt me-2"></i>Agregar Contenido</h4>
+            <h4 class="text-info mb-1"><i class="fas fa-file-alt me-2"></i>Agregar Contenido</h4>
         </div>
     </div>
     
@@ -21,7 +21,7 @@
         <div class="col-lg-7">
             <div class="card border-0 shadow-sm bg-dark border-secondary">
                 <div class="card-header bg-dark border-secondary" style="border-bottom: 2px solid #5dade2;">
-                    <h6 class="mb-0 text-success"><i class="fas fa-plus-circle me-2"></i>Datos del Contenido</h6>
+                    <h6 class="mb-0 text-info"><i class="fas fa-plus-circle me-2"></i>Datos del Contenido</h6>
                 </div>
                 <div class="card-body p-3">
                     <?= $this->Form->create($contenidosLeccion, ['type' => 'file', 'novalidate' => true, 'class' => 'form']) ?>
@@ -117,14 +117,14 @@
                     </div>
 
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-sm btn-success flex-grow-1">
+                        <button type="submit" class="btn btn-sm btn-primary flex-grow-1">
                             <i class="fas fa-save me-1"></i> Guardar
                         </button>
-                        <?= $this->Html->link(
+                        <!-- <?= $this->Html->link(
                             '<i class="fas fa-times me-1"></i>Cancelar',
                             ['action' => 'index', '?' => isset($leccionId) ? ['leccion_id' => $leccionId] : []],
                             ['class' => 'btn btn-sm btn-secondary', 'escape' => false]
-                        ) ?>
+                        ) ?> -->
                     </div>
 
                     <?= $this->Form->end() ?>
@@ -138,7 +138,7 @@
                 <?php if (isset($contenidosExistentes) && !$contenidosExistentes->isEmpty()): ?>
                     <div class="card border-0 shadow-sm bg-dark border-secondary">
                         <div class="card-header bg-dark border-secondary p-2" style="border-bottom: 2px solid #5dade2;">
-                            <h6 class="mb-0 text-success" style="font-size: 0.9rem;">
+                            <h6 class="mb-0 text-info" style="font-size: 0.9rem;">
                                 <i class="fas fa-list me-2"></i>Contenidos (<?= $contenidosExistentes->count() ?>)
                             </h6>
                         </div>
@@ -147,7 +147,7 @@
                                 <?php foreach ($contenidosExistentes as $cont): ?>
                                     <div class="list-group-item bg-dark border-secondary p-2">
                                         <div class="mb-0">
-                                            <span class="badge bg-success me-2" style="font-size: 0.7rem;"><?= $cont->posicion ?></span>
+                                            <span class="badge bg-primary me-2" style="font-size: 0.7rem;"><?= $cont->posicion ?></span>
                                             <span class="text-light" style="font-size: 0.85rem;"><strong><?php
                                                 $tipoIcon = match($cont->tipo) {
                                                     'video' => 'video',
@@ -218,7 +218,7 @@
                             let html = `
                                 <div class="card border-0 shadow-sm bg-dark border-secondary">
                                     <div class="card-header bg-dark border-secondary p-2" style="border-bottom: 2px solid #5dade2;">
-                                        <h6 class="mb-0 text-success" style="font-size: 0.9rem;">
+                                        <h6 class="mb-0 text-primary" style="font-size: 0.9rem;">
                                             <i class="fas fa-list me-2"></i>Contenidos (${data.contenidos.length})
                                         </h6>
                                     </div>
@@ -238,7 +238,7 @@
                                 html += `
                                     <div class="list-group-item bg-dark border-secondary p-2">
                                         <div class="mb-0">
-                                            <span class="badge bg-success me-2" style="font-size: 0.7rem;">${cont.posicion}</span>
+                                            <span class="badge bg-primary me-2" style="font-size: 0.7rem;">${cont.posicion}</span>
                                             <span class="text-light" style="font-size: 0.85rem;"><strong><i class="fas fa-${icon} me-1"></i>${cont.tipo.charAt(0).toUpperCase() + cont.tipo.slice(1)}</strong></span>
                                         </div>
                                     </div>`;

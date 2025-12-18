@@ -90,11 +90,11 @@
                         <button type="submit" class="btn btn-sm btn-warning flex-grow-1">
                             <i class="fas fa-save me-1"></i> Guardar Cambios
                         </button>
-                        <?= $this->Html->link(
+                        <!-- <?= $this->Html->link(
                             '<i class="fas fa-times me-1"></i>Cancelar',
                             ['action' => 'index'],
                             ['class' => 'btn btn-sm btn-secondary', 'escape' => false]
-                        ) ?>
+                        ) ?> -->
                     </div>
 
                     <?= $this->Form->end() ?>

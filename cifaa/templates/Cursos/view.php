@@ -18,6 +18,9 @@ if (empty($curso)) {
 
 $identity = $this->getRequest()->getAttribute('identity');
 
+// Verificar si el curso está inactivo y el usuario es estudiante
+$cursoInactivoParaEstudiante = $curso->estado === 'inactivo' && (!empty($identity) && $identity->rol != 1);
+
 // Detectar qué pestaña mostrar por defecto
 $tabActiva = $this->request->getQuery('tab') === 'contenido' ? 'contenido' : 'presentacion';
 ?>
@@ -96,7 +99,18 @@ $tabActiva = $this->request->getQuery('tab') === 'contenido' ? 'contenido' : 'pr
 
                 <!-- TAB 2: Contenido (Módulos + Lecciones) -->
                 <div class="tab-pane fade <?= $tabActiva === 'contenido' ? 'show active' : '' ?>" id="contenido" role="tabpanel">
-                    <?php if (!empty($curso->modulos)): ?>
+                    <?php if ($cursoInactivoParaEstudiante): ?>
+                        <!-- Mensaje de curso inactivo para estudiantes -->
+                        <div class="alert alert-danger mb-0" role="alert">
+                            <h5 class="alert-heading">
+                                <i class="fas fa-ban me-2"></i>Curso no disponible
+                            </h5>
+                            <p class="mb-0">
+                                Este curso ha sido desactivado y no está disponible en este momento. 
+                                El contenido no es accesible hasta que el administrador lo reactive.
+                            </p>
+                        </div>
+                    <?php elseif (!empty($curso->modulos)): ?>
                         <div class="accordion accordion-flush" id="modulosAccordion">
                             <?php foreach ($curso->modulos as $index => $modulo): ?>
                                 <div class="accordion-item bg-dark border-secondary">
@@ -275,31 +289,33 @@ $tabActiva = $this->request->getQuery('tab') === 'contenido' ? 'contenido' : 'pr
                                 <i class="fas fa-info-circle me-1"></i>
                                 Tu solicitud está siendo revisada por un administrador.
                             </p>
-                        <?php elseif ($estaRechazado): ?>
-                            <button class="btn btn-danger w-100 mb-3" disabled>
-                                <i class="fas fa-times-circle me-1"></i> Solicitud Rechazada
-                            </button>
-                            <p class="small text-muted mb-0">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Tu solicitud fue rechazada. Contacta al administrador.
-                            </p>
                         <?php else: ?>
+                            <!-- Mostrar botón de solicitud para: Sin inscripción, Rechazado, o Removido -->
                             <?php if ($identity->rol != 1): // Solo mostrar para no-admin ?>
-                                <?php if ($curso->estado === 'activo'): ?>
-                                    <?= $this->Form->postLink(
+                                <?php if ($curso->estado === 'activo' || $curso->estado === 'publicado'): ?>
+                                    <?= $this->Form->create(null, [
+                                        'url' => ['controller' => 'Cursos', 'action' => 'solicitar', $curso->id],
+                                        'method' => 'POST'
+                                    ]) ?>
+                                    <?= $this->Form->button(
                                         '<i class="fas fa-plus-circle me-1"></i> Solicitar Inscripción',
-                                        ['controller' => 'Cursos', 'action' => 'solicitar', $curso->id],
                                         [
-                                            'class' => 'btn btn-primary w-100 mb-3', 
+                                            'type' => 'submit',
+                                            'class' => 'btn btn-primary w-100 mb-3',
                                             'escape' => false,
-                                            'confirm' => '¿Estás seguro de que deseas solicitar inscripción al curso "' . h($curso->titulo) . '"?'
+                                            'onclick' => 'return confirm("¿Estás seguro de que deseas solicitar inscripción al curso \"' . h($curso->titulo) . '\"?");'
                                         ]
                                     ) ?>
+                                    <?= $this->Form->end() ?>
                                     <p class="small text-muted mb-0">
                                         <i class="fas fa-info-circle me-1"></i>
-                                        Tu solicitud será enviada al administrador para aprobación.
+                                        <?php if ($estaRechazado): ?>
+                                            Tu solicitud anterior fue rechazada. Puedes enviar una nueva solicitud.
+                                        <?php else: ?>
+                                            Tu solicitud será enviada al administrador para aprobación.
+                                        <?php endif; ?>
                                     </p>
-                                <?php elseif ($curso->estado === 'desactivado'): ?>
+                                <?php elseif ($curso->estado === 'desactivado' || $curso->estado === 'inactivo'): ?>
                                     <button class="btn btn-secondary w-100 mb-3" disabled>
                                         <i class="fas fa-ban me-1"></i> Inscripción no disponible
                                     </button>

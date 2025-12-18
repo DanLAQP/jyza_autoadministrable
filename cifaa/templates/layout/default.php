@@ -166,7 +166,7 @@
                         <p>Usuarios</p>
                     </a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a href="<?= $this->Url->build(['controller' => 'Modulos', 'action' => 'index']) ?>" class="nav-link">
                         <i class="fas fa-layer-group nav-icon"></i>
                         <p>Módulos</p>
@@ -183,7 +183,7 @@
                         <i class="fas fa-file-alt nav-icon"></i>
                         <p>Contenidos Lección</p>
                     </a>
-                </li>
+                </li> -->
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="fas fa-certificate nav-icon"></i>

@@ -602,10 +602,10 @@ class InscripcionesController extends AppController
     public function rechazar($id = null)
     {
         /**
-         * Nueva implementación con control de acceso:
-         * Utiliza el método requiereAdministradorODocente() del trait ControlAccesoRoles.
-         * Solo los administradores y docentes pueden rechazar solicitudes de inscripción.
-         * Esto garantiza un control adecuado sobre quién puede denegar accesos a cursos.
+         * Eliminación de inscripción (rechazar)
+         * Nota: Se cambia el comportamiento para ELIMINAR la inscripción completamente
+         * en lugar de solo cambiar el estado a 'rechazada'. Esto permite que el estudiante
+         * pueda solicitar nuevamente después si el curso se reactiva.
          */
         if ($redirect = $this->requiereAdministradorODocente()) {
             return $redirect;
@@ -620,19 +620,18 @@ class InscripcionesController extends AppController
             return $this->redirect(['action' => 'index']);
         }
         
-        // Validar que esté en estado pendiente
+        // Validar que esté en estado pendiente ANTES de permitir rechazo
         if ($inscripcione->estado !== 'pendiente') {
             $estadoActual = ucfirst($inscripcione->estado);
             $this->Flash->warning(__('Esta inscripción ya fue procesada. Estado actual: {0}', $estadoActual));
             return $this->redirect(['action' => 'view', $id]);
         }
         
-        $inscripcione->estado = 'rechazada';
-        
-        if ($this->Inscripciones->save($inscripcione)) {
+        // ELIMINAR la inscripción completamente en lugar de rechazarla
+        if ($this->Inscripciones->delete($inscripcione)) {
             $nombreEstudiante = $inscripcione->user->nombre;
             $nombreCurso = $inscripcione->curso->titulo;
-            $this->Flash->success(__('Inscripción de {0} al curso "{1}" ha sido rechazada.', $nombreEstudiante, $nombreCurso));
+            $this->Flash->success(__('Inscripción de {0} al curso "{1}" ha sido rechazada y eliminada.', $nombreEstudiante, $nombreCurso));
         } else {
             $this->Flash->error(__('No se pudo rechazar la inscripción. Por favor, intenta nuevamente.'));
         }

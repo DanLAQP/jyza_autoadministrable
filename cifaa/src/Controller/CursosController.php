@@ -410,7 +410,7 @@ class CursosController extends AppController
         $curso = $this->Cursos->get($id);
         
         if ($curso->estado === 'inactivo') {
-            $curso->estado = 'publicado';
+            $curso->estado = 'activo';
             
             if ($this->Cursos->save($curso)) {
                 $this->Flash->success(__('Curso reactivado correctamente.'));
@@ -554,20 +554,26 @@ class CursosController extends AppController
             return $this->redirect(['controller' => 'Users', 'action' => 'login']);
         }
         
+        // VALIDACIÓN 2: ID de curso válido
+        if (!$id) {
+            $this->Flash->error(__('Debes seleccionar un curso válido.'));
+            return $this->redirect(['action' => 'index']);
+        }
+        
         // VALIDACIÓN 3: Curso existe y está publicado
         try {
             $curso = $this->Cursos->get($id);
             
-            if ($curso->estado !== 'activo') {
-                $this->Flash->error(__('Este curso no está disponible para inscripciones.'));
-                return $this->redirect(['action' => 'index']);
+            if (!in_array($curso->estado, ['activo', 'publicado'])) {
+                $this->Flash->error(__('Este curso no está disponible para inscripciones. Estado actual: ' . $curso->estado));
+                return $this->redirect(['action' => 'view', $id]);
             }
         } catch (\Exception $e) {
             $this->Flash->error(__('El curso seleccionado no existe.'));
             return $this->redirect(['action' => 'index']);
         }
         
-        // VALIDACIÓN 4: No tiene inscripción previa
+        // VALIDACIÓN 4: Validar estado de inscripciones previas
         $inscripcionesTable = $this->fetchTable('Inscripciones');
         
         $inscripcionExistente = $inscripcionesTable->find()
@@ -578,15 +584,15 @@ class CursosController extends AppController
             ->first();
         
         if ($inscripcionExistente) {
-            // Ya existe inscripción
+            // Si existe una inscripción aprobada, no permitir otra
             if ($inscripcionExistente->estado === 'aprobada') {
                 $this->Flash->warning(__('Ya estás inscrito en este curso.'));
-            } elseif ($inscripcionExistente->estado === 'pendiente') {
-                $this->Flash->warning(__('Ya tienes una solicitud pendiente para este curso.'));
+                return $this->redirect(['action' => 'view', $id]);
             } else {
-                $this->Flash->error(__('Tu solicitud fue rechazada. Contacta al administrador.'));
+                // Si está pendiente, rechazada o en cualquier otro estado no-aprobado,
+                // ELIMINARLA para permitir una nueva solicitud
+                $inscripcionesTable->delete($inscripcionExistente);
             }
-            return $this->redirect(['action' => 'view', $id]);
         }
         
         // CREAR INSCRIPCIÓN
@@ -604,12 +610,12 @@ class CursosController extends AppController
             ]);
         } else {
             $errores = $inscripcion->getErrors();
-            $mensajeError = 'No se pudo guardar la inscripción.';
+            $mensajeError = 'No se pudo guardar la inscripción. Usuario: ' . $usuarioActual->id . ', Curso: ' . $id;
             if (!empty($errores)) {
                 $mensajeError .= ' Errores: ' . json_encode($errores);
             }
             $this->log($mensajeError, 'error');
-            $this->Flash->error(__('No se pudo completar la solicitud. Inténtalo nuevamente.'));
+            $this->Flash->error(__('No se pudo completar la solicitud. Por favor intenta nuevamente. Detalles: ' . implode(', ', array_keys($errores))));
         }
         return $this->redirect(['action' => 'view', $id]);
 

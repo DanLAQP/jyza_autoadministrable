@@ -134,18 +134,16 @@ class CursosController extends AppController
     public function view($id = null)
     {
         // Cargar curso con todas las relaciones necesarias para vista tipo Domestika
-        $curso = $this->Cursos->get($id, [
-            'contain' => [
-                'Users',
-                'Modulos' => [
-                    'sort' => ['Modulos.posicion' => 'ASC'],
-                    'Lecciones' => [
-                        'sort' => ['Lecciones.posicion' => 'ASC'],
-                        'ContenidosLeccion'
-                    ]
-                ],
-                'Inscripciones' => ['Users']
-            ]
+        $curso = $this->Cursos->get($id, contain: [
+            'Users',
+            'Modulos' => [
+                'sort' => ['Modulos.posicion' => 'ASC'],
+                'Lecciones' => [
+                    'sort' => ['Lecciones.posicion' => 'ASC'],
+                    'ContenidosLeccion'
+                ]
+            ],
+            'Inscripciones' => ['Users']
         ]);
 
         // Obtener usuario actual

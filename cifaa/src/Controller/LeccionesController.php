@@ -47,17 +47,15 @@ class LeccionesController extends AppController
     public function view($id = null)
     {
         // Cargar lección con todas las relaciones necesarias para vista tipo Domestika
-        $leccion = $this->Lecciones->get($id, [
-            'contain' => [
-                'Modulos' => [
-                    'Cursos',
-                    'Lecciones' => [
-                        'sort' => ['Lecciones.posicion' => 'ASC']
-                    ]
-                ],
-                'ContenidosLeccion' => [
-                    'sort' => ['ContenidosLeccion.posicion' => 'ASC']
+        $leccion = $this->Lecciones->get($id, contain: [
+            'Modulos' => [
+                'Cursos',
+                'Lecciones' => [
+                    'sort' => ['Lecciones.posicion' => 'ASC']
                 ]
+            ],
+            'ContenidosLeccion' => [
+                'sort' => ['ContenidosLeccion.posicion' => 'ASC']
             ]
         ]);
         

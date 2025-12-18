@@ -244,22 +244,22 @@ class InscripcionesController extends AppController
         }
         
         // Cargar listas para el formulario
-        // Solo alumnos activos (rol=2)
-        $users = $this->Inscripciones->Users->find('list', [
-            'keyField' => 'id',
-            'valueField' => function ($user) {
+        // Solo alumnos activos (rol=3 - estudiantes, no rol 2)
+        $users = $this->Inscripciones->Users->find(
+            keyField: 'id',
+            valueField: function ($user) {
                 $email = !empty($user->email) ? ' - ' . $user->email : '';
                 $dni = !empty($user->dni) ? ' (DNI: ' . $user->dni . ')' : '';
                 return $user->username . $email . $dni;
             }
-        ])->where(['rol' => 2])
+        )->where(['rol' => 3])
           ->order(['username' => 'ASC'])
           ->all();
           
-        $cursos = $this->Inscripciones->Cursos->find('list', [
-            'keyField' => 'id',
-            'valueField' => 'titulo'
-        ])->order(['titulo' => 'ASC'])
+        $cursos = $this->Inscripciones->Cursos->find(
+            keyField: 'id',
+            valueField: 'titulo'
+        )->order(['titulo' => 'ASC'])
           ->all();
 
         $this->set(compact('inscripcione', 'users', 'cursos'));
@@ -602,10 +602,10 @@ class InscripcionesController extends AppController
     public function rechazar($id = null)
     {
         /**
-         * Eliminación de inscripción (rechazar)
-         * Nota: Se cambia el comportamiento para ELIMINAR la inscripción completamente
-         * en lugar de solo cambiar el estado a 'rechazada'. Esto permite que el estudiante
-         * pueda solicitar nuevamente después si el curso se reactiva.
+         * Nueva implementación con control de acceso:
+         * Utiliza el método requiereAdministradorODocente() del trait ControlAccesoRoles.
+         * Solo los administradores y docentes pueden rechazar solicitudes de inscripción.
+         * Esto garantiza un control adecuado sobre quién puede denegar accesos a cursos.
          */
         if ($redirect = $this->requiereAdministradorODocente()) {
             return $redirect;
@@ -620,18 +620,19 @@ class InscripcionesController extends AppController
             return $this->redirect(['action' => 'index']);
         }
         
-        // Validar que esté en estado pendiente ANTES de permitir rechazo
+        // Validar que esté en estado pendiente
         if ($inscripcione->estado !== 'pendiente') {
             $estadoActual = ucfirst($inscripcione->estado);
             $this->Flash->warning(__('Esta inscripción ya fue procesada. Estado actual: {0}', $estadoActual));
             return $this->redirect(['action' => 'view', $id]);
         }
         
-        // ELIMINAR la inscripción completamente en lugar de rechazarla
-        if ($this->Inscripciones->delete($inscripcione)) {
+        $inscripcione->estado = 'rechazada';
+        
+        if ($this->Inscripciones->save($inscripcione)) {
             $nombreEstudiante = $inscripcione->user->nombre;
             $nombreCurso = $inscripcione->curso->titulo;
-            $this->Flash->success(__('Inscripción de {0} al curso "{1}" ha sido rechazada y eliminada.', $nombreEstudiante, $nombreCurso));
+            $this->Flash->success(__('Inscripción de {0} al curso "{1}" ha sido rechazada.', $nombreEstudiante, $nombreCurso));
         } else {
             $this->Flash->error(__('No se pudo rechazar la inscripción. Por favor, intenta nuevamente.'));
         }

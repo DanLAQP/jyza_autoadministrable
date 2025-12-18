@@ -144,8 +144,8 @@
                 <?php if (isset($usuario) && $usuario->rol == 3): ?>
                 <li class="nav-item">
                     <a href="https://wa.me/51901562110?text=Hola,%20necesito%20información%20sobre%20los%20cursos%20de%20CIFAA" target="_blank" class="nav-link">
-                        <i class="fab fa-whatsapp nav-icon text-success"></i>
-                        <p>Contactar Administrador</p>
+                        <i class="fab fa-whatsapp nav-icon"></i>
+                        <p>Contactanos</p>
                     </a>
                 </li>
                 <?php endif; ?>
@@ -333,9 +333,7 @@
             <h5 class="modal-title" id="modalLabelLg">
                 <img src="<?= $this->Url->image('iconoCifa.png') ?>" alt="Logo Clínica" style="max-height: 50px;">
             </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div id="modalContentSm"></div> <!-- Contenedor para contenido dinámico -->
@@ -352,9 +350,7 @@
             <h5 class="modal-title" id="modalLabelLg">
                 <img src="<?= $this->Url->image('iconoCifa.png') ?>" alt="Logo Clínica" style="max-height: 50px;">
             </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div id="modalContentMd"></div> <!-- Contenedor para contenido dinámico -->
@@ -372,9 +368,7 @@
                 <img src="<?= $this->Url->image('iconoCifa.png') ?>" alt="Logo Clínica" style="max-height: 50px;">
             </h5>
 
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div id="modalContentLg"></div> <!-- Contenedor para contenido dinámico -->

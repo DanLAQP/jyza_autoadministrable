@@ -509,7 +509,7 @@ class CursosController extends AppController
         $queryDisponibles->contain(['Users'])
             ->orderBy(['Cursos.created' => 'DESC']);
 
-        $disponibles = $this->paginate($queryDisponibles, ['limit' => 9]);
+        $disponibles = $this->paginate($queryDisponibles, ['limit' => 12]);
 
         $this->set(compact('matriculados', 'pendientes', 'disponibles', 'termino'));
     }

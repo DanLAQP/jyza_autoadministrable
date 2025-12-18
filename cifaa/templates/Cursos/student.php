@@ -209,18 +209,38 @@ $whatsappAdmin = Configure::read('Cifa.whatsapp_admin', '51999999999');
             </div>
 
             <!-- PAGINACIÓN -->
-            <div class="row mt-4">
-                <div class="col-12">
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination justify-content-center">
-                            <?= $this->Paginator->first('<i class="fas fa-angle-double-left"></i>', ['escape' => false]) ?>
-                            <?= $this->Paginator->prev('<i class="fas fa-angle-left"></i>', ['escape' => false]) ?>
-                            <?= $this->Paginator->numbers() ?>
-                            <?= $this->Paginator->next('<i class="fas fa-angle-right"></i>', ['escape' => false]) ?>
-                            <?= $this->Paginator->last('<i class="fas fa-angle-double-right"></i>', ['escape' => false]) ?>
-                        </ul>
-                    </nav>
-                </div>
+            <div class="mt-5">
+                <nav aria-label="Paginación de cursos">
+                    <ul class="pagination justify-content-center">
+                        <?php
+                        echo $this->Paginator->first(
+                            '<i class="fas fa-angle-double-left"></i>',
+                            ['escape' => false, 'class' => 'page-link', 'title' => 'Primera página']
+                        );
+                        echo $this->Paginator->prev(
+                            '<i class="fas fa-chevron-left"></i> Anterior',
+                            ['escape' => false, 'class' => 'page-link']
+                        );
+                        echo $this->Paginator->numbers([
+                            'modulus' => 3,
+                            'first' => 1,
+                            'last' => 1
+                        ]);
+                        echo $this->Paginator->next(
+                            'Siguiente <i class="fas fa-chevron-right"></i>',
+                            ['escape' => false, 'class' => 'page-link']
+                        );
+                        echo $this->Paginator->last(
+                            '<i class="fas fa-angle-double-right"></i>',
+                            ['escape' => false, 'class' => 'page-link', 'title' => 'Última página']
+                        );
+                        ?>
+                    </ul>
+                </nav>
+                <p class="text-center text-muted mt-2 small">
+                    <i class="fas fa-info-circle"></i> 
+                    <?= $this->Paginator->counter('Página {{page}} de {{pages}}, mostrando {{current}} curso(s) de {{count}} totales') ?>
+                </p>
             </div>
         <?php endif; ?>
     </div>
@@ -263,4 +283,11 @@ $whatsappAdmin = Configure::read('Cifa.whatsapp_admin', '51999999999');
     #termino-busqueda {
         transition: all 0.3s ease;
     }
+
+    /* Estilos de paginación mejorados */
+    .pagination {
+        gap: 5px;
+    }
+    
+   
 </style>

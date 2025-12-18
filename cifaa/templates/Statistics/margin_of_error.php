@@ -33,7 +33,7 @@
 }
 
 .calc-form-group .form-control::placeholder {
-    color: #6c757d;
+    color: #8eb4d6;
 }
 
 .calc-form-group .form-control:focus,

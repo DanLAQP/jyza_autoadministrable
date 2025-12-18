@@ -368,6 +368,13 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
+    /* Placeholder text styling for dark forms */
+    .form-control::placeholder,
+    .form-select::placeholder {
+        color: #8eb4d6 !important;
+        opacity: 1 !important;
+    }
+
     .form-select-lg, .form-control-lg {
         font-size: 1.1rem;
         padding: 0.75rem 1rem;
@@ -395,11 +402,24 @@ document.addEventListener('DOMContentLoaded', function() {
     .list-group-item-action {
         cursor: pointer;
         transition: all 0.2s;
+        background-color: #343a40 !important;
+        color: #ffffff !important;
+        border-color: #495057 !important;
     }
     
     .list-group-item-action:hover {
-        background-color: #e9ecef;
-        border-left: 4px solid #007bff;
+        background-color: #495057 !important;
+        border-left: 4px solid #007bff !important;
+        color: #ffffff !important;
+    }
+    
+    .list-group-item-action strong {
+        color: #ffffff !important;
+        font-weight: 600;
+    }
+    
+    .list-group-item-action small {
+        color: #adb5bd !important;
     }
     
     #resultados-alumnos::-webkit-scrollbar,

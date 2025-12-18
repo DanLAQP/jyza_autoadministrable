@@ -245,12 +245,12 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- CSS para mejorar visual -->
 <style>
     .form-control::placeholder {
-        color: #6c757d !important;
+        color: #8eb4d6 !important;
         opacity: 1;
     }
     
     .form-control:focus::placeholder {
-        color: #6c757d !important;
+        color: #8eb4d6 !important;
     }
     
     select.form-select {

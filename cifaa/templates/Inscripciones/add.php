@@ -93,12 +93,12 @@ $usuario = $this->getRequest()->getAttribute('identity');
 <!-- CSS para placeholder visible y selects diferenciados -->
 <style>
     .form-control::placeholder {
-        color: #6c757d !important;
+        color: #8eb4d6 !important;
         opacity: 1;
     }
     
     .form-control:focus::placeholder {
-        color: #6c757d !important;
+        color: #8eb4d6 !important;
     }
     
     /* Mejorar visual de los select */

@@ -1,13 +1,23 @@
 
+CREATE TABLE `titulares` (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `dni` varchar(20) NOT NULL UNIQUE,
+  `nombre_completo` varchar(200) NOT NULL,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL
+);
+
 CREATE TABLE `users` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `titular_id` int(11) DEFAULT NULL,
   `username` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `rol` int(11) NOT NULL,
   `dni` varchar(20) DEFAULT NULL,
   `created` datetime NOT NULL,
   `modified` datetime NOT NULL,
-  `estado` varchar(50) NOT NULL DEFAULT 'activo'
+  `estado` varchar(50) NOT NULL DEFAULT 'activo',
+  FOREIGN KEY (`titular_id`) REFERENCES `titulares` (`id`)
 );
 
 CREATE TABLE `cursos` (

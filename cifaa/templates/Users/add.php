@@ -7,7 +7,7 @@
 
 <div class="container mt-4 mb-4">
     <div class="row">
-        <div class="col-lg-8 offset-lg-2">
+        <div class="col-lg-10 offset-lg-1">
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white">
                     <h4 class="mb-0"><i class="fas fa-user-plus"></i> Agregar Nuevo Usuario</h4>
@@ -33,7 +33,7 @@
 
                     <!-- Datos de Acceso -->
                     <fieldset class="border p-3 mb-4">
-                        <legend class="w-auto px-2 text-primary">
+                        <legend class="w-auto px-2 text-info">
                             <i class="fas fa-key"></i> Datos de Acceso
                         </legend>
 
@@ -106,7 +106,7 @@
 
                     <!-- Datos Personales -->
                     <fieldset class="border p-3 mb-4" id="datos-personales">
-                        <legend class="w-auto px-2 text-success">
+                        <legend class="w-auto px-2 text-info">
                             <i class="fas fa-id-card"></i> Datos Personales
                         </legend>
 
@@ -148,21 +148,6 @@
                                     Documento de identidad
                                 </small>
                             </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="email" class="form-label">
-                                    <i class="fas fa-envelope"></i> Email
-                                </label>
-                                <?= $this->Form->control('email', [
-                                    'label' => false,
-                                    'type' => 'email',
-                                    'class' => 'form-control',
-                                    'placeholder' => 'ejemplo@correo.com (opcional)'
-                                ]) ?>
-                                <small class="text-muted">
-                                    Opcional
-                                </small>
-                            </div>
                         </div>
 
                         <!-- Alertas de vinculación con titular -->
@@ -189,15 +174,9 @@
                             ['action' => 'index'],
                             ['class' => 'btn btn-secondary', 'escape' => false]
                         ) ?>
-                        <?= $this->Form->button(
-                            '<i class="fas fa-save"></i> Guardar Usuario',
-                            [
-                                'type' => 'submit',
-                                'class' => 'btn btn-info',
-                                'id' => 'btn-guardar',
-                                'escape' => false
-                            ]
-                        ) ?>
+                        <button type="submit" class="btn btn-info" id="btn-guardar">
+                            <i class="fas fa-save"></i> Guardar Usuario
+                        </button>
                     </div>
 
                     <?= $this->Form->end() ?>
@@ -292,3 +271,61 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<style>
+    /* Estilos para placeholders y controles de formulario oscuros */
+    .form-control::placeholder,
+    .form-select::placeholder {
+        color: #8eb4d6 !important;
+        opacity: 1;
+    }
+
+    .form-control {
+        background-color: #1a3a52;
+        border-color: #0d6efd;
+        color: #ffffff;
+    }
+
+    .form-control:focus {
+        background-color: #1a3a52;
+        border-color: #5dade2;
+        color: #ffffff;
+        box-shadow: 0 0 0 0.2rem rgba(93, 173, 226, 0.25);
+    }
+
+    .form-select {
+        background-color: #1a3a52;
+        border-color: #0d6efd;
+        color: #ffffff;
+    }
+
+    .form-select:focus {
+        background-color: #1a3a52;
+        border-color: #5dade2;
+        color: #ffffff;
+        box-shadow: 0 0 0 0.2rem rgba(93, 173, 226, 0.25);
+    }
+
+    .form-check-input {
+        background-color: #1a3a52;
+        border-color: #0d6efd;
+    }
+
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .form-label {
+        color: #ffffff;
+    }
+
+    fieldset {
+        background-color: rgba(26, 58, 82, 0.3) !important;
+        border-color: #0d6efd !important;
+    }
+
+    legend {
+        background-color: transparent !important;
+    }
+</style>

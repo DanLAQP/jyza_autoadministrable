@@ -52,7 +52,7 @@ class UsersController extends AppController
         $filtroEstado = $this->request->getQuery('estado', 'activo');
         
         $query = $this->Users->find()
-            ->contain(['Titulares']); // Cargar relación con titulares
+            ->contain(['Titular']); // Cargar relación con titulares
         
         // Aplicar filtro por estado
         if ($filtroEstado === 'todos') {
@@ -112,7 +112,18 @@ class UsersController extends AppController
          * pueda ver cualquier perfil. Si el usuario intenta ver un perfil ajeno
          * sin ser administrador, se le redirige a su propio perfil.
          */
-        $user = $this->Users->get($id, contain: ['Titulares']);
+        $user = $this->Users->get($id, contain: ['Titular']);
+        
+        // DEBUG: Verificar si se está cargando el titular
+        if ($user->titular_id) {
+            $this->log("User ID: {$user->id}, Titular ID: {$user->titular_id}, Has Titular: " . (!empty($user->titular) ? 'YES' : 'NO'), 'debug');
+            if (!empty($user->titular)) {
+                $this->log("Titular Nombre: {$user->titular->nombre_completo}", 'debug');
+            } else {
+                $this->log("ERROR: Titular no está cargado aunque titular_id = {$user->titular_id}", 'error');
+            }
+        }
+        
         $usuarioActual = $this->obtenerUsuarioActual();
         
         // Verificar si el usuario puede ver este perfil
@@ -276,7 +287,7 @@ class UsersController extends AppController
          * - Estudiantes no pueden cambiar DNI si ya está vinculado (protección de identidad)
          */
         $titularesTable = $this->fetchTable('Titulares');
-        $user = $this->Users->get($id, contain: ['Titulares']);
+        $user = $this->Users->get($id, contain: ['Titular']);
         $usuarioActual = $this->obtenerUsuarioActual();
         $esAdmin = $usuarioActual->rol == 1;
         
@@ -294,6 +305,15 @@ class UsersController extends AppController
         if ($this->request->is(['patch', 'post', 'put'])) {
             $data = $this->request->getData();
             
+            // Si la contraseña está vacía, removerla para no sobrescribir la existente
+            if (empty($data['password'])) {
+                unset($data['password']);
+            }
+            
+            // Separar datos que pertenecen a Titulares
+            $nombreCompleto = $data['nombre_completo'] ?? null;
+            unset($data['nombre_completo']); // Remover de datos de Users
+            
             // Proteger edición de DNI si el usuario tiene titular vinculado
             if (!$esAdmin && $user->titular_id && isset($data['dni']) && $data['dni'] != $user->dni) {
                 $this->Flash->error(__('No puede cambiar el DNI porque está vinculado a un titular. Contacte al administrador.'));
@@ -301,9 +321,9 @@ class UsersController extends AppController
             }
             
             // Actualizar vinculación con titular si cambian DNI o nombre_completo
-            if (!empty($data['dni']) && !empty($data['nombre_completo'])) {
+            if (!empty($data['dni']) && !empty($nombreCompleto)) {
                 $nuevoDni = trim($data['dni']);
-                $nuevoNombre = trim($data['nombre_completo']);
+                $nuevoNombre = trim($nombreCompleto);
                 
                 // Solo procesar si el DNI cambió o si no tiene titular
                 if ($data['dni'] != $user->dni || !$user->titular_id) {
@@ -318,6 +338,9 @@ class UsersController extends AppController
                             return;
                         }
                         $data['titular_id'] = $titular->id;
+                        // Actualizar nombre en titular existente
+                        $titular->nombre_completo = $nuevoNombre;
+                        $titularesTable->save($titular);
                     } else {
                         // Crear nuevo titular
                         $nuevoTitular = $titularesTable->buscarOCrear($nuevoDni, $nuevoNombre);
@@ -325,7 +348,7 @@ class UsersController extends AppController
                             $data['titular_id'] = $nuevoTitular->id;
                         }
                     }
-                } elseif ($user->titular_id && $data['nombre_completo'] != $user->titular->nombre_completo) {
+                } elseif ($user->titular_id && isset($user->titular) && $user->titular && $nombreCompleto != $user->titular->nombre_completo) {
                     // Si solo cambió el nombre, actualizar titular existente
                     $titular = $titularesTable->get($user->titular_id);
                     $titular->nombre_completo = $nuevoNombre;
@@ -340,6 +363,9 @@ class UsersController extends AppController
             }
             $this->Flash->error(__('No se pudo actualizar el usuario. Por favor, inténtelo nuevamente.'));
         }
+        
+        // Recargar usuario con su relación a Titular para la vista
+        $user = $this->Users->get($user->id, contain: ['Titular']);
         
         $this->set(compact('user', 'esAdmin'));
         // Usar un layout diferenciado para solicitudes normales o AJAX

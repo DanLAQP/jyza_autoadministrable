@@ -47,8 +47,9 @@ class UsersTable extends Table
         $this->addBehavior('Timestamp');
 
         // NUEVA ARQUITECTURA: Usuarios se vinculan a Titulares
-        $this->belongsTo('Titulares', [
+        $this->belongsTo('Titular', [
             'foreignKey' => 'titular_id',
+            'className' => 'Titulares',
             'joinType' => 'LEFT',  // Opcional (NULL en DB para admin)
         ]);
 
@@ -75,7 +76,8 @@ class UsersTable extends Table
             ->scalar('password')
             ->maxLength('password', 255)
             ->requirePresence('password', 'create')
-            ->notEmptyString('password');
+            ->notEmptyString('password', 'create')
+            ->allowEmptyString('password', 'update');
 
         $validator
             ->integer('rol')
@@ -126,7 +128,7 @@ class UsersTable extends Table
         ]);
         
         // Validar que titular_id exista en la tabla titulares
-        $rules->add($rules->existsIn(['titular_id'], 'Titulares', 'El titular especificado no existe.'), [
+        $rules->add($rules->existsIn(['titular_id'], 'Titular', 'El titular especificado no existe.'), [
             'errorField' => 'titular_id'
         ]);
 

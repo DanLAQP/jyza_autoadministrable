@@ -8,8 +8,8 @@
 
 <div class="container mt-4 mb-4">
     <div class="row">
-        <div class="col-lg-8 offset-lg-2">
-            <div class="card shadow-sm">
+        <div class="col-lg-10 offset-lg-1">
+            <div class="card shadow-sm bg-dark border-0">
                 <div class="card-header bg-warning text-dark">
                     <h4 class="mb-0"><i class="fas fa-user-edit"></i> Editar Usuario</h4>
                 </div>
@@ -21,19 +21,10 @@
                         </div>
                     <?php endif; ?>
 
-                    <!-- Advertencias sobre titular vinculado -->
-                    <?php if ($user->titular_id && isset($user->titular)): ?>
-                        <div class="alert alert-info">
-                            <i class="fas fa-link"></i> <strong>Usuario vinculado a titular:</strong>
-                            <p class="mb-0 mt-2">
-                                <strong><?= h($user->titular->nombre_completo) ?></strong> (DNI: <?= h($user->titular->dni) ?>)<br>
-                                <small class="text-muted">
-                                    Este usuario tiene <?= $user->titular->total_certificados ?? 0 ?> certificado(s) vinculado(s).
-                                    <?php if (!$esAdmin): ?>
-                                        No puede cambiar el DNI porque está vinculado a un titular.
-                                    <?php endif; ?>
-                                </small>
-                            </p>
+                    <!-- Información sobre titular vinculado -->
+                    <?php if (!empty($user->titular)): ?>
+                        <div class="alert alert-info border-info border-2 mb-4" role="alert">
+                            <i class="fas fa-link"></i> <strong>Usuario vinculado a titular</strong>
                         </div>
                     <?php endif; ?>
 
@@ -41,7 +32,7 @@
 
                     <!-- Datos de Acceso -->
                     <fieldset class="border p-3 mb-4">
-                        <legend class="w-auto px-2 text-primary">
+                        <legend class="w-auto px-2 text-info">
                             <i class="fas fa-key"></i> Datos de Acceso
                         </legend>
 
@@ -66,8 +57,8 @@
                                     'label' => false,
                                     'type' => 'password',
                                     'class' => 'form-control',
-                                    'placeholder' => 'Dejar vacío para no cambiar',
-                                    'value' => ''
+                                    'placeholder' => 'Dejar vacío para mantener la actual',
+                                    'autocomplete' => 'new-password'
                                 ]) ?>
                                 <small class="text-muted">Solo si desea cambiar la contraseña</small>
                             </div>
@@ -107,15 +98,21 @@
                                     'options' => [
                                         'activo' => 'Activo',
                                         'inactivo' => 'Inactivo'
-                                    ]
+                                    ],
+                                    'disabled' => ($user->rol == 1)
                                 ]) ?>
+                                <?php if ($user->rol == 1): ?>
+                                    <small class="text-danger">
+                                        <i class="fas fa-shield-alt"></i> Administradores no pueden cambiar su estado
+                                    </small>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </fieldset>
 
                     <!-- Datos Personales -->
                     <fieldset class="border p-3 mb-4">
-                        <legend class="w-auto px-2 text-success">
+                        <legend class="w-auto px-2 text-info">
                             <i class="fas fa-id-card"></i> Datos Personales
                         </legend>
 
@@ -128,7 +125,7 @@
                                 <?= $this->Form->control('nombre_completo', [
                                     'label' => false,
                                     'class' => 'form-control',
-                                    'value' => $user->titular ? $user->titular->nombre_completo : '',
+                                    'value' => !empty($user->titular) ? $user->titular->nombre_completo : '',
                                     'placeholder' => 'Ej: Juan Carlos Pérez García',
                                     'maxlength' => 200,
                                     'required' => true
@@ -163,40 +160,20 @@
                                     <small class="text-muted">Documento de identidad</small>
                                 <?php endif; ?>
                             </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="email" class="form-label">
-                                    <i class="fas fa-envelope"></i> Email
-                                </label>
-                                <?= $this->Form->control('email', [
-                                    'label' => false,
-                                    'type' => 'email',
-                                    'class' => 'form-control',
-                                    'placeholder' => 'ejemplo@correo.com (opcional)'
-                                ]) ?>
-                                <small class="text-muted">Opcional</small>
-                            </div>
                         </div>
                     </fieldset>
 
                     <!-- Información de auditoría -->
-                    <div class="card bg-light mb-3">
-                        <div class="card-body">
-                            <h6 class="card-title">Información del Registro</h6>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <small class="text-muted">
-                                        <strong>Creado:</strong><br>
-                                        <?= $user->created->format('d/m/Y H:i:s') ?>
-                                    </small>
-                                </div>
-                                <div class="col-md-6">
-                                    <small class="text-muted">
-                                        <strong>Última modificación:</strong><br>
-                                        <?= $user->modified->format('d/m/Y H:i:s') ?>
-                                    </small>
-                                </div>
-                            </div>
+                    <div class="row text-muted mb-3">
+                        <div class="col-md-6">
+                            <small>
+                                <i class="fas fa-calendar-plus"></i> Creado: <span class="text-info"><?= $user->created->format('d/m/Y H:i:s') ?></span>
+                            </small>
+                        </div>
+                        <div class="col-md-6">
+                            <small>
+                                <i class="fas fa-calendar-check"></i> Modificado: <span class="text-info"><?= $user->modified->format('d/m/Y H:i:s') ?></span>
+                            </small>
                         </div>
                     </div>
 
@@ -207,14 +184,9 @@
                             ['action' => 'index'],
                             ['class' => 'btn btn-secondary', 'escape' => false]
                         ) ?>
-                        <?= $this->Form->button(
-                            '<i class="fas fa-save"></i> Guardar Cambios',
-                            [
-                                'type' => 'submit',
-                                'class' => 'btn btn-warning',
-                                'escape' => false
-                            ]
-                        ) ?>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
                     </div>
 
                     <?= $this->Form->end() ?>
@@ -223,3 +195,61 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Estilos para placeholders en formularios oscuros */
+    .form-control::placeholder,
+    .form-select::placeholder {
+        color: #8eb4d6 !important;
+        opacity: 1;
+    }
+
+    .form-control {
+        background-color: #1a3a52;
+        border-color: #0d6efd;
+        color: #ffffff;
+    }
+
+    .form-control:focus {
+        background-color: #1a3a52;
+        border-color: #5dade2;
+        color: #ffffff;
+        box-shadow: 0 0 0 0.2rem rgba(93, 173, 226, 0.25);
+    }
+
+    .form-select {
+        background-color: #1a3a52;
+        border-color: #0d6efd;
+        color: #ffffff;
+    }
+
+    .form-select:focus {
+        background-color: #1a3a52;
+        border-color: #5dade2;
+        color: #ffffff;
+        box-shadow: 0 0 0 0.2rem rgba(93, 173, 226, 0.25);
+    }
+
+    .form-check-input {
+        background-color: #1a3a52;
+        border-color: #0d6efd;
+    }
+
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .form-label {
+        color: #ffffff;
+    }
+
+    fieldset {
+        background-color: rgba(26, 58, 82, 0.3) !important;
+        border-color: #0d6efd !important;
+    }
+
+    legend {
+        background-color: transparent !important;
+    }
+</style>

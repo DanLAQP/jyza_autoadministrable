@@ -14,7 +14,7 @@
     </div>
 
     <!-- Filtros y Búsqueda -->
-    <div class="card shadow-sm mb-4">
+    <div class="card shadow-sm mb-4 bg-dark border-primary">
         <div class="card-body">
             <div class="row align-items-center">
                 <!-- Búsqueda por término -->
@@ -23,7 +23,8 @@
                     <div class="input-group">
                         <input type="text" name="termino" class="form-control" 
                                placeholder="Buscar por usuario o DNI..." 
-                               value="<?= h($this->request->getQuery('termino')) ?>">
+                               value="<?= h($this->request->getQuery('termino')) ?>"
+                               style="background-color: #1a3a52; color: #ffffff; border: 1px solid #0d6efd;">
                         <input type="hidden" name="estado" value="<?= h($filtroEstado) ?>">
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-search"></i> Buscar
@@ -77,7 +78,7 @@
             
             <!-- Indicador de filtro activo -->
             <?php if ($filtroEstado !== 'activo'): ?>
-                <div class="alert alert-info mt-3 mb-0">
+                <div class="alert alert-info mt-3 mb-0" style="background-color: #0f3460; border-color: #0d6efd; color: #0d6efd;">
                     <i class="fas fa-info-circle"></i> 
                     Mostrando usuarios: <strong><?= ucfirst($filtroEstado) ?></strong>
                     <?php if ($filtroEstado === 'inactivo'): ?>
@@ -89,14 +90,14 @@
     </div>
     <div class="row">
         <div class="col-12">
-            <div class="card border-0 shadow-sm bg-dark">
-                <div class="card-header bg-info text-white">
+            <div class="card border-0 shadow-sm bg-dark border-primary">
+                <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="fas fa-list"></i> Todos los Usuarios</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover table-dark">
-                            <thead class="table-secondary">
+                        <table class="table table-hover table-dark table-sticky-actions">
+                            <thead class="table-dark">
                                 <tr>
                                     <th><?= $this->Paginator->sort('id', 'ID') ?></th>
                                     <th><?= $this->Paginator->sort('username', 'Usuario') ?></th>
@@ -105,7 +106,7 @@
                                     <th>Titular</th>
                                     <th><?= $this->Paginator->sort('estado', 'Estado') ?></th>
                                     <th><?= $this->Paginator->sort('created', 'Creado') ?></th>
-                                    <th class="text-center">Acciones</th>
+                                    <th class="text-center sticky-col">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -154,7 +155,7 @@
                                         <?php endif; ?>
                                     </td>
                                     <td><?= h($user->created->format('d/m/Y')) ?></td>
-                                    <td class="text-center">
+                                    <td class="text-center sticky-col sticky-actions">
                                         <div class="btn-group btn-group-sm" role="group">
                                             <?= $this->Html->link(
                                                 '<i class="fas fa-eye"></i>',
@@ -328,6 +329,94 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
+    /* Estilos para input de búsqueda */
+    input[name="termino"]::placeholder {
+        color: #8eb4d6 !important;
+        opacity: 1;
+    }
+    
+    input[name="termino"]:focus {
+        background-color: #1a3a52 !important;
+        color: #ffffff !important;
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 5px rgba(13, 110, 253, 0.5) !important;
+    }
+    
+    /* Estilos sticky para la columna de acciones */
+    .table-sticky-actions {
+        position: relative;
+    }
+    
+    .table-sticky-actions .sticky-col {
+        background-color: inherit;
+        position: sticky;
+        right: 0;
+        z-index: 10;
+        min-width: 140px;
+        white-space: nowrap;
+    }
+    
+    /* Para el header */
+    .table-sticky-actions thead .sticky-col {
+        background-color: #212529;
+        box-shadow: -2px 0 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Para las filas del body */
+    .table-sticky-actions tbody .sticky-col {
+        box-shadow: -2px 0 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Cuando la fila está inactiva */
+    .table-sticky-actions tbody tr.table-secondary .sticky-col {
+        background-color: #6c757d;
+    }
+    
+    /* Cuando la fila está activa */
+    .table-sticky-actions tbody tr:not(.table-secondary) .sticky-col {
+        background-color: #212529;
+    }
+    
+    /* En responsive, asegurar que sea visible */
+    @media (max-width: 992px) {
+        .table-sticky-actions .sticky-col {
+            min-width: 95px;
+        }
+        
+        .table-sticky-actions .sticky-col .btn-group {
+            flex-direction: row;
+            gap: 2px;
+            width: 100%;
+        }
+        
+        .table-sticky-actions .sticky-col .btn-group-sm {
+            width: 100%;
+        }
+        
+        .table-sticky-actions .sticky-col .btn {
+            flex: 1;
+            padding: 0.35rem 0.5rem !important;
+            font-size: 0.7rem !important;
+            min-width: 32px;
+        }
+        
+        .table-sticky-actions .sticky-col .btn i {
+            margin-right: 0 !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .table-sticky-actions .sticky-col {
+            min-width: 85px;
+        }
+        
+        .table-sticky-actions .sticky-col .btn {
+            padding: 0.25rem 0.4rem !important;
+            font-size: 0.65rem !important;
+            min-width: 28px;
+        }
+    }
+    
     #resultados-usuarios-ajax .list-group-item {
         cursor: pointer;
         transition: background-color 0.2s;

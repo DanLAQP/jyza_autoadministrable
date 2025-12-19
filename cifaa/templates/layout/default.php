@@ -184,7 +184,7 @@
                         <p>Contenidos Lección</p>
                     </a>
                 </li> -->
-                <li class="nav-item has-treeview">
+                <!-- <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="fas fa-certificate nav-icon"></i>
                         <p>
@@ -221,7 +221,7 @@
                             </a>
                         </li>
                     </ul>
-                </li>
+                </li> -->
                 <!-- Opción de Titulares eliminada - gestión interna automática -->
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">

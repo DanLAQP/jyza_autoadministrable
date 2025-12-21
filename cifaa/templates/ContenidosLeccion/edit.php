@@ -73,15 +73,29 @@
                     </div>
 
                     <div class="mb-3">
-                        <?= $this->Form->label('contenido', 'Contenido (Texto/Descripción)') ?>
+                        <?= $this->Form->label('contenido', 'Contenido/Link') ?>
                         <?= $this->Form->textarea(
                             'contenido',
                             [
                                 'class' => 'form-control form-control-sm',
-                                'rows' => 3,
-                                'placeholder' => 'Descripción del contenido o link del video'
+                                'rows' => 2,
+                                'placeholder' => 'Link del video, URL, o referencia al contenido'
                             ]
                         ) ?>
+                        <small class="form-text text-muted d-block mt-1">Link o referencia al contenido</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <?= $this->Form->label('descripcion', 'Descripción') ?>
+                        <?= $this->Form->textarea(
+                            'descripcion',
+                            [
+                                'class' => 'form-control form-control-sm',
+                                'rows' => 3,
+                                'placeholder' => 'Descripción o notas sobre este contenido'
+                            ]
+                        ) ?>
+                        <small class="form-text text-muted d-block mt-1">Información adicional sobre este recurso</small>
                     </div>
 
                     <div class="mb-3">
@@ -127,6 +141,19 @@
                                 <?= implode(', ', $contenidosLeccion->getError('posicion')) ?>
                             </div>
                         <?php endif; ?>
+                    </div>
+
+                    <div class="mb-3">
+                        <?= $this->Form->label('link_externo', 'Link Externo') ?>
+                        <?= $this->Form->text(
+                            'link_externo',
+                            [
+                                'class' => 'form-control form-control-sm',
+                                'placeholder' => 'https://example.com',
+                                'type' => 'url'
+                            ]
+                        ) ?>
+                        <small class="form-text text-muted d-block mt-1">Enlace externo relacionado con el contenido (opcional)</small>
                     </div>
 
                     <div class="d-grid gap-2">

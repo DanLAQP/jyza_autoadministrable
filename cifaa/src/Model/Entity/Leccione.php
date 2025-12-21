@@ -11,6 +11,7 @@ use Cake\ORM\Entity;
  * @property int $id
  * @property int $modulo_id
  * @property string $titulo
+ * @property string|null $descripcion
  * @property string|null $tipo_contenido
  * @property int $posicion
  * @property \Cake\I18n\DateTime $created
@@ -32,6 +33,7 @@ class Leccione extends Entity
     protected array $_accessible = [
         'modulo_id' => true,
         'titulo' => true,
+        'descripcion' => true,
         'tipo_contenido' => true,
         'posicion' => true,
         'created' => true,

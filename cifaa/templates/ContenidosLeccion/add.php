@@ -76,15 +76,29 @@
                     </div>
 
                     <div class="mb-2">
-                        <?= $this->Form->label('contenido', 'Descripción', ['class' => 'form-label small text-muted']) ?>
+                        <?= $this->Form->label('contenido', 'Titulo', ['class' => 'form-label small text-muted']) ?>
                         <?= $this->Form->textarea(
                             'contenido',
                             [
                                 'class' => 'form-control form-control-sm',
-                                'rows' => 3,
-                                'placeholder' => 'Ej: Link YouTube, descripción, etc.'
+                                'rows' => 2,
+                                'placeholder' => 'Video uno...'
                             ]
                         ) ?>
+                        <small class="text-muted d-block mt-1">Link o referencia al contenido</small>
+                    </div>
+
+                    <div class="mb-2">
+                        <?= $this->Form->label('descripcion', 'Descripción', ['class' => 'form-label small text-muted']) ?>
+                        <?= $this->Form->textarea(
+                            'descripcion',
+                            [
+                                'class' => 'form-control form-control-sm',
+                                'rows' => 3,
+                                'placeholder' => 'Descripción, Link o notas sobre este contenido (opcional)'
+                            ]
+                        ) ?>
+                        <small class="text-muted d-block mt-1">Información adicional sobre este recurso</small>
                     </div>
 
                     <div class="mb-2">
@@ -98,6 +112,19 @@
                             ]
                         ) ?>
                         <small class="text-muted d-block mt-1">PDF, DOC, XLSX, JPG, PNG, MP4... (Máx. 50MB)</small>
+                    </div>
+
+                    <div class="mb-2">
+                        <?= $this->Form->label('link_externo', 'Link Externo', ['class' => 'form-label small text-muted']) ?>
+                        <?= $this->Form->text(
+                            'link_externo',
+                            [
+                                'class' => 'form-control form-control-sm',
+                                'placeholder' => 'https://example.com',
+                                'type' => 'url'
+                            ]
+                        ) ?>
+                        <small class="text-muted d-block mt-1">Enlace externo relacionado con el contenido (opcional)</small>
                     </div>
 
                     <div class="mb-3">

@@ -41,8 +41,37 @@ class PagesController extends AppController
 
         // Lógica especial para la página "home"
         if ($path[0] === 'home') {
-            // Solo renderizar la vista sin consultar tablas inexistentes
-            // Los datos estarán disponibles cuando todas las tablas se hayan creado
+            // Consultar datos reales
+            $certificadosCount = $this->fetchTable('Certificados')->find()->count();
+            $cursosCount = $this->fetchTable('Cursos')->find()->count();
+            $usuariosCount = $this->fetchTable('Users')->find()->count();
+
+            // Consultar cantidad de diplomados emitidos
+            $diplomadosCount = $this->fetchTable('Certificados')->find()
+                ->where(['Certificados.tipo' => 'diplomado'])
+                ->count();
+
+            // Consultar cantidad de usuarios inscritos a cursos
+            $usuariosInscritosCount = $this->fetchTable('Inscripciones')->find()->count();
+
+            // Consultar el curso con más inscripciones
+            $topCurso = $this->fetchTable('Cursos')->find()
+                ->select(['titulo', 'total_inscripciones' => 'COUNT(Inscripciones.id)'])
+                ->leftJoinWith('Inscripciones')
+                ->group(['Cursos.id'])
+                ->order(['total_inscripciones' => 'DESC'])
+                ->first();
+
+            // Manejar el caso en que no haya un curso con inscripciones
+            $topCurso = $topCurso ?? (object) ['titulo' => 'Ninguno', 'total_inscripciones' => 0];
+
+            // Consultar cantidad de inscripciones pendientes
+            $inscripcionesPendientesCount = $this->fetchTable('Inscripciones')->find()
+                ->where(['estado' => 'pendiente'])
+                ->count();
+
+            // Pasar datos a la vista
+            $this->set(compact('certificadosCount', 'cursosCount', 'usuariosCount', 'diplomadosCount', 'usuariosInscritosCount', 'topCurso', 'inscripcionesPendientesCount'));
         }
 
         try {

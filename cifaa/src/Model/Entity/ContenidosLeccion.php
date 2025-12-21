@@ -12,6 +12,7 @@ use Cake\ORM\Entity;
  * @property int $leccion_id
  * @property string $tipo
  * @property string|null $contenido
+ * @property string|null $descripcion
  * @property string|null $archivo
  * @property int $posicion
  * @property \Cake\I18n\DateTime $created
@@ -34,10 +35,12 @@ class ContenidosLeccion extends Entity
         'leccion_id' => true,
         'tipo' => true,
         'contenido' => true,
+        'descripcion' => true,
         'archivo' => true,
         'posicion' => true,
         'created' => true,
         'modified' => true,
         'leccione' => true,
+        'link_externo' => true,
     ];
 }

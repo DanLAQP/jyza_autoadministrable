@@ -9,19 +9,13 @@ use Authentication\PasswordHasher\DefaultPasswordHasher;
 /**
  * User Entity
  *
- * NUEVA ARQUITECTURA: Usuarios se vinculan a TITULARES (opcional para admin, obligatorio para estudiantes)
- *
  * @property int $id
- * @property int|null $titular_id FK a titulares (identidad certificable)
  * @property string $username
  * @property string $password
  * @property int $rol 1=admin, 2=docente, 3=estudiante
- * @property string $dni
  * @property string $estado activo/inactivo
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
- *
- * @property \App\Model\Entity\Titular|null $titular Titular vinculado (heredar certificados)
  */
 class User extends Entity
 {
@@ -35,16 +29,13 @@ class User extends Entity
      * @var array<string, bool>
      */
     protected array $_accessible = [
-        'titular_id' => true,  // NUEVO - Vinculación a titular
         'username' => true,
         'password' => true,
         'rol' => true,
-        'dni' => true,
-        'nombre_completo' => true,  // Campo temporal para crear titular
         'estado' => true,
         'created' => true,
         'modified' => true,
-        'titular' => true,  // NUEVO - Relación
+        'nombres' => true,
     ];
 
     /**

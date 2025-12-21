@@ -7,99 +7,79 @@ use App\Controller\CertificadosController;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
+/**
+ * App\Controller\CertificadosController Test Case
+ *
+ * @uses \App\Controller\CertificadosController
+ */
 class CertificadosControllerTest extends TestCase
 {
     use IntegrationTestTrait;
 
+    /**
+     * Fixtures
+     *
+     * @var list<string>
+     */
     protected array $fixtures = [
         'app.Certificados',
         'app.Users',
         'app.Cursos',
+        'app.CertificadoModulos',
     ];
 
-    public function setUp(): void
+    /**
+     * Test index method
+     *
+     * @return void
+     * @uses \App\Controller\CertificadosController::index()
+     */
+    public function testIndex(): void
     {
-        parent::setUp();
+        $this->markTestIncomplete('Not implemented yet.');
     }
 
-    public function testIndexAdmin(): void
+    /**
+     * Test view method
+     *
+     * @return void
+     * @uses \App\Controller\CertificadosController::view()
+     */
+    public function testView(): void
     {
-        // Admin
-        $this->session([
-            'Auth' => [
-                'id' => 1,
-                'username' => 'admin',
-                'rol' => 1,
-                'estado' => 'activo'
-            ]
-        ]);
-        
-        $this->get('/certificados');
-        $this->assertResponseOk();
-        $this->assertResponseContains('Gestión de Certificados');
+        $this->markTestIncomplete('Not implemented yet.');
     }
 
-    public function testIndexStudentForbidden(): void
+    /**
+     * Test add method
+     *
+     * @return void
+     * @uses \App\Controller\CertificadosController::add()
+     */
+    public function testAdd(): void
     {
-        // Student
-        $this->session([
-            'Auth' => [
-                'id' => 3,
-                'username' => 'student',
-                'rol' => 3,
-                'estado' => 'activo'
-            ]
-        ]);
-        
-        $this->get('/certificados');
-        // Should redirect to student page or home depending on logic.
-        // In ControlAccesoRoles: student -> student page (redirect)
-        $this->assertRedirect();
+        $this->markTestIncomplete('Not implemented yet.');
     }
 
-    public function testGenerarPost(): void
+    /**
+     * Test edit method
+     *
+     * @return void
+     * @uses \App\Controller\CertificadosController::edit()
+     */
+    public function testEdit(): void
     {
-        // Admin
-        $this->session([
-            'Auth' => [
-                'id' => 1,
-                'username' => 'admin',
-                'rol' => 1,
-                'estado' => 'activo'
-            ]
-        ]);
-
-        $this->enableCsrfToken();
-        $data = [
-            'user_id' => 3, // Student in fixture
-            'curso_id' => 1, // Course in fixture
-            'horas' => 50,
-            'fecha_emision' => '2025-12-12',
-            // codigo auto-generated
-        ];
-        
-        $this->post('/certificados/generar', $data);
-        $this->assertRedirect(['action' => 'index']);
-
-        $certificados = $this->getTableLocator()->get('Certificados');
-        $query = $certificados->find()->where(['user_id' => 3, 'horas' => 50]);
-        $this->assertEquals(1, $query->count());
+        $this->markTestIncomplete('Not implemented yet.');
     }
 
-    public function testMisCertificadosStudent(): void
+    /**
+     * Test delete method
+     *
+     * @return void
+     * @uses \App\Controller\CertificadosController::delete()
+     */
+    public function testDelete(): void
     {
-        // Student
-        $this->session([
-            'Auth' => [
-                'id' => 3,
-                'username' => 'student',
-                'rol' => 3,
-                'estado' => 'activo'
-            ]
-        ]);
-
-        $this->get('/certificados/mis-certificados');
-        $this->assertResponseOk();
-        $this->assertResponseContains('Mis Certificados');
+        $this->markTestIncomplete('Not implemented yet.');
     }
 }

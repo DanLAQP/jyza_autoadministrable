@@ -123,6 +123,7 @@
                         <p>Inicio</p>
                     </a>
                 </li>
+
                 
                 <!-- Cursos - Visible para todos los usuarios autenticados -->
                 <li class="nav-item">
@@ -139,7 +140,15 @@
                         <p>Calculadora Estadística</p>
                     </a>
                 </li>
-                
+                <!-- Mis Certificados - Visible solo para estudiantes (Rol 3) -->
+                <?php if (isset($usuario) && $usuario->rol == 3): ?>
+                <li class="nav-item">
+                    <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'index']) ?>" class="nav-link">
+                        <i class="fas fa-certificate nav-icon"></i>
+                        <p>Mis Certificados</p>
+                    </a>
+                </li>
+                <?php endif; ?>
                 <!-- WhatsApp - Visible solo para estudiantes (Rol 3) -->
                 <?php if (isset($usuario) && $usuario->rol == 3): ?>
                 <li class="nav-item">
@@ -150,15 +159,7 @@
                 </li>
                 <?php endif; ?>
                 
-                <!-- Mis Certificados - Visible solo para estudiantes (Rol 3) -->
-                <?php if (isset($usuario) && $usuario->rol == 3): ?>
-                <li class="nav-item">
-                    <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'misCertificados']) ?>" class="nav-link">
-                        <i class="fas fa-certificate nav-icon"></i>
-                        <p>Mis Certificados</p>
-                    </a>
-                </li>
-                <?php endif; ?>
+                
                 <?php if (isset($usuario) && $usuario->rol == 1): ?>
                 <li class="nav-item">
                     <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'index']) ?>" class="nav-link">
@@ -166,87 +167,31 @@
                         <p>Usuarios</p>
                     </a>
                 </li>
-                <!-- <li class="nav-item">
-                    <a href="<?= $this->Url->build(['controller' => 'Modulos', 'action' => 'index']) ?>" class="nav-link">
-                        <i class="fas fa-layer-group nav-icon"></i>
-                        <p>Módulos</p>
+                <?php if (isset($usuario) && $usuario->rol == 1): ?>
+                <li class="nav-item">
+                    <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'index']) ?>" class="nav-link">
+                        <i class="fas fa-award nav-icon"></i>
+                        <p>Certificados</p>
                     </a>
                 </li>
+                 <?php endif; ?>
+                <?php if (isset($usuario) && $usuario->rol == 1): ?>
                 <li class="nav-item">
-                    <a href="<?= $this->Url->build(['controller' => 'Lecciones', 'action' => 'index']) ?>" class="nav-link">
-                        <i class="fas fa-chalkboard-teacher nav-icon"></i>
-                        <p>Lecciones</p>
+                    <a href="<?= $this->Url->build(['controller' => 'Inscripciones', 'action' => 'index']) ?>" class="nav-link">
+                        <i class="far fas fa-user-check nav-icon"></i>
+                        <p>Inscripciones</p>
                     </a>
                 </li>
+                 <?php endif; ?>
+                
+                
+                
+                <!-- Verificar Certificado - Público (sin autenticación requerida) -->
                 <li class="nav-item">
-                    <a href="<?= $this->Url->build(['controller' => 'ContenidosLeccion', 'action' => 'index']) ?>" class="nav-link">
-                        <i class="fas fa-file-alt nav-icon"></i>
-                        <p>Contenidos Lección</p>
-                    </a>
-                </li> -->
-                <!-- <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
+                    <a href="<?= $this->Url->build(['controller' => 'CertificadosPublic', 'action' => 'search']) ?>" class="nav-link" target="_blank">
                         <i class="fas fa-certificate nav-icon"></i>
-                        <p>
-                            Certificados
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
+                        <p>Verificar Certificado</p>
                     </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'index']) ?>" class="nav-link">
-                                <i class="fas fa-award nav-icon"></i>
-                                <p>Listar Certificados</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'diplomados']) ?>" class="nav-link">
-                                <i class="fas fa-medal nav-icon"></i>
-                                <p>Listar Diplomados</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <hr class="dropdown-divider" style="border-top: 1px solid rgba(255,255,255,0.1); margin: 0.5rem 0;">
-                        </li>
-                        <li class="nav-item">
-                            <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'generar']) ?>" class="nav-link">
-                                <i class="fas fa-plus-circle nav-icon"></i>
-                                <p>Generar Certificado</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="<?= $this->Url->build(['controller' => 'Certificados', 'action' => 'generarDiplomado']) ?>" class="nav-link">
-                                <i class="fas fa-plus-square nav-icon"></i>
-                                <p>Generar Diplomado</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li> -->
-                <!-- Opción de Titulares eliminada - gestión interna automática -->
-                <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-user-check nav-icon"></i>
-                        <p>
-                            Inscripciones
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="<?= $this->Url->build(['controller' => 'Inscripciones', 'action' => 'index']) ?>" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Ver Solicitudes</p>
-                            </a>
-                        </li>
-                        <?php if ($usuario['rol'] == 1): ?>
-                        <li class="nav-item">
-                            <a href="<?= $this->Url->build(['controller' => 'Inscripciones', 'action' => 'matricular']) ?>" class="nav-link">
-                                <i class="fas fa-user-plus nav-icon text-success"></i>
-                                <p>Matricular Alumno</p>
-                            </a>
-                        </li>
-                        <?php endif; ?>
-                    </ul>
                 </li>
                 <?php endif; ?>
             </ul>
@@ -489,7 +434,7 @@ window.closeModal = function() {
   <!-- Main Footer -->
   <footer class="main-footer">
     <strong >QP Secure Solutions</strong>
-    Centro Integral De Formacion y Asesoriia Academica S.C 2025.
+    Centro Integral De Formacion y Asesoriia Academica S.A.C 2026.
     <div class="float-right d-none d-sm-inline-block">
       <b>Version</b> 1.0
     </div>

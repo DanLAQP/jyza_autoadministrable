@@ -149,6 +149,16 @@ $principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion
                 <?= h($leccion->titulo) ?>
             </h2>
 
+            <!-- Descripción de la Lección -->
+            <?php
+            // Descripción de la Lección
+            if (!empty($leccion->descripcion)) {
+                echo '<p class="text-light mb-3" style="line-height: 1.6; font-size: 0.95rem;">';
+                echo nl2br(h($leccion->descripcion));
+                echo '</p>';
+            }
+            ?>
+
             <!-- Tabs / Selector de Contenidos -->
             <?php if (!empty($leccion->contenidos_leccion)): ?>
                 <ul class="nav nav-tabs mb-3 border-bottom border-secondary" role="tablist">
@@ -183,6 +193,34 @@ $principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion
                              id="contenido-<?= $cont->id ?>"
                              role="tabpanel"
                              aria-labelledby="tab-contenido-<?= $cont->id ?>">
+                            <!-- Descripción del contenido (antes del video/imagen) -->
+                            <?php if ($cont->descripcion || !empty($cont->link_externo)): ?>
+    <div class="card bg-dark border-secondary mb-3">
+        <div class="card-body">
+            <h5 class="card-title text-info mb-3">
+                <i class="fas fa-align-left me-2"></i>Descripción
+            </h5>
+
+            <?php if ($cont->descripcion): ?>
+                <p class="card-text text-light mb-2" style="line-height: 1.8;">
+                    <?= nl2br(h($cont->descripcion)) ?>
+                </p>
+            <?php endif; ?>
+
+            <?php if (!empty($cont->link_externo)): ?>
+                <a href="<?= h($cont->link_externo) ?>"
+                   target="_blank"
+                   rel="noopener"
+                   class="btn btn-sm btn-outline-info mt-2">
+                    <i class="fas fa-external-link-alt me-2"></i>
+                    Ver recurso externo
+                </a>
+            <?php endif; ?>
+        </div>
+    </div>
+<?php endif; ?>
+
+                            
                             <div class="card mb-3 bg-dark border-secondary shadow">
                                 <div class="card-body p-0">
                                     <?php if ($cont->archivo): ?>
@@ -235,6 +273,8 @@ $principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion
                                     <?php endif; ?>
                                 </div>
                             </div>
+
+                            
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -257,20 +297,62 @@ $principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion
                 </div>
             <?php endif; ?>
 
-            <!-- Descripción del contenido seleccionado -->
+            <!-- Información del contenido seleccionado -->
             <?php if (!empty($leccion->contenidos_leccion)): ?>
                 <div class="tab-content">
                     <?php foreach ($leccion->contenidos_leccion as $cont): ?>
                         <div class="tab-pane fade" id="desc-<?= $cont->id ?>" role="tabpanel">
-                            <?php if ($cont->contenido): ?>
+                            <?php if ($cont->contenido || $cont->descripcion): ?>
                                 <div class="card bg-dark border-secondary">
                                     <div class="card-body">
-                                        <h5 class="card-title text-info mb-3">
-                                            <i class="fas fa-align-left me-2"></i>Descripción
-                                        </h5>
-                                        <p class="card-text text-light" style="line-height: 1.8;">
-                                            <?= nl2br(h($cont->contenido)) ?>
-                                        </p>
+                                        <?php if ($cont->contenido): ?>
+                                            <h5 class="card-title text-info mb-3">
+                                                <i class="fas fa-link me-2"></i>Contenido/Link
+                                            </h5>
+                                            <p class="card-text text-light mb-3" style="line-height: 1.8;">
+                                                <?php
+                                                    $content = $this->Text->autoLink(
+                                                        h($cont->contenido),
+                                                        ['target' => '_blank', 'rel' => 'noopener']
+                                                    );
+
+                                                    // Agregar clases Bootstrap a los links
+                                                    $content = str_replace(
+                                                        '<a ',
+                                                        '<a class="text-info text-decoration-none" ',
+                                                        $content
+                                                    );
+
+                                                    echo nl2br($content);
+                                                ?>
+
+                                            </p>
+                                        <?php endif; ?>
+                                        
+                                        <?php if ($cont->descripcion): ?>
+                                            <hr class="border-secondary">
+                                            <h5 class="card-title text-info mb-3">
+                                                <i class="fas fa-align-left me-2"></i>Descripción
+                                            </h5>
+                                            <p class="card-text text-light" style="line-height: 1.8;">
+                                               <?php
+                                                    $desc = $this->Text->autoLink(
+                                                        h($cont->descripcion),
+                                                        ['target' => '_blank', 'rel' => 'noopener']
+                                                    );
+
+                                                    // Agregar clases Bootstrap a los links
+                                                    $desc = str_replace(
+                                                        '<a ',
+                                                        '<a class="text-info text-decoration-none" ',
+                                                        $desc
+                                                    );
+
+                                                    echo nl2br($desc);
+                                                ?>
+
+                                            </p>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             <?php endif; ?>

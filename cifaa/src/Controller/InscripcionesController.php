@@ -306,6 +306,14 @@ class InscripcionesController extends AppController
             ->contain(['Users'])
             ->orderBy(['Inscripciones.created' => 'DESC'])
             ->all();
+        
+        // Determinar URL de redirección - si viene desde un modal, redirigir a curso/view, si no a administrarCurso
+        $fromModal = $this->request->getQuery('fromModal');
+        if ($fromModal) {
+            $redirectUrl = ['controller' => 'Cursos', 'action' => 'view', $cursoId];
+        } else {
+            $redirectUrl = ['action' => 'administrarCurso', $cursoId];
+        }
 
         // Manejar matriculación desde esta vista
         if ($this->request->is('post') && $this->request->getData('action') === 'matricular') {
@@ -347,13 +355,15 @@ class InscripcionesController extends AppController
                         
                         if ($this->Inscripciones->save($inscripcione)) {
                             $this->Flash->success(__('El alumno {0} ha sido matriculado exitosamente.', $usuario->username));
-                            return $this->redirect(['action' => 'administrarCurso', $cursoId]);
+                        } else {
+                            $this->Flash->error(__('Error al matricular el alumno. Intente nuevamente.'));
                         }
-                        
-                        $this->Flash->error(__('Error al matricular el alumno. Intente nuevamente.'));
                     }
                 }
             }
+            
+            // Redirigir usando la URL de redirección determinada
+            return $this->redirect($redirectUrl);
         }
 
         $this->set(compact('curso', 'inscripciones'));
@@ -492,12 +502,22 @@ class InscripcionesController extends AppController
         }
         
         $inscripcione = $this->Inscripciones->get($id, contain: ['Users', 'Cursos']);
+        $cursoId = $inscripcione->curso_id;
+        
+        // Determinar URL de redirección - si viene desde un modal, redirigir a curso/view, si no a index
+        $fromModal = $this->request->getQuery('fromModal');
+        if ($fromModal) {
+            $redirectUrl = ['controller' => 'Cursos', 'action' => 'view', $cursoId];
+        } else {
+            $redirectUrl = ['action' => 'index'];
+        }
+        
         if ($this->request->is(['patch', 'post', 'put'])) {
             $inscripcione = $this->Inscripciones->patchEntity($inscripcione, $this->request->getData());
             if ($this->Inscripciones->save($inscripcione)) {
                 $this->Flash->success(__('The inscripcione has been saved.'));
 
-                return $this->redirect(['action' => 'index']);
+                return $this->redirect($redirectUrl);
             }
             $this->Flash->error(__('The inscripcione could not be saved. Please, try again.'));
         }
@@ -532,13 +552,19 @@ class InscripcionesController extends AppController
         }
         
         $this->request->allowMethod(['post', 'delete']);
-        $inscripcione = $this->Inscripciones->get($id);
+        $inscripcione = $this->Inscripciones->get($id, contain: ['Cursos']);
+        $cursoId = $inscripcione->curso_id;
+        
         if ($this->Inscripciones->delete($inscripcione)) {
             $this->Flash->success(__('The inscripcione has been deleted.'));
         } else {
             $this->Flash->error(__('The inscripcione could not be deleted. Please, try again.'));
         }
 
+        // Redirigir al curso si existe, si no al índice de inscripciones
+        if ($cursoId) {
+            return $this->redirect(['controller' => 'Cursos', 'action' => 'view', $cursoId]);
+        }
         return $this->redirect(['action' => 'index']);
     }
 
@@ -581,15 +607,20 @@ class InscripcionesController extends AppController
         
         $inscripcione->estado = 'aprobada';
         $inscripcione->progreso = 0; // Iniciar en 0%
+        $cursoId = $inscripcione->curso_id;
         
         if ($this->Inscripciones->save($inscripcione)) {
-            $nombreEstudiante = $inscripcione->user->nombre;
+            $nombreEstudiante = $inscripcione->user->username;
             $nombreCurso = $inscripcione->curso->titulo;
             $this->Flash->success(__('Inscripción aprobada. {0} ahora puede acceder al curso "{1}".', $nombreEstudiante, $nombreCurso));
         } else {
             $this->Flash->error(__('No se pudo aprobar la inscripción. Por favor, intenta nuevamente.'));
         }
         
+        // Redirigir al curso si existe, si no al índice de inscripciones
+        if ($cursoId) {
+            return $this->redirect(['controller' => 'Cursos', 'action' => 'view', $cursoId]);
+        }
         return $this->redirect(['action' => 'index']);
     }
 
@@ -628,15 +659,20 @@ class InscripcionesController extends AppController
         }
         
         $inscripcione->estado = 'rechazada';
+        $cursoId = $inscripcione->curso_id;
         
         if ($this->Inscripciones->save($inscripcione)) {
-            $nombreEstudiante = $inscripcione->user->nombre;
+            $nombreEstudiante = $inscripcione->user->username;
             $nombreCurso = $inscripcione->curso->titulo;
             $this->Flash->success(__('Inscripción de {0} al curso "{1}" ha sido rechazada.', $nombreEstudiante, $nombreCurso));
         } else {
             $this->Flash->error(__('No se pudo rechazar la inscripción. Por favor, intenta nuevamente.'));
         }
         
+        // Redirigir al curso si existe, si no al índice de inscripciones
+        if ($cursoId) {
+            return $this->redirect(['controller' => 'Cursos', 'action' => 'view', $cursoId]);
+        }
         return $this->redirect(['action' => 'index']);
     }
 

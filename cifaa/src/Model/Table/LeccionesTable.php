@@ -77,6 +77,10 @@ class LeccionesTable extends Table
             ->notEmptyString('titulo');
 
         $validator
+            ->scalar('descripcion')
+            ->allowEmptyString('descripcion');
+
+        $validator
             ->scalar('tipo_contenido')
             ->maxLength('tipo_contenido', 50)
             ->allowEmptyString('tipo_contenido');

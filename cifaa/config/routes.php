@@ -53,30 +53,20 @@ return function (RouteBuilder $routes): void {
     $routes->connect('/', ['controller' => 'Pages', 'action' => 'display', 'home']);
     $routes->connect('/logout', ['controller' => 'Users', 'action' => 'logout']);
     
-    // Ruta pública para verificación de certificados
-    $routes->connect('/certificados/verificar', ['controller' => 'Certificados', 'action' => 'verificar']);
-    $routes->connect('/certificados/verificar/:codigo', ['controller' => 'Certificados', 'action' => 'verificar'], ['pass' => ['codigo']]);
+    /**
+     * Rutas públicas para búsqueda de certificados
+     */
+    $routes->scope('/verificar-certificado', function (RouteBuilder $builder): void {
+        $builder->setExtensions(['json']);
+        $builder->connect('/', ['controller' => 'CertificadosPublic', 'action' => 'search']);
+        $builder->connect('/buscar', ['controller' => 'CertificadosPublic', 'action' => 'search']);
+        $builder->connect('/ver/:codigo', ['controller' => 'CertificadosPublic', 'action' => 'view']);
+        $builder->connect('/descargar/:codigo', ['controller' => 'CertificadosPublic', 'action' => 'downloadPdf']);
+    });
     
-    // Rutas para Titulares (AJAX endpoints)
-    $routes->connect('/titulares/buscar/:dni', ['controller' => 'Titulares', 'action' => 'buscar'], ['pass' => ['dni']]);
-    $routes->connect('/titulares/verificar/:dni', ['controller' => 'Titulares', 'action' => 'verificar'], ['pass' => ['dni']]);
-    
-    $routes->connect('/buscarPaciente', ['controller' => 'Pacientes1', 'action' => 'buscarPaciente']);
-    $routes->connect('/citas-diarias', ['controller' => 'Citas', 'action' => 'citaDiaria']);
-        // Verifica si la ruta está bien configurada en config/routes.php
-    $routes->connect('/citas/actualizar-hora', ['controller' => 'Citas', 'action' => 'actualizarHora']);
     $routes->scope('/', function (RouteBuilder $builder): void {
         // Solo POST
-    $builder->connect(
-        '/citas/restablecer-cita',
-        ['controller' => 'Citas', 'action' => 'restablecerCita', '_method' => 'POST']
-    );
-
-    // Solo GET
-    $builder->connect(
-        '/citas/fetch-citas',
-        ['controller' => 'Citas', 'action' => 'fetchCitas', '_method' => 'GET']
-    );
+    
         /*
          * Here, we are connecting '/' (base path) to a controller called 'Pages',
          * its action called 'display', and we pass a param to select the view file

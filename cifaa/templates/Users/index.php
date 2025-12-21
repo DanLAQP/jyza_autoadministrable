@@ -22,7 +22,7 @@
                     <?= $this->Form->create(null, ['type' => 'get', 'class' => 'd-flex']) ?>
                     <div class="input-group">
                         <input type="text" name="termino" class="form-control" 
-                               placeholder="Buscar por usuario o DNI..." 
+                               placeholder="Buscar por usuario..." 
                                value="<?= h($this->request->getQuery('termino')) ?>"
                                style="background-color: #1a3a52; color: #ffffff; border: 1px solid #0d6efd;">
                         <input type="hidden" name="estado" value="<?= h($filtroEstado) ?>">
@@ -101,9 +101,8 @@
                                 <tr>
                                     <th><?= $this->Paginator->sort('id', 'ID') ?></th>
                                     <th><?= $this->Paginator->sort('username', 'Usuario') ?></th>
-                                    <th><?= $this->Paginator->sort('dni', 'DNI') ?></th>
+                                    <th><?= $this->Paginator->sort('nombres', 'Nombres') ?></th>
                                     <th><?= $this->Paginator->sort('rol', 'Rol') ?></th>
-                                    <th>Titular</th>
                                     <th><?= $this->Paginator->sort('estado', 'Estado') ?></th>
                                     <th><?= $this->Paginator->sort('created', 'Creado') ?></th>
                                     <th class="text-center sticky-col">Acciones</th>
@@ -123,29 +122,12 @@
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <?php if ($user->dni): ?>
-                                            <span class="badge bg-secondary"><?= h($user->dni) ?></span>
-                                        <?php else: ?>
-                                            <span class="text-muted">-</span>
-                                        <?php endif; ?>
+                                        <?= h($user->nombres) ?>
                                     </td>
                                     <td>
                                         <span class="badge bg-<?= $user->rol == 1 ? 'danger' : ($user->rol == 2 ? 'warning text-dark' : 'info') ?>">
                                             <?= $roles[$user->rol] ?? 'Desconocido' ?>
                                         </span>
-                                    </td>
-                                    <td>
-                                        <?php if ($user->titular_id && isset($user->titulare)): ?>
-                                            <span class="badge bg-success" title="<?= h($user->titulare->nombre_completo) ?>">
-                                                <i class="fas fa-check-circle"></i> Vinculado
-                                            </span>
-                                        <?php elseif ($user->rol == 3): ?>
-                                            <span class="badge bg-warning text-dark">
-                                                <i class="fas fa-exclamation-triangle"></i> Sin vincular
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="text-muted">-</span>
-                                        <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php if ($user->estado === 'activo'): ?>
@@ -296,12 +278,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             
                             let rolNombre = roles[usuario.rol] || 'Desconocido';
                             let rolBadge = '<span class="badge bg-info ms-1"><i class="fas fa-user-tag"></i> ' + rolNombre + '</span>';
-                            let dniBadge = usuario.dni ? '<span class="badge bg-secondary ms-1"><i class="fas fa-id-card"></i> DNI: ' + usuario.dni + '</span>' : '';
                             
                             item.innerHTML = '<div class="d-flex justify-content-between align-items-center">' +
                                            '<div>' +
                                            '<strong class="text-primary"><i class="fas fa-user"></i> ' + usuario.username + '</strong>' +
-                                           '<div class="small text-muted mt-1">' + rolBadge + dniBadge + '</div>' +
+                                           '<div class="small text-muted mt-1">' + rolBadge + '</div>' +
                                            '</div>' +
                                            '<div>' + estadoBadge + '</div>' +
                                            '</div>';

@@ -27,6 +27,7 @@ class CertificadosTableTest extends TestCase
         'app.Certificados',
         'app.Users',
         'app.Cursos',
+        'app.CertificadoModulos',
     ];
 
     /**

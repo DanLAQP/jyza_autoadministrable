@@ -297,15 +297,9 @@ $tabActiva = $this->request->getQuery('tab') === 'contenido' ? 'contenido' : 'pr
                                         'url' => ['controller' => 'Cursos', 'action' => 'solicitar', $curso->id],
                                         'method' => 'POST'
                                     ]) ?>
-                                    <?= $this->Form->button(
-                                        '<i class="fas fa-plus-circle me-1"></i> Solicitar Inscripción',
-                                        [
-                                            'type' => 'submit',
-                                            'class' => 'btn btn-primary w-100 mb-3',
-                                            'escape' => false,
-                                            'onclick' => 'return confirm("¿Estás seguro de que deseas solicitar inscripción al curso \"' . h($curso->titulo) . '\"?");'
-                                        ]
-                                    ) ?>
+                                    <button type="submit" class="btn btn-primary w-100 mb-3" onclick="return confirm('¿Estás seguro de que deseas solicitar inscripción al curso \"<?= h($curso->titulo) ?>\"?');">
+                                        <i class="fas fa-plus-circle me-1"></i> Solicitar Inscripción
+                                    </button>
                                     <?= $this->Form->end() ?>
                                     <p class="small text-muted mb-0">
                                         <i class="fas fa-info-circle me-1"></i>
@@ -369,8 +363,8 @@ $tabActiva = $this->request->getQuery('tab') === 'contenido' ? 'contenido' : 'pr
                         <hr class="border-secondary">
                         <div class="d-grid gap-2">
                             <?= $this->Html->link(
-                                '<i class="fas fa-users-cog me-1"></i> Administrar Inscripciones',
-                                ['controller' => 'Inscripciones', 'action' => 'administrarCurso', $curso->id],
+                                '<i class="fas fa-users-cog me-1"></i> Matricular Alumnos',
+                                ['controller' => 'Inscripciones', 'action' => 'administrarCurso', $curso->id, '?' => ['fromModal' => 1]],
                                 ['class' => 'btn btn-sm btn-info openModal', 'escape' => false]
                             ) ?>
                             <?= $this->Html->link(
@@ -479,16 +473,43 @@ $tabActiva = $this->request->getQuery('tab') === 'contenido' ? 'contenido' : 'pr
                                         <td><?= $inscripcion->created->format('d/m/Y') ?></td>
                                         <td class="text-center">
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <?= $this->Html->link(
-                                                    '<i class="fas fa-eye"></i>',
-                                                    ['controller' => 'Inscripciones', 'action' => 'view', $inscripcion->id],
-                                                    ['class' => 'btn btn-info openModal', 'title' => 'Ver', 'escape' => false, 'data-bs-toggle' => 'tooltip']
-                                                ) ?>
-                                                <?= $this->Html->link(
-                                                    '<i class="fas fa-chart-line"></i>',
-                                                    ['controller' => 'Inscripciones', 'action' => 'edit', $inscripcion->id],
-                                                    ['class' => 'btn btn-warning openModal', 'title' => 'Editar progreso', 'escape' => false, 'data-bs-toggle' => 'tooltip']
-                                                ) ?>
+                                                <?php if ($inscripcion->estado === 'pendiente'): ?>
+                                                    <!-- Botones de Aceptar/Rechazar para inscripciones pendientes -->
+                                                    <?= $this->Form->postLink(
+                                                        '<i class="fas fa-check"></i>',
+                                                        ['controller' => 'Inscripciones', 'action' => 'aprobar', $inscripcion->id],
+                                                        [
+                                                            'confirm' => '¿Aceptar inscripción de ' . ($inscripcion->hasValue('user') ? $inscripcion->user->username : 'este alumno') . '?',
+                                                            'class' => 'btn btn-success',
+                                                            'title' => 'Aceptar inscripción',
+                                                            'escape' => false,
+                                                            'data-bs-toggle' => 'tooltip'
+                                                        ]
+                                                    ) ?>
+                                                    <?= $this->Form->postLink(
+                                                        '<i class="fas fa-times"></i>',
+                                                        ['controller' => 'Inscripciones', 'action' => 'rechazar', $inscripcion->id],
+                                                        [
+                                                            'confirm' => '¿Rechazar inscripción de ' . ($inscripcion->hasValue('user') ? $inscripcion->user->username : 'este alumno') . '?',
+                                                            'class' => 'btn btn-danger',
+                                                            'title' => 'Rechazar inscripción',
+                                                            'escape' => false,
+                                                            'data-bs-toggle' => 'tooltip'
+                                                        ]
+                                                    ) ?>
+                                                <?php else: ?>
+                                                    <!-- Botones estándar para inscripciones aprobadas/rechazadas -->
+                                                    <?= $this->Html->link(
+                                                        '<i class="fas fa-eye"></i>',
+                                                        ['controller' => 'Inscripciones', 'action' => 'view', $inscripcion->id],
+                                                        ['class' => 'btn btn-info openModal', 'title' => 'Ver', 'escape' => false, 'data-bs-toggle' => 'tooltip']
+                                                    ) ?>
+                                                    <?= $this->Html->link(
+                                                        '<i class="fas fa-chart-line"></i>',
+                                                        ['controller' => 'Inscripciones', 'action' => 'edit', $inscripcion->id, '?' => ['fromModal' => 1]],
+                                                        ['class' => 'btn btn-warning openModal', 'title' => 'Editar progreso', 'escape' => false, 'data-bs-toggle' => 'tooltip']
+                                                    ) ?>
+                                                <?php endif; ?>
                                                 <?= $this->Form->postLink(
                                                     '<i class="fas fa-user-times"></i>',
                                                     ['controller' => 'Inscripciones', 'action' => 'delete', $inscripcion->id],

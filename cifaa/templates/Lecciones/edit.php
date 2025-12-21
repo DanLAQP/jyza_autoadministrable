@@ -49,6 +49,19 @@
                         ) ?>
                     </div>
 
+                    <div class="mb-2">
+                        <?= $this->Form->label('descripcion', 'Descripción', ['class' => 'form-label small text-muted']) ?>
+                        <?= $this->Form->textarea(
+                            'descripcion',
+                            [
+                                'class' => 'form-control form-control-sm',
+                                'placeholder' => 'Descripción de la lección (opcional)',
+                                'rows' => 3
+                            ]
+                        ) ?>
+                        <small class="text-muted d-block mt-1">Texto adicional sobre el contenido de esta lección</small>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6 mb-2">
                             <?= $this->Form->label('tipo_contenido', 'Tipo Contenido', ['class' => 'form-label small text-muted']) ?>

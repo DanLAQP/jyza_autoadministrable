@@ -21,13 +21,6 @@
                         </div>
                     <?php endif; ?>
 
-                    <!-- Información sobre titular vinculado -->
-                    <?php if (!empty($user->titular)): ?>
-                        <div class="alert alert-info border-info border-2 mb-4" role="alert">
-                            <i class="fas fa-link"></i> <strong>Usuario vinculado a titular</strong>
-                        </div>
-                    <?php endif; ?>
-
                     <?= $this->Form->create($user, ['id' => 'form-editar-usuario']) ?>
 
                     <!-- Datos de Acceso -->
@@ -108,57 +101,20 @@
                                 <?php endif; ?>
                             </div>
                         </div>
-                    </fieldset>
-
-                    <!-- Datos Personales -->
-                    <fieldset class="border p-3 mb-4">
-                        <legend class="w-auto px-2 text-info">
-                            <i class="fas fa-id-card"></i> Datos Personales
-                        </legend>
-
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <label for="nombre-completo" class="form-label">
-                                    <i class="fas fa-user"></i> Nombre Completo
-                                    <span class="text-danger">*</span>
-                                </label>
-                                <?= $this->Form->control('nombre_completo', [
-                                    'label' => false,
-                                    'class' => 'form-control',
-                                    'value' => !empty($user->titular) ? $user->titular->nombre_completo : '',
-                                    'placeholder' => 'Ej: Juan Carlos Pérez García',
-                                    'maxlength' => 200,
-                                    'required' => true
-                                ]) ?>
-                                <small class="text-muted">Nombre completo del usuario</small>
-                            </div>
-                        </div>
-
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="dni" class="form-label">
-                                    <i class="fas fa-fingerprint"></i> DNI
-                                    <span class="text-danger">*</span>
+                                <label for="nombres" class="form-label">
+                                    <i class="fas fa-id-card"></i> Nombres completos <span class="text-danger">*</span>
                                 </label>
-                                <?= $this->Form->control('dni', [
+
+                                <?= $this->Form->control('nombres', [
                                     'label' => false,
-                                    'class' => 'form-control' . ($user->titular_id && !$esAdmin ? ' bg-light' : ''),
-                                    'placeholder' => 'Ej: 12345678',
-                                    'maxlength' => 20,
-                                    'readonly' => ($user->titular_id && !$esAdmin),
+                                    'class' => 'form-control',
+                                    'placeholder' => 'Ej: Juan Pérez Gómez',
                                     'required' => true
                                 ]) ?>
-                                <?php if ($user->titular_id && !$esAdmin): ?>
-                                    <small class="text-danger">
-                                        <i class="fas fa-lock"></i> DNI protegido (vinculado a titular)
-                                    </small>
-                                <?php elseif ($esAdmin && $user->titular_id): ?>
-                                    <small class="text-warning">
-                                        <i class="fas fa-exclamation-triangle"></i> Cambiar el DNI modificará la vinculación
-                                    </small>
-                                <?php else: ?>
-                                    <small class="text-muted">Documento de identidad</small>
-                                <?php endif; ?>
+
+                                <small class="text-muted">Tal como aparecerá en certificados y reportes</small>
                             </div>
                         </div>
                     </fieldset>

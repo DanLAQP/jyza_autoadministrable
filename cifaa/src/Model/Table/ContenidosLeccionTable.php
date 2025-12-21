@@ -76,6 +76,10 @@ class ContenidosLeccionTable extends Table
             ->allowEmptyString('contenido');
 
         $validator
+            ->scalar('descripcion')
+            ->allowEmptyString('descripcion');
+
+        $validator
             ->scalar('archivo')
             ->maxLength('archivo', 255)
             ->allowEmptyString('archivo');
@@ -83,6 +87,11 @@ class ContenidosLeccionTable extends Table
         $validator
             ->integer('posicion')
             ->notEmptyString('posicion', 'La posición es requerida');
+
+        $validator
+            ->scalar('link_externo')
+            ->maxLength('link_externo', 2083)
+            ->allowEmptyString('link_externo');
 
         return $validator;
     }

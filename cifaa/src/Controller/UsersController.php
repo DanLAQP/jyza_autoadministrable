@@ -51,8 +51,7 @@ class UsersController extends AppController
         // Obtener filtro de estado desde URL (por defecto: activo)
         $filtroEstado = $this->request->getQuery('estado', 'activo');
         
-        $query = $this->Users->find()
-            ->contain(['Titular']); // Cargar relación con titulares
+        $query = $this->Users->find();
         
         // Aplicar filtro por estado
         if ($filtroEstado === 'todos') {
@@ -98,32 +97,7 @@ class UsersController extends AppController
      */
     public function view($id = null)
     {
-        /**
-         * Versión anterior (comentada para referencia):
-         * $rol = $this->request->getAttribute('identity')->get('rol');
-         * if ($rol != 1) {
-         *     $this->Flash->error(__('No tienes permisos para acceder a esta sección'));
-         *     return $this->redirect($this->referer()); 
-         * }
-         * 
-         * Nueva implementación:
-         * Utiliza el método puedeEditar() del trait ControlAccesoRoles.
-         * Permite que un usuario visualice su propio perfil, o que un administrador
-         * pueda ver cualquier perfil. Si el usuario intenta ver un perfil ajeno
-         * sin ser administrador, se le redirige a su propio perfil.
-         */
-        $user = $this->Users->get($id, contain: ['Titular']);
-        
-        // DEBUG: Verificar si se está cargando el titular
-        if ($user->titular_id) {
-            $this->log("User ID: {$user->id}, Titular ID: {$user->titular_id}, Has Titular: " . (!empty($user->titular) ? 'YES' : 'NO'), 'debug');
-            if (!empty($user->titular)) {
-                $this->log("Titular Nombre: {$user->titular->nombre_completo}", 'debug');
-            } else {
-                $this->log("ERROR: Titular no está cargado aunque titular_id = {$user->titular_id}", 'error');
-            }
-        }
-        
+        $user = $this->Users->get($id);
         $usuarioActual = $this->obtenerUsuarioActual();
         
         // Verificar si el usuario puede ver este perfil
@@ -165,11 +139,6 @@ class UsersController extends AppController
          * Utiliza el método requiereAdministrador() del trait ControlAccesoRoles.
          * Solo los administradores pueden crear nuevos usuarios en el sistema.
          * Maneja tanto solicitudes normales como AJAX de manera unificada.
-         * 
-         * Vinculación automática con Titulares:
-         * - Si el DNI existe en titulares → vincula automáticamente
-         * - Si el DNI NO existe → crea titular mínimo (DNI + nombres extraídos de username)
-         * - Valida que el titular no esté ya vinculado a otro usuario (UNIQUE constraint)
          */
         if ($redirect = $this->requiereAdministrador()) {
             // Manejar respuesta AJAX si es necesario
@@ -181,58 +150,10 @@ class UsersController extends AppController
             return $redirect;
         }
         
-        $titularesTable = $this->fetchTable('Titulares');
         $user = $this->Users->newEmptyEntity();
         
         if ($this->request->is('post')) {
             $data = $this->request->getData();
-            
-            // DEBUG: Ver qué datos llegan
-            $this->log('Datos recibidos en add(): ' . json_encode($data), 'debug');
-            
-            // Procesar vinculación con titular SIEMPRE que tenga DNI y nombre_completo
-            if (!empty($data['dni']) && !empty($data['nombre_completo'])) {
-                $dni = trim($data['dni']);
-                $nombreCompleto = trim($data['nombre_completo']);
-                
-                $this->log("Procesando titular: DNI={$dni}, Nombre={$nombreCompleto}", 'debug');
-                
-                // Buscar titular existente por DNI
-                $titular = $titularesTable->buscarPorDni($dni);
-                
-                if ($titular) {
-                    $this->log("Titular existente encontrado: ID={$titular->id}", 'debug');
-                    
-                    // Verificar que el titular no esté ya vinculado a otro usuario
-                    if ($titularesTable->tieneUsuarioVinculado($titular->id)) {
-                        $this->Flash->error(__('Este DNI ya está vinculado a otro usuario del sistema.'));
-                        $this->set(compact('user'));
-                        return;
-                    }
-                    
-                    // Vincular usuario con titular existente
-                    $data['titular_id'] = $titular->id;
-                    $this->log("Usuario vinculado a titular existente ID={$titular->id}", 'debug');
-                } else {
-                    $this->log("Titular no existe, creando nuevo...", 'debug');
-                    
-                    // Crear titular automáticamente
-                    $nuevoTitular = $titularesTable->buscarOCrear($dni, $nombreCompleto);
-                    if ($nuevoTitular) {
-                        $data['titular_id'] = $nuevoTitular->id;
-                        $this->log("Nuevo titular creado con ID={$nuevoTitular->id}", 'debug');
-                    } else {
-                        $this->log("ERROR: No se pudo crear el titular", 'error');
-                        $this->Flash->error(__('No se pudo crear el registro de titular.'));
-                        $this->set(compact('user'));
-                        return;
-                    }
-                }
-            } else {
-                $this->log("ADVERTENCIA: DNI o nombre_completo vacío. No se vinculará titular.", 'warning');
-            }
-            
-            $this->log("Guardando usuario con titular_id=" . ($data['titular_id'] ?? 'NULL'), 'debug');
             
             $user = $this->Users->patchEntity($user, $data);
             if ($this->Users->save($user)) {
@@ -240,8 +161,6 @@ class UsersController extends AppController
                 return $this->redirect(['action' => 'index']);
             }
             
-            $errors = $user->getErrors();
-            $this->log('Error al guardar usuario: ' . json_encode($errors), 'error');
             $this->Flash->error(__('No se pudo guardar el usuario. Por favor, verifique los datos e inténtelo nuevamente.'));
         }
         
@@ -282,12 +201,8 @@ class UsersController extends AppController
          * pueda editar cualquier perfil. Esto mejora la flexibilidad permitiendo
          * que los usuarios gestionen su propia información.
          * 
-         * Restricción de DNI:
-         * - Si el usuario tiene titular_id vinculado, solo admin puede cambiar DNI
-         * - Estudiantes no pueden cambiar DNI si ya está vinculado (protección de identidad)
          */
-        $titularesTable = $this->fetchTable('Titulares');
-        $user = $this->Users->get($id, contain: ['Titular']);
+        $user = $this->Users->get($id);
         $usuarioActual = $this->obtenerUsuarioActual();
         $esAdmin = $usuarioActual->rol == 1;
         
@@ -310,52 +225,6 @@ class UsersController extends AppController
                 unset($data['password']);
             }
             
-            // Separar datos que pertenecen a Titulares
-            $nombreCompleto = $data['nombre_completo'] ?? null;
-            unset($data['nombre_completo']); // Remover de datos de Users
-            
-            // Proteger edición de DNI si el usuario tiene titular vinculado
-            if (!$esAdmin && $user->titular_id && isset($data['dni']) && $data['dni'] != $user->dni) {
-                $this->Flash->error(__('No puede cambiar el DNI porque está vinculado a un titular. Contacte al administrador.'));
-                unset($data['dni']); // Remover cambio de DNI
-            }
-            
-            // Actualizar vinculación con titular si cambian DNI o nombre_completo
-            if (!empty($data['dni']) && !empty($nombreCompleto)) {
-                $nuevoDni = trim($data['dni']);
-                $nuevoNombre = trim($nombreCompleto);
-                
-                // Solo procesar si el DNI cambió o si no tiene titular
-                if ($data['dni'] != $user->dni || !$user->titular_id) {
-                    // Buscar si existe titular con el nuevo DNI
-                    $titular = $titularesTable->buscarPorDni($nuevoDni);
-                    
-                    if ($titular) {
-                        // Verificar que no esté vinculado a otro usuario
-                        if ($titularesTable->tieneUsuarioVinculado($titular->id) && $titular->id != $user->titular_id) {
-                            $this->Flash->error(__('El DNI {0} ya está vinculado a otro usuario.', [$nuevoDni]));
-                            $this->set(compact('user', 'esAdmin'));
-                            return;
-                        }
-                        $data['titular_id'] = $titular->id;
-                        // Actualizar nombre en titular existente
-                        $titular->nombre_completo = $nuevoNombre;
-                        $titularesTable->save($titular);
-                    } else {
-                        // Crear nuevo titular
-                        $nuevoTitular = $titularesTable->buscarOCrear($nuevoDni, $nuevoNombre);
-                        if ($nuevoTitular) {
-                            $data['titular_id'] = $nuevoTitular->id;
-                        }
-                    }
-                } elseif ($user->titular_id && isset($user->titular) && $user->titular && $nombreCompleto != $user->titular->nombre_completo) {
-                    // Si solo cambió el nombre, actualizar titular existente
-                    $titular = $titularesTable->get($user->titular_id);
-                    $titular->nombre_completo = $nuevoNombre;
-                    $titularesTable->save($titular);
-                }
-            }
-            
             $user = $this->Users->patchEntity($user, $data);
             if ($this->Users->save($user)) {
                 $this->Flash->success(__('Usuario actualizado correctamente.'));
@@ -363,9 +232,6 @@ class UsersController extends AppController
             }
             $this->Flash->error(__('No se pudo actualizar el usuario. Por favor, inténtelo nuevamente.'));
         }
-        
-        // Recargar usuario con su relación a Titular para la vista
-        $user = $this->Users->get($user->id, contain: ['Titular']);
         
         $this->set(compact('user', 'esAdmin'));
         // Usar un layout diferenciado para solicitudes normales o AJAX
@@ -526,50 +392,6 @@ class UsersController extends AppController
                 ])
                 ->order(['Users.username' => 'ASC'])
                 ->limit(15)
-                ->toArray();
-        }
-        
-        $this->response = $this->response->withType('application/json')
-            ->withStringBody(json_encode($resultados, JSON_UNESCAPED_UNICODE));
-        
-        return $this->response;
-    }
-
-    /**
-     * Buscar alumnos por DNI ÚNICAMENTE (AJAX)
-     * Búsqueda solo por DNI, mínimo 4 caracteres, máximo 3 resultados
-     * 
-     * @return \Cake\Http\Response JSON con resultados
-     */
-    public function buscarAlumnos()
-    {
-        $this->request->allowMethod(['get']);
-        $this->viewBuilder()->setLayout('ajax');
-        
-        $dni = $this->request->getQuery('dni');
-        $resultados = [];
-        
-        if (!empty($dni) && strlen($dni) >= 4) {
-            // Buscar usuarios estudiantes con titular vinculado - SOLO POR DNI
-            $resultados = $this->Users->find()
-                ->contain(['Titulares']) // Cargar datos del titular
-                ->select([
-                    'Users.id',
-                    'Users.username',
-                    'Users.dni',
-                    'Users.titular_id',
-                    'Titulares.id',
-                    'Titulares.dni',
-                    'Titulares.nombre_completo'
-                ])
-                ->where([
-                    'Users.rol' => 3, // 3 = Estudiante
-                    'Users.estado' => 'activo',
-                    'Users.titular_id IS NOT' => null, // Solo usuarios con titular
-                    'Titulares.dni LIKE' => $dni . '%' // SOLO DNI que EMPIECE con el término
-                ])
-                ->order(['Titulares.dni' => 'ASC'])
-                ->limit(3) // MÁXIMO 3 RESULTADOS
                 ->toArray();
         }
         

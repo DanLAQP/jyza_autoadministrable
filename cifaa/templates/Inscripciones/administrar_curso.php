@@ -12,7 +12,7 @@ $this->assign('title', 'Administrar Inscripciones - ' . h($curso->titulo));
     <div class="row mb-4">
         <div class="col-md-8">
             <h2 class="text-info d-inline-block">
-                <i class="fas fa-users-cog"></i> Administrar Inscripciones
+                <i class="fas fa-users-cog"></i> Matricular Alumnos
             </h2>
             <h4 class="text-light mt-2">
                 <i class="fas fa-book me-2"></i><?= h($curso->titulo) ?>
@@ -110,7 +110,7 @@ $this->assign('title', 'Administrar Inscripciones - ' . h($curso->titulo));
                                     <th style="width: 15%;"><i class="fas fa-chart-line"></i> Progreso</th>
                                     <th style="width: 12%;"><i class="fas fa-info-circle"></i> Estado</th>
                                     <th style="width: 13%;"><i class="fas fa-calendar"></i> Fecha</th>
-                                    <th style="width: 15%;" class="text-center">Acciones</th>
+                                    <!-- <th style="width: 15%;" class="text-center">Acciones</th> -->
                                 </tr>
                             </thead>
                             <tbody>
@@ -163,7 +163,7 @@ $this->assign('title', 'Administrar Inscripciones - ' . h($curso->titulo));
                                         <td class="text-muted small">
                                             <?= h($inscripcion->created->format('d/m/Y')) ?>
                                         </td>
-                                        <td class="text-center">
+                                        <!-- <td class="text-center">
                                             <div class="btn-group" role="group">
                                                 <?= $this->Html->link(
                                                     '<i class="fas fa-edit"></i>',
@@ -187,7 +187,7 @@ $this->assign('title', 'Administrar Inscripciones - ' . h($curso->titulo));
                                                     ]
                                                 ) ?>
                                             </div>
-                                        </td>
+                                        </td> -->
                                     </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>

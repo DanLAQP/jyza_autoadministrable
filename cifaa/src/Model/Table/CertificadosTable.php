@@ -143,6 +143,11 @@ class CertificadosTable extends Table
             ->scalar('modulos')
             ->allowEmptyString('modulos');
 
+        $validator
+            ->scalar('archivo_ruta')
+            ->maxLength('archivo_ruta', 255)
+            ->allowEmptyString('archivo_ruta');
+
         return $validator;
     }
 

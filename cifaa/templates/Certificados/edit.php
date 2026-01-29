@@ -17,7 +17,7 @@
                 </h3>
             </div>
 
-            <?= $this->Form->create($certificado, ['class' => 'form-horizontal']) ?>
+            <?= $this->Form->create($certificado, ['class' => 'form-horizontal', 'enctype' => 'multipart/form-data']) ?>
             <div class="card-body">
                 
                 <!-- Sección 1: Tipo de Certificado -->
@@ -342,6 +342,41 @@
                     </div>
                 </div>
 
+                <hr>
+
+                <!-- Sección 7: Archivo Adjunto -->
+                <h5 class="text-info mb-3">
+                    <i class="fas fa-upload"></i> Archivo Adjunto
+                </h5>
+
+                <?php if (!empty($certificado->archivo_ruta)): ?>
+                    <div class="form-group row mb-3">
+                        <label class="col-sm-2 col-form-label">Archivo Actual</label>
+                        <div class="col-sm-10">
+                            <div class="alert alert-info">
+                                <strong>Archivo actual:</strong> <?= h(basename($certificado->archivo_ruta)) ?><br>
+                                <small>Para reemplazarlo, seleccione un nuevo archivo abajo.</small>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Nuevo Archivo (PDF, DOC, Imagen)</label>
+                    <div class="col-sm-10">
+                        <?= $this->Form->control(
+                            'archivo_ruta',
+                            [
+                                'type' => 'file',
+                                'class' => 'form-control',
+                                'label' => false,
+                                'accept' => '.pdf,.doc,.docx,.jpg,.jpeg,.png'
+                            ]
+                        ) ?>
+                        <small class="text-muted">Formatos permitidos: PDF, DOC, DOCX, JPG, PNG. Dejar en blanco para mantener el archivo actual.</small>
+                    </div>
+                </div>
+
             </div>
 
             <div class="card-footer">
@@ -435,10 +470,12 @@
         // Módulos existentes (pasados desde el controller)
         const modulosExistentesTitulos = <?= json_encode($modulosExistentes ?? []) ?>;
         const modulosManualesData = <?= json_encode($modulosManualesData ?? []) ?>;
+        const modulosIdsCertificado = <?= json_encode($modulosIdsCertificado ?? []) ?>;
         
         // Debug
         console.log('Módulos manuales data:', modulosManualesData);
         console.log('Módulos existentes títulos:', modulosExistentesTitulos);
+        console.log('Módulos IDs del certificado:', modulosIdsCertificado);
 
         // Mostrar/ocultar sección de titulares
         function actualizarTitular() {
@@ -465,6 +502,12 @@
                 seccionCursoManual.style.display = 'block';
                 seccionModulosAutomaticos.style.display = 'none';
                 
+                // Limpiar la lista de módulos automáticos cuando se deselecciona el curso
+                const listaModulos = document.getElementById('listaModulos');
+                if (listaModulos) {
+                    listaModulos.innerHTML = '';
+                }
+                
                 // Mostrar módulos manuales solo si hay texto en curso manual
                 if (cursoManual.value.trim() !== '') {
                     seccionModulosManual.style.display = 'block';
@@ -489,6 +532,13 @@
                 .then(response => response.json())
                 .then(data => {
                     const listaModulos = document.getElementById('listaModulos');
+                    
+                    // Guardar el estado actual de los checkboxes antes de regenerar
+                    const estadoActual = {};
+                    listaModulos.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                        estadoActual[checkbox.value] = checkbox.checked;
+                    });
+                    
                     listaModulos.innerHTML = '';
 
                     if (data.length > 0) {
@@ -497,9 +547,16 @@
                             const item = document.createElement('div');
                             item.className = 'list-group-item';
                             
-                            // Verificar si este módulo estaba seleccionado anteriormente
-                            const esModuloExistente = modulosExistentesTitulos.includes(modulo.titulo || modulo.nombre);
-                            const checked = esModuloExistente ? 'checked' : '';
+                            // Verificar si este módulo estaba desmarcado por el usuario (estado actual)
+                            // Si no está en estadoActual, usar el estado original (modulosIdsCertificado)
+                            let checked = false;
+                            if (estadoActual.hasOwnProperty(modulo.id)) {
+                                checked = estadoActual[modulo.id];
+                            } else {
+                                checked = modulosIdsCertificado.includes(modulo.id);
+                            }
+                            
+                            const checkedAttr = checked ? 'checked' : '';
                             
                             item.innerHTML = `
                                 <div class="custom-control custom-checkbox">
@@ -508,7 +565,7 @@
                                         class="custom-control-input" 
                                         id="modulo_${modulo.id}"
                                         value="${modulo.id}"
-                                        ${checked}
+                                        ${checkedAttr}
                                     >
                                     <label class="custom-control-label" for="modulo_${modulo.id}">
                                         <i class="fas fa-layer-group"></i> ${modulo.titulo || modulo.nombre}

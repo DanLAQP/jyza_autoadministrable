@@ -59,9 +59,30 @@ class CertificadosPublicController extends Controller
 
             // Buscar certificado por código
             $certificado = $certificadosTable->find()
+                ->select(['Certificados.id', 'Certificados.codigo', 'Certificados.tipo', 'Certificados.usuario_id', 
+                         'Certificados.nombre_titular', 'Certificados.dni_titular', 'Certificados.curso_id',
+                         'Certificados.nombre_curso_manual', 'Certificados.nota_final', 'Certificados.horas_lectivas',
+                         'Certificados.fecha_inicio', 'Certificados.fecha_fin', 'Certificados.archivo_ruta',
+                         'Certificados.created', 'Certificados.modified'])
                 ->where(['Certificados.codigo' => $codigo])
-                ->contain(['Users', 'Cursos', 'CertificadoModulos'])
+                ->contain([
+                    'Users' => fn($q) => $q->select(['Users.id', 'Users.username', 'Users.nombres'])
+                ])
                 ->first();
+            
+            // Cargar módulos por separado
+            if ($certificado) {
+                $certificado->certificado_modulos = $this->fetchTable('CertificadoModulos')
+                    ->find()
+                    ->where(['certificado_id' => $certificado->id])
+                    ->orderBy(['posicion' => 'ASC'])
+                    ->toArray();
+                
+                // Cargar curso por separado
+                if ($certificado->curso_id) {
+                    $certificado->curso = $this->fetchTable('Cursos')->get($certificado->curso_id);
+                }
+            }
 
             if (!$certificado) {
                 $this->Flash->error('Certificado no encontrado. Verifica el código ingresado.');
@@ -95,9 +116,30 @@ class CertificadosPublicController extends Controller
         }
 
         $certificado = $certificadosTable->find()
-            ->where(['Certificados.codigo' => $codigo])
-            ->contain(['Users', 'Cursos', 'CertificadoModulos'])
-            ->first();
+                ->select(['Certificados.id', 'Certificados.codigo', 'Certificados.tipo', 'Certificados.usuario_id', 
+                         'Certificados.nombre_titular', 'Certificados.dni_titular', 'Certificados.curso_id',
+                         'Certificados.nombre_curso_manual', 'Certificados.nota_final', 'Certificados.horas_lectivas',
+                         'Certificados.fecha_inicio', 'Certificados.fecha_fin', 'Certificados.archivo_ruta',
+                         'Certificados.created', 'Certificados.modified'])
+                ->where(['Certificados.codigo' => $codigo])
+                ->contain([
+                    'Users' => fn($q) => $q->select(['Users.id', 'Users.username', 'Users.nombres'])
+                ])
+                ->first();
+            
+            // Cargar módulos por separado
+            if ($certificado) {
+                $certificado->certificado_modulos = $this->fetchTable('CertificadoModulos')
+                    ->find()
+                    ->where(['certificado_id' => $certificado->id])
+                    ->orderBy(['posicion' => 'ASC'])
+                    ->toArray();
+                
+                // Cargar curso por separado
+                if ($certificado->curso_id) {
+                    $certificado->curso = $this->fetchTable('Cursos')->get($certificado->curso_id);
+                }
+            }
 
         if (!$certificado) {
             $this->Flash->error('Certificado no encontrado.');
@@ -125,9 +167,30 @@ class CertificadosPublicController extends Controller
         }
 
         $certificado = $certificadosTable->find()
-            ->where(['Certificados.codigo' => $codigo])
-            ->contain(['Users', 'Cursos', 'CertificadoModulos'])
-            ->first();
+                ->select(['Certificados.id', 'Certificados.codigo', 'Certificados.tipo', 'Certificados.usuario_id', 
+                         'Certificados.nombre_titular', 'Certificados.dni_titular', 'Certificados.curso_id',
+                         'Certificados.nombre_curso_manual', 'Certificados.nota_final', 'Certificados.horas_lectivas',
+                         'Certificados.fecha_inicio', 'Certificados.fecha_fin', 'Certificados.archivo_ruta',
+                         'Certificados.created', 'Certificados.modified'])
+                ->where(['Certificados.codigo' => $codigo])
+                ->contain([
+                    'Users' => fn($q) => $q->select(['Users.id', 'Users.username', 'Users.nombres'])
+                ])
+                ->first();
+            
+            // Cargar módulos por separado
+            if ($certificado) {
+                $certificado->certificado_modulos = $this->fetchTable('CertificadoModulos')
+                    ->find()
+                    ->where(['certificado_id' => $certificado->id])
+                    ->orderBy(['posicion' => 'ASC'])
+                    ->toArray();
+                
+                // Cargar curso por separado
+                if ($certificado->curso_id) {
+                    $certificado->curso = $this->fetchTable('Cursos')->get($certificado->curso_id);
+                }
+            }
 
         if (!$certificado) {
             $this->Flash->error('Certificado no encontrado.');

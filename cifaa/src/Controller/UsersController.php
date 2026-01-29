@@ -65,12 +65,13 @@ class UsersController extends AppController
             $query->where(['Users.estado' => 'activo']);
         }
 
-        // Filtro de búsqueda por término (username o DNI)
+        // Filtro de búsqueda por término (username, nombres o DNI)
         $termino = $this->request->getQuery('termino');
         if (!empty($termino)) {
             $query->where([
                 'OR' => [
                     'Users.username LIKE' => '%' . $termino . '%',
+                    'Users.nombres LIKE' => '%' . $termino . '%',
                     'Users.dni LIKE' => '%' . $termino . '%'
                 ]
             ]);

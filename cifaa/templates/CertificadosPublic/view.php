@@ -142,6 +142,53 @@
                     <hr class="border-secondary">
                     <?php endif; ?>
 
+                    <!-- Sección de Previsualizacion de Archivo -->
+                    <?php if (!empty($certificado->archivo_ruta)): ?>
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">
+                            <i class="fas fa-file me-2"></i> ARCHIVO ADJUNTO
+                        </h6>
+                        <?php 
+                            $fileExtension = strtolower(pathinfo($certificado->archivo_ruta, PATHINFO_EXTENSION));
+                            $fileName = basename($certificado->archivo_ruta);
+                        ?>
+                        
+                        <?php if (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'])): ?>
+                            <!-- Previsualizacion de imagen -->
+                            <div class="text-center mb-3">
+                                <img src="<?= $this->Url->assetUrl($certificado->archivo_ruta) ?>" alt="Archivo Subido" class="img-fluid" style="max-width: 100%; max-height: 400px; border: 1px solid #444; border-radius: 5px;">
+                            </div>
+                        <?php else: ?>
+                            <!-- Icono y boton para descarga para otros tipos de archivo -->
+                            <div class="d-flex align-items-center gap-3">
+                                <?php 
+                                    $iconClass = 'fa-file';
+                                    $fileType = 'Archivo';
+                                    if ($fileExtension === 'pdf') {
+                                        $iconClass = 'fa-file-pdf';
+                                        $fileType = 'PDF';
+                                    } elseif (in_array($fileExtension, ['doc', 'docx'])) {
+                                        $iconClass = 'fa-file-word';
+                                        $fileType = 'Documento Word';
+                                    } elseif (in_array($fileExtension, ['xls', 'xlsx'])) {
+                                        $iconClass = 'fa-file-excel';
+                                        $fileType = 'Hoja de cálculo';
+                                    }
+                                ?>
+                                <i class="fas <?= $iconClass ?> text-info" style="font-size: 2rem;"></i>
+                                <div>
+                                    <p class="mb-2 text-white"><strong><?= $fileType ?></strong></p>
+                                    <a href="<?= $this->Url->assetUrl($certificado->archivo_ruta) ?>" download="<?= h($fileName) ?>" class="btn btn-sm btn-success">
+                                        <i class="fas fa-download"></i> Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <hr class="border-secondary">
+                    <?php endif; ?>
+
                     <!-- Información de calificación -->
                     <?php if ($certificado->nota_final !== null): ?>
                     <div class="mb-4">
@@ -160,18 +207,6 @@
                     <?php endif; ?>
 
                     <!-- Botones de acción -->
-                    <div class="d-grid gap-2">
-                        <?= $this->Html->link(
-                            '<i class="fas fa-file-pdf me-2"></i> Descargar Certificado en PDF',
-                            ['action' => 'downloadPdf', $certificado->codigo],
-                            [
-                                'class' => 'btn btn-success btn-lg',
-                                'escape' => false,
-                                'target' => '_blank'
-                            ]
-                        ) ?>
-                    </div>
-
                     <div class="mt-3">
                         <?= $this->Html->link(
                             '<i class="fas fa-search me-2"></i> Buscar otro certificado',

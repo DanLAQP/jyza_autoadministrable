@@ -22,7 +22,7 @@
                     <?= $this->Form->create(null, ['type' => 'get', 'class' => 'd-flex']) ?>
                     <div class="input-group">
                         <input type="text" name="termino" class="form-control" 
-                               placeholder="Buscar por usuario..." 
+                               placeholder="Buscar por usuario o nombre..." 
                                value="<?= h($this->request->getQuery('termino')) ?>"
                                style="background-color: #1a3a52; color: #ffffff; border: 1px solid #0d6efd;">
                         <input type="hidden" name="estado" value="<?= h($filtroEstado) ?>">

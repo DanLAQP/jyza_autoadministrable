@@ -25,6 +25,7 @@ use Cake\ORM\Entity;
  * @property string $codigo
  * @property string|null $nombre_completo
  * @property string|null $modulos
+ * @property string|null $archivo_ruta
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  *
@@ -61,21 +62,12 @@ class Certificado extends Entity
         'codigo' => true,
         'nombre_completo' => true,
         'modulos' => true,
+        'archivo_ruta' => true,
         'created' => true,
         'modified' => true,
         'user' => true,
         'titular' => true,
         'curso' => true,
         'certificado_modulos' => true,
-    ];
-
-    /**
-     * Automatically cast date fields to DateTime objects.
-     *
-     * @var array<string, string>
-     */
-    protected $_dates = [
-        'fecha_inicio' => 'datetime',
-        'fecha_fin' => 'datetime',
     ];
 }

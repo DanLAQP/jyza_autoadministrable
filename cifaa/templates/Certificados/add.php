@@ -18,7 +18,7 @@
                 </h3>
             </div>
 
-            <?= $this->Form->create($certificado, ['class' => 'form-horizontal']) ?>
+            <?= $this->Form->create($certificado, ['class' => 'form-horizontal', 'enctype' => 'multipart/form-data']) ?>
             <div class="card-body">
                 
                 <!-- Sección 1: Tipo de Certificado -->
@@ -347,6 +347,27 @@
                     </div>
                 </div>
 
+                <!-- Sección 7: Subida de Archivos -->
+                <h5 class="text-info mb-3">
+                    <i class="fas fa-upload"></i> Subir Archivo
+                </h5>
+
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Archivo (PDF, DOC, Imagen)</label>
+                    <div class="col-sm-10">
+                        <?= $this->Form->control(
+                            'archivo_ruta',
+                            [
+                                'type' => 'file',
+                                'class' => 'form-control',
+                                'label' => false,
+                                'accept' => '.pdf,.doc,.docx,.jpg,.jpeg,.png'
+                            ]
+                        ) ?>
+                        <small class="text-muted">Formatos permitidos: PDF, DOC, DOCX, JPG, PNG.</small>
+                    </div>
+                </div>
+
             </div>
 
             <div class="card-footer">
@@ -471,6 +492,12 @@
                 // Si NO hay curso seleccionado
                 seccionCursoManual.style.display = 'block';
                 seccionModulosAutomaticos.style.display = 'none';
+                
+                // Limpiar la lista de módulos automáticos cuando se deselecciona el curso
+                const listaModulos = document.getElementById('listaModulos');
+                if (listaModulos) {
+                    listaModulos.innerHTML = '';
+                }
                 
                 // Mostrar módulos manuales solo si hay texto en curso manual
                 if (cursoManual.value.trim() !== '') {

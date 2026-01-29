@@ -169,9 +169,60 @@
                         </div>
                         <?php endif; ?>
 
+                        <!-- Sección de Previsualizacion de Archivo -->
+                        <?php if (!empty($certificado->archivo_ruta)): ?>
+                        <div class="file-section mb-4">
+                            <div class="info-label mb-3">
+                                <i class="fas fa-file me-2"></i>Archivo Adjunto
+                            </div>
+                            <?php 
+                                $fileExtension = strtolower(pathinfo($certificado->archivo_ruta, PATHINFO_EXTENSION));
+                                $fileName = basename($certificado->archivo_ruta);
+                            ?>
+                            
+                            <?php if (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'])): ?>
+                                <!-- Miniatura de imagen -->
+                                <div class="image-preview">
+                                    <img src="<?= $this->Url->assetUrl($certificado->archivo_ruta) ?>" alt="Archivo Subido" class="img-fluid" style="max-width: 100%; max-height: 300px; border: 1px solid #444; border-radius: 8px;">
+                                    <div class="mt-3">
+                                        <a href="<?= $this->Url->assetUrl($certificado->archivo_ruta) ?>" download="<?= h($fileName) ?>" class="btn btn-sm btn-success">
+                                            <i class="fas fa-download"></i> Descargar
+                                        </a>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <!-- Icono y boton para descarga para otros tipos de archivo -->
+                                <div class="file-item d-flex align-items-center gap-3">
+                                    <?php 
+                                        $iconClass = 'fa-file';
+                                        $fileType = 'Archivo';
+                                        if ($fileExtension === 'pdf') {
+                                            $iconClass = 'fa-file-pdf';
+                                            $fileType = 'Documento PDF';
+                                        } elseif (in_array($fileExtension, ['doc', 'docx'])) {
+                                            $iconClass = 'fa-file-word';
+                                            $fileType = 'Documento Word';
+                                        } elseif (in_array($fileExtension, ['xls', 'xlsx'])) {
+                                            $iconClass = 'fa-file-excel';
+                                            $fileType = 'Hoja de cálculo';
+                                        }
+                                    ?>
+                                    <i class="fas <?= $iconClass ?>" style="font-size: 2.5rem; color: #4a90e2;"></i>
+                                    <div>
+                                        <p class="mb-2" style="color: #ffffff; font-weight: 600;"><?= $fileType ?></p>
+                                        <a href="<?= $this->Url->assetUrl($certificado->archivo_ruta) ?>" download="<?= h($fileName) ?>" class="btn btn-sm btn-success">
+                                            <i class="fas fa-download"></i> Descargar
+                                        </a>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
+
                         <!-- Botones de Acción -->
                         <div class="action-buttons">
-                            <?= $this->Html->link(
+                            
+                            <!-- <?= $this->Html->link(
                                 '<i class="fas fa-file-pdf me-2"></i>Descargar PDF',
                                 ['action' => 'downloadPdf', $certificado->codigo],
                                 [
@@ -179,13 +230,14 @@
                                     'escape' => false,
                                     'target' => '_blank'
                                 ]
-                            ) ?>
+                            ) ?> -->
+                            
                             
                             <?= $this->Html->link(
                                 '<i class="fas fa-arrow-left me-2"></i>Nueva Búsqueda',
                                 ['action' => 'search'],
                                 [
-                                    'class' => 'btn btn-secondary btn-back',
+                                    'class' => 'btn btn-secondary btn-back w-100',
                                     'escape' => false
                                 ]
                             ) ?>
@@ -556,6 +608,23 @@
     padding: 0.75rem 1.5rem;
     border-radius: 30px;
     font-size: 1rem;
+}
+
+/* File Section */
+.file-section {
+    background: var(--card-light);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.image-preview {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.file-item {
+    padding: 0.5rem;
 }
 
 /* Action Buttons */

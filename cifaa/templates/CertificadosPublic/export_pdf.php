@@ -165,7 +165,7 @@
             font-size: 18pt;
             font-weight: bold;
             color: #000;
-            margin: 4mm -1mm 3mm 0;
+            margin: 4mm 0 3mm 0;
             text-transform: uppercase;
             letter-spacing: 1px;
             display: block;
@@ -174,7 +174,7 @@
         /* Contenedor de firma y texto lado a lado */
         .firma-texto-container {
             width: 100%;
-            margin: 2mm 0 2mm 0;
+            margin: 4mm 0 2mm 0;
             /* text-align: center; */
         }
         
@@ -188,7 +188,7 @@
         .firma-section {
             float: left;
             width: 30%;
-            text-align: center;
+            text-align: left;
             padding-right: 8mm;
         }
         
@@ -197,11 +197,11 @@
             height: auto;
         }
         .firma {
-            font-size: 8pt;
+            font-size: 9pt;
             /* margin-top: 2mm; */
-            
+
         }
-       .firma-text {
+        .firma-text {
             border-top: 1px dotted #000;
             font-weight: 700;
             /* padding-top: 8px; */
@@ -238,10 +238,10 @@
         }
         
         /* ===== PÁGINA 2 - MÓDULOS ===== */
-        .page2 .content {
-            /* padding: 15mm 20mm; */
+        /* .page2 .content {
+            padding: 15mm 20mm 20mm 20mm ;
             background: #f5f5f0;
-        }
+        } */
         
         .modulos-title {
             font-size: 20pt;
@@ -255,13 +255,14 @@
         }
         
         .page2 .logo {
-            width: 35mm;
+            width: 40mm;
+            margin-top: -5mm;
             margin-bottom: 5mm;
         }
         
         /* Tabla de módulos estilo imagen */
         .modulos-table {
-            width: 100%;
+            width: 70%;
             border-collapse: collapse;
             margin: 5mm auto;
             font-family: Arial, sans-serif;
@@ -273,26 +274,26 @@
         }
         
         .modulos-table th {
-            padding: 3mm 4mm;
-            font-size: 11pt;
+            padding: 2mm 4mm;
+            font-size: 10pt;
             font-weight: bold;
             text-align: center;
             border: 1px solid #000;
         }
         
         .modulos-table td {
-            padding: 3mm 4mm;
+            padding: 2mm 4mm;
             font-size: 9pt;
             border: 1px solid #666;
             text-align: center;
             vertical-align: middle;
-            background: #fff;
+            /* background: #fff; */
         }
         
         .modulos-table td:first-child {
             font-weight: bold;
             width: 20%;
-            background: #f5f5f0;
+            /* background: #f5f5f0; */
         }
         
         .modulos-table td:last-child {
@@ -319,6 +320,45 @@
             font-size: 7pt;
             color: #666;
         }
+        .page2 .border-outer {
+            position: absolute;
+            top: -2mm;
+            left: -2mm;
+            right: -2mm;
+            bottom: -2mm;
+            /* border: 1.5px solid #ffcc00; */
+            box-sizing: border-box;
+            z-index: 120;
+            background: #f5f5f0;
+
+        }
+        .page2 .border-inner {
+            position: absolute;
+            top: 1mm;
+            left: 1mm;
+            right: 1mm;
+            bottom: -3mm;
+            border: 2.5px solid #ffcc00;
+            padding: 0;
+            box-sizing: border-box;
+            z-index: 12;
+        }
+        .page2 .border-inner1 {
+            position: absolute;
+            top: 0mm;
+            left: 0mm;
+            right: 0mm;
+            bottom: -4mm;
+            border: 1px solid #ffcc00;
+            padding: 0;
+            box-sizing: border-box;
+            z-index: 12;
+        }
+        /* .page2 .corner-tl { top: -2.5mm; left: -2.5mm; border-radius: 0 0 100% 0; }
+        .page2 .corner-tr { top: -2.5mm; right: -2.5mm; border-radius: 0 0 0 100%; } */
+        .page2 .corner-bl { bottom: -5mm; left: -2.5mm; border-radius: 0 100% 0 0; }
+        .page2 .corner-br { bottom: -5mm; right: -2.5mm; border-radius: 100% 0 0 0; }
+        
     </style>
 </head>
 <body>
@@ -412,7 +452,6 @@
                         </div>
 
 
-
                         
                         <!-- Texto del cuerpo - derecha -->
                         <div class="texto">
@@ -443,13 +482,14 @@
 <!-- PÁGINA 2: MÓDULOS -->
 <div class="page2">
 <div class="certificate">
-    
+    <div class="border-outer">
         <!-- Decoraciones en esquinas -->
         <div class="corner corner-tl"></div>
         <div class="corner corner-tr"></div>
         <div class="corner corner-bl"></div>
         <div class="corner corner-br"></div>
-        
+         <div class="border-inner1"> 
+            <div class="border-inner">
        
             <!-- Marca de agua -->
             <div class="watermark">CIFAA</div>
@@ -463,9 +503,9 @@
                 <!-- Título -->
                 <div class="modulos-title">
                     <?php if ($certificado->tipo === 'diplomado'): ?>
-                        DIPLOMADO EN: <?= strtoupper(h($certificado->curso ? $certificado->curso->titulo : $certificado->nombre_curso_manual)) ?>
+                        DIPLOMADO EN <?= strtoupper(h($certificado->curso ? $certificado->curso->titulo : $certificado->nombre_curso_manual)) ?>
                     <?php else: ?>
-                        CERTIFICADO EN: <?= strtoupper(h($certificado->curso ? $certificado->curso->titulo : $certificado->nombre_curso_manual)) ?>
+                        CERTIFICADO EN <?= strtoupper(h($certificado->curso ? $certificado->curso->titulo : $certificado->nombre_curso_manual)) ?>
                     <?php endif; ?>
                 </div>
                 
@@ -503,6 +543,10 @@
                     <div style="margin-bottom: 3mm; font-size: 9pt; text-align: left; padding: 0 20mm;">
                         <strong>CÓDIGO DEL CERTIFICADO:</strong> <?= h($certificado->codigo) ?>
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <strong>DURACIÓN:</strong> <?= !empty($certificado->duracion_meses) ? h($certificado->duracion_meses) . ' MESES' : 'N/A' ?>
                         <br>
                         <strong>NOTA FINAL:</strong> <?= !empty($certificado->nota_final) ? h($certificado->nota_final) : 'N/A' ?>
@@ -513,13 +557,17 @@
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+                        &nbsp;&nbsp;&nbsp;
                         <strong>HORAS LECTIVAS:</strong> <?= !empty($certificado->horas_lectivas) ? h($certificado->horas_lectivas) : 'N/A' ?>
                     </div>
                     
                     <div style="margin-top: 5mm;">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=<?= urlencode('http://localhost/cifaa/cifaa/verificar-certificado?codigo=' . $certificado->codigo) ?>" 
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=<?= urlencode('https://sistemacifaa.cifaaedu.com/cifaa/verificar-certificado?codigo=' . $certificado->codigo) ?>" 
                              alt="QR Verificación" class="qr-code">
                     </div>
                     
@@ -530,7 +578,8 @@
                 </div>
             </div>
         
-    
+        </div>                  
+    </div>
 </div>
 </div>
 

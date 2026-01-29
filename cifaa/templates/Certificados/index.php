@@ -24,7 +24,7 @@
                     <?= $this->Form->create(null, ['type' => 'get', 'class' => 'd-flex']) ?>
                     <div class="input-group">
                         <input type="text" name="termino" class="form-control" 
-                               placeholder="Buscar por código, titular, DNI, usuario o curso..." 
+                               placeholder="Buscar por código, titular, DNI, usuario, nombre o curso..." 
                                value="<?= h($this->request->getQuery('termino')) ?>"
                                style="background-color: #1a3a52; color: #ffffff; border: 1px solid #0d6efd;">
                         <input type="hidden" name="tipo" value="<?= h($this->request->getQuery('tipo')) ?>">
@@ -125,14 +125,15 @@
                                     </td>
                                     <td>
                                         <?php if ($certificado->tipo === 'certificado'): ?>
-                                            <span class="badge bg-info"><i class="fas fa-award"></i> Certificado</span>
+                                            <span class="badge bg-info"><i class="fas fa-award"></i>Certificado</span>
                                         <?php else: ?>
-                                            <span class="badge bg-warning text-dark"><i class="fas fa-medal"></i> Diplomado</span>
+                                            <span class="badge bg-warning text-dark"><i class="fas fa-medal"></i>Diplomado</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php if ($certificado->user): ?>
-                                            <i class="fas fa-user"></i> <?= h($certificado->user->username) ?>
+                                            <i class="fas fa-user"></i> <?= h($certificado->user->username) ?><br>
+                                            <small class="text-muted"><?= h($certificado->user->nombres ?? '') ?></small>
                                         <?php else: ?>
                                             <span class="text-muted">-</span>
                                         <?php endif; ?>
@@ -190,11 +191,23 @@
                                                     ['escape' => false, 'title' => 'Ver', 'class' => 'btn btn-info']
                                                 ) ?>
                                             <?php endif; ?>
-                                            <?= $this->Html->link(
+                                            <?php if ($certificado->archivo_ruta): ?>
+                                                <?= $this->Html->link(
+                                                    '<i class="fas fa-download"></i>',
+                                                    ['action' => 'downloadFile', $certificado->id],
+                                                    ['escape' => false, 'title' => 'Descargar archivo', 'class' => 'btn btn-success']
+                                                ) ?>
+                                            <?php else: ?>
+                                                <button class="btn btn-success disabled" title="Sin archivo subido" disabled>
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                            <?php endif; ?>
+                                            
+                                            <!-- <?= $this->Html->link(
                                                 '<i class="fas fa-print"></i>',
                                                 ['action' => 'exportPdf', $certificado->id],
                                                 ['escape' => false, 'title' => 'Descargar PDF', 'class' => 'btn btn-success', 'target' => '_blank']
-                                            ) ?>
+                                            ) ?> -->
                                             
                                             <?php if (!isset($identity) || $identity->rol != 3): ?>
                                                 <?= $this->Html->link(

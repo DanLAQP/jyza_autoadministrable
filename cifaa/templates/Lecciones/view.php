@@ -408,11 +408,11 @@ $principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion
                         ['controller' => 'ContenidosLeccion', 'action' => 'add', '?' => ['leccion_id' => $leccion->id]],
                         ['class' => 'btn btn-primary openModal', 'escape' => false]
                     ) ?>
-                    <!-- <?= $this->Form->postLink(
+                    <?= $this->Form->postLink(
                         '<i class="fas fa-trash me-1"></i>Eliminar',
                         ['action' => 'delete', $leccion->id],
-                        ['confirm' => '¿Estás seguro?', 'class' => 'btn btn-danger', 'escape' => false]
-                    ) ?> -->
+                        ['confirm' => '¿Estás seguro de que deseas eliminar esta lección? Esta acción no se puede deshacer.', 'class' => 'btn btn-danger', 'escape' => false]
+                    ) ?>
                 </div>
             <?php endif; ?>
         </div>
@@ -469,6 +469,82 @@ $principal = !empty($leccion->contenidos_leccion) ? $leccion->contenidos_leccion
                     <?php endif; ?>
                 </div>
             </div>
+
+            <!-- Navegación entre Módulos -->
+            <?php 
+                // Intentar obtener módulos de diferentes formas
+                $modulos = [];
+                
+                // Opción 1: Desde $curso->modulos
+                if (isset($curso->modulos) && !empty($curso->modulos)) {
+                    $modulos = $curso->modulos;
+                }
+                // Opción 2: Desde $modulo->curso->modulos
+                elseif (isset($modulo->curso->modulos) && !empty($modulo->curso->modulos)) {
+                    $modulos = $modulo->curso->modulos;
+                }
+                // Opción 3: Cargar manualmente desde la BD
+                else {
+                    try {
+                        $modulosTable = \Cake\ORM\TableRegistry::getTableLocator()->get('Modulos');
+                        $modulos = $modulosTable->find()
+                            ->where(['curso_id' => $curso->id])
+                            ->contain(['Lecciones'])
+                            ->orderAsc('posicion')
+                            ->toArray();
+                    } catch (\Exception $e) {
+                        // Si hay error, dejar vacío
+                        $modulos = [];
+                    }
+                }
+                
+                $moduloAnterior = null;
+                $moduloSiguiente = null;
+                
+                // Buscar el índice del módulo actual
+                if (!empty($modulos)) {
+                    for ($i = 0; $i < count($modulos); $i++) {
+                        if ($modulos[$i]->id == $modulo->id) {
+                            // Módulo anterior
+                            if ($i > 0) {
+                                $moduloAnterior = $modulos[$i - 1];
+                            }
+                            // Módulo siguiente
+                            if ($i < count($modulos) - 1) {
+                                $moduloSiguiente = $modulos[$i + 1];
+                            }
+                            break;
+                        }
+                    }
+                }
+            ?>
+            
+            <?php if (!empty($modulos) && count($modulos) > 1): ?>
+                <div class="card bg-dark border-secondary shadow mt-3">
+                    <div class="card-header bg-secondary text-white">
+                        <strong><i class="fas fa-arrows-alt-h me-2"></i>Navegar Módulos</strong>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="d-grid gap-2">
+                            <?php if ($moduloAnterior && !empty($moduloAnterior->lecciones)): ?>
+                                <?= $this->Html->link(
+                                    '<i class="fas fa-arrow-left me-2"></i>Módulo Anterior',
+                                    ['action' => 'view', $moduloAnterior->lecciones[0]->id],
+                                    ['class' => 'btn btn-outline-secondary btn-sm', 'escape' => false]
+                                ) ?>
+                            <?php endif; ?>
+                            
+                            <?php if ($moduloSiguiente && !empty($moduloSiguiente->lecciones)): ?>
+                                <?= $this->Html->link(
+                                    'Siguiente Módulo<i class="fas fa-arrow-right ms-2"></i>',
+                                    ['action' => 'view', $moduloSiguiente->lecciones[0]->id],
+                                    ['class' => 'btn btn-outline-info btn-sm', 'escape' => false]
+                                ) ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <!-- Recursos Descargables -->
             <div class="card bg-dark border-secondary shadow">

@@ -41,6 +41,7 @@ class CertificadosController extends AppController
                     'Certificados.dni_titular LIKE' => "%$termino%",
                     'Certificados.nombre_curso_manual LIKE' => "%$termino%",
                     'Users.username LIKE' => "%$termino%",
+                    'Users.nombres LIKE' => "%$termino%",
                     'Cursos.titulo LIKE' => "%$termino%",
                 ]
             ]);
@@ -137,6 +138,29 @@ class CertificadosController extends AppController
                 $data['codigo'] = $this->generarCodigoUnico();
             }
             
+            // Manejo de subida de archivo
+            if (!empty($data['archivo_ruta']) && is_object($data['archivo_ruta']) && $data['archivo_ruta']->getError() === UPLOAD_ERR_OK) {
+                $uploadedFile = $data['archivo_ruta'];
+                $directory = WWW_ROOT . 'uploads' . DS . 'certificadosarchivos';
+
+                // Crear la carpeta si no existe
+                if (!is_dir($directory)) {
+                    mkdir($directory, 0777, true);
+                }
+
+                $filename = time() . '_' . $uploadedFile->getClientFilename();
+                $uploadPath = $directory . DS . $filename;
+
+                // Mover el archivo al destino
+                $uploadedFile->moveTo($uploadPath);
+                $data['archivo_ruta'] = 'uploads/certificadosarchivos/' . $filename;
+            } else {
+                // Si no hay archivo, remover el campo para evitar errores
+                if (empty($data['archivo_ruta']) || (is_object($data['archivo_ruta']) && $data['archivo_ruta']->getError() !== UPLOAD_ERR_OK)) {
+                    unset($data['archivo_ruta']);
+                }
+            }
+            
             // Capturar módulos antes de guardar (pueden venir de checkboxes o textarea)
             $modulosIds = [];
             $modulosManual = [];
@@ -175,7 +199,16 @@ class CertificadosController extends AppController
             $this->Flash->error(__('El certificado no pudo ser guardado. Por favor, intenta de nuevo.'));
         }
         
-        $users = $this->Certificados->Users->find('list', limit: 200)->all();
+        // Personalizar la lista de usuarios para mostrar username (nombres)
+        $users = $this->Certificados->Users->find()
+            ->select(['id', 'username', 'nombres'])
+            ->limit(200)
+            ->all()
+            ->combine('id', function($user) {
+                $nombres = !empty($user->nombres) ? " ({$user->nombres})" : "";
+                return $user->username . $nombres;
+            });
+        
         $cursos = $this->Certificados->Cursos->find('list', limit: 200)->all();
         
         $this->set(compact('certificado', 'users', 'cursos'));
@@ -194,14 +227,23 @@ class CertificadosController extends AppController
         $certificadoModulosTable = $this->fetchTable('CertificadoModulos');
         
         $posicion = 1;
+        $titulosGuardados = []; // Mantener un registro de títulos ya guardados para evitar duplicados
         
         // Guardar módulos seleccionados del curso (IDs)
         foreach ($modulosIds as $moduloId) {
             $modulo = $this->fetchTable('Modulos')->get($moduloId);
+            $titulo = $modulo->titulo ?? $modulo->nombre;
+            
+            // Evitar guardar duplicados
+            if (in_array(strtolower($titulo), $titulosGuardados)) {
+                continue;
+            }
+            
+            $titulosGuardados[] = strtolower($titulo);
             
             $certificadoModulo = $certificadoModulosTable->newEmptyEntity();
             $certificadoModulo->certificado_id = $certificadoId;
-            $certificadoModulo->titulo = $modulo->titulo ?? $modulo->nombre;
+            $certificadoModulo->titulo = $titulo;
             $certificadoModulo->descripcion = $modulo->descripcion ?? '';
             $certificadoModulo->horas = $modulo->horas ?? null;
             $certificadoModulo->posicion = $posicion;
@@ -224,6 +266,13 @@ class CertificadosController extends AppController
             if (empty($titulo)) {
                 continue; // Saltar módulos sin título
             }
+            
+            // Evitar guardar duplicados
+            if (in_array(strtolower($titulo), $titulosGuardados)) {
+                continue;
+            }
+            
+            $titulosGuardados[] = strtolower($titulo);
             
             $certificadoModulo = $certificadoModulosTable->newEmptyEntity();
             $certificadoModulo->certificado_id = $certificadoId;
@@ -321,6 +370,26 @@ class CertificadosController extends AppController
         // Preparar datos de módulos existentes para la vista (con IDs)
         $modulosExistentes = [];
         $modulosManualesData = []; // Array con id y titulo
+        $modulosIdsCertificado = []; // IDs de módulos que vinieron del curso
+        
+        // Si el certificado tiene un curso, obtener todos los módulos del curso
+        $modulosCurso = [];
+        if (!empty($certificado->curso_id)) {
+            $modulosCurso = $this->fetchTable('Modulos')
+                ->find()
+                ->where(['curso_id' => $certificado->curso_id])
+                ->toArray();
+        }
+        
+        // Crear un mapa de títulos de módulos del curso para comparación rápida
+        $titulosModulosCurso = [];
+        $modulosCursoMap = []; // Mapa: titulo -> id del módulo
+        foreach ($modulosCurso as $mod) {
+            $titulo = strtolower($mod->titulo ?? $mod->nombre ?? '');
+            $titulosModulosCurso[] = $titulo;
+            $modulosCursoMap[$titulo] = $mod->id;
+        }
+        
         if (!empty($certificado->certificado_modulos)) {
             foreach ($certificado->certificado_modulos as $modulo) {
                 $modulosExistentes[] = $modulo->titulo;
@@ -328,6 +397,12 @@ class CertificadosController extends AppController
                     'id' => $modulo->id,
                     'titulo' => $modulo->titulo
                 ];
+                
+                // Si el módulo del certificado está en los módulos del curso, agregarlo a modulosIdsCertificado
+                $tituloNormalizado = strtolower($modulo->titulo ?? '');
+                if (isset($modulosCursoMap[$tituloNormalizado])) {
+                    $modulosIdsCertificado[] = $modulosCursoMap[$tituloNormalizado];
+                }
             }
         }
         
@@ -338,6 +413,38 @@ class CertificadosController extends AppController
         
         if ($this->request->is(['patch', 'post', 'put'])) {
             $data = $this->request->getData();
+            
+            // Manejo de subida de archivo (reemplazar si es necesario)
+            if (!empty($data['archivo_ruta']) && is_object($data['archivo_ruta']) && $data['archivo_ruta']->getError() === UPLOAD_ERR_OK) {
+                $uploadedFile = $data['archivo_ruta'];
+                
+                // Eliminar archivo anterior si existe
+                if (!empty($certificado->archivo_ruta)) {
+                    $oldFilePath = WWW_ROOT . $certificado->archivo_ruta;
+                    if (file_exists($oldFilePath)) {
+                        unlink($oldFilePath);
+                    }
+                }
+                
+                $directory = WWW_ROOT . 'uploads' . DS . 'certificadosarchivos';
+
+                // Crear la carpeta si no existe
+                if (!is_dir($directory)) {
+                    mkdir($directory, 0777, true);
+                }
+
+                $filename = time() . '_' . $uploadedFile->getClientFilename();
+                $uploadPath = $directory . DS . $filename;
+
+                // Mover el archivo al destino
+                $uploadedFile->moveTo($uploadPath);
+                $data['archivo_ruta'] = 'uploads/certificadosarchivos/' . $filename;
+            } else {
+                // Si no hay archivo nuevo, mantener el anterior
+                if (empty($data['archivo_ruta']) || (is_object($data['archivo_ruta']) && $data['archivo_ruta']->getError() !== UPLOAD_ERR_OK)) {
+                    unset($data['archivo_ruta']);
+                }
+            }
             
             // Capturar módulos antes de guardar (pueden venir de checkboxes o textarea)
             $modulosIds = [];
@@ -380,18 +487,30 @@ class CertificadosController extends AppController
                 $certificadoModulosTable = $this->fetchTable('CertificadoModulos');
                 $certificadoModulosTable->deleteAll(['certificado_id' => $certificado->id]);
                 
-                // Guardar los módulos actualizados
-                $this->guardarModulosCertificado($certificado->id, $modulosIds, $modulosManual);
+                // Guardar los módulos actualizados (solo si hay módulos para guardar)
+                if (!empty($modulosIds) || !empty($modulosManual)) {
+                    $this->guardarModulosCertificado($certificado->id, $modulosIds, $modulosManual);
+                }
                 
                 $this->Flash->success(__('El certificado ha sido actualizado exitosamente.'));
                 return $this->redirect(['action' => 'index']);
             }
             $this->Flash->error(__('El certificado no pudo ser guardado. Por favor, intenta de nuevo.'));
         }
-        $users = $this->Certificados->Users->find('list', limit: 200)->all();
+        
+        // Personalizar la lista de usuarios para mostrar username (nombres)  
+        $users = $this->Certificados->Users->find()
+            ->select(['id', 'username', 'nombres'])
+            ->limit(200)
+            ->all()
+            ->combine('id', function($user) {
+                $nombres = !empty($user->nombres) ? " ({$user->nombres})" : "";
+                return $user->username . $nombres;
+            });
+            
         $cursos = $this->Certificados->Cursos->find('list', limit: 200)->all();
         
-        $this->set(compact('certificado', 'users', 'cursos', 'modulosExistentes', 'modulosManualesData'));
+        $this->set(compact('certificado', 'users', 'cursos', 'modulosExistentes', 'modulosManualesData', 'modulosIdsCertificado'));
     }
 
     /**
@@ -420,5 +539,41 @@ class CertificadosController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+
+    /**
+     * Download File method
+     * Descarga el archivo subido para un certificado
+     *
+     * @param string|int $id Certificado id
+     * @return \Cake\Http\Response
+     */
+    public function downloadFile($id = null)
+    {
+        $certificado = $this->Certificados->get($id);
+        
+        // Verificar si el archivo existe
+        if (!$certificado->archivo_ruta) {
+            $this->Flash->error(__('No hay archivo disponible para descargar.'));
+            return $this->redirect($this->referer());
+        }
+        
+        // Construir la ruta completa del archivo
+        $filePath = WWW_ROOT . $certificado->archivo_ruta;
+        
+        // Verificar que el archivo existe en el servidor
+        if (!file_exists($filePath)) {
+            $this->Flash->error(__('El archivo no se encontró en el servidor.'));
+            return $this->redirect($this->referer());
+        }
+        
+        // Obtener nombre del archivo
+        $filename = basename($filePath);
+        
+        // Descargar el archivo
+        return $this->response->withFile($filePath, [
+            'download' => true,
+            'name' => $filename
+        ]);
     }
 }

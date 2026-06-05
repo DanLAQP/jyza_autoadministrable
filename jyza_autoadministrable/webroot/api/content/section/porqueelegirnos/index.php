@@ -1,8 +1,4 @@
 <?php
-// API bridge: read-only endpoint that returns section content from the database
-// This is a lightweight fallback that queries the app database directly and
-// returns JSON formatted similarly to the Cake `ContentService` output.
-
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, OPTIONS');
@@ -14,7 +10,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// Database connection (adjust if your MySQL user/password are different)
 $dbHost = '127.0.0.1';
 $dbUser = 'root';
 $dbPass = '';
@@ -29,7 +24,6 @@ if ($mysqli->connect_errno) {
 
 $slug = 'porqueelegirnos';
 
-// Get section
 $stmt = $mysqli->prepare('SELECT id, slug, title, description, metadata, modified FROM content_sections WHERE slug = ? AND is_active = 1 LIMIT 1');
 $stmt->bind_param('s', $slug);
 $stmt->execute();
@@ -43,9 +37,8 @@ if (!$section) {
 
 $sectionId = (int)$section->id;
 
-// Get blocks
 $blocks = [];
-$bstmt = $mysqli->prepare('SELECT id, block_key, block_type, content, metadata FROM content_blocks WHERE section_id = ? ORDER BY sort_order ASC');
+$bstmt = $mysqli->prepare('SELECT id, block_key, block_type, content, metadata, is_active FROM content_blocks WHERE section_id = ? AND is_active = 1 ORDER BY sort_order ASC');
 $bstmt->bind_param('i', $sectionId);
 $bstmt->execute();
 $bres = $bstmt->get_result();
@@ -59,12 +52,12 @@ while ($b = $bres->fetch_object()) {
         'type' => $b->block_type,
         'content' => $b->content,
         'metadata' => $meta ?: new stdClass(),
+        'is_active' => (int)$b->is_active,
     ];
 }
 
-// Get images
 $images = [];
-$istmt = $mysqli->prepare('SELECT id, file_path, alt_text, title, dimensions FROM content_images WHERE section_id = ? ORDER BY id ASC');
+$istmt = $mysqli->prepare('SELECT id, file_path, alt_text, title, dimensions FROM content_images WHERE section_id = ? ORDER BY id DESC');
 $istmt->bind_param('i', $sectionId);
 $istmt->execute();
 $ires = $istmt->get_result();

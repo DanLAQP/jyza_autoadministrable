@@ -1,0 +1,592 @@
+2025-01-10 12:20:35 error: [Cake\Database\Exception\DatabaseException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Schema\Collection.php on line 158
+Stack Trace:
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [Cake\Database\Exception\QueryException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Driver.php on line 375
+Stack Trace:
+- CORE\src\Database\Driver.php:322
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [PDOException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Statement\Statement.php on line 146
+Stack Trace:
+- CORE\src\Database\Statement\Statement.php:146
+- CORE\src\Database\Driver.php:320
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+2025-01-10 12:21:05 error: [Cake\Database\Exception\DatabaseException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Schema\Collection.php on line 158
+Stack Trace:
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [Cake\Database\Exception\QueryException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Driver.php on line 375
+Stack Trace:
+- CORE\src\Database\Driver.php:322
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [PDOException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Statement\Statement.php on line 146
+Stack Trace:
+- CORE\src\Database\Statement\Statement.php:146
+- CORE\src\Database\Driver.php:320
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+2025-01-10 12:21:34 error: [Cake\Database\Exception\DatabaseException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Schema\Collection.php on line 158
+Stack Trace:
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [Cake\Database\Exception\QueryException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Driver.php on line 375
+Stack Trace:
+- CORE\src\Database\Driver.php:322
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [PDOException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Statement\Statement.php on line 146
+Stack Trace:
+- CORE\src\Database\Statement\Statement.php:146
+- CORE\src\Database\Driver.php:320
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+2025-01-30 07:31:46 error: [Cake\Database\Exception\DatabaseException] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dental.consultas_registros' doesn't exist in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Schema\Collection.php on line 158
+Stack Trace:
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:116
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [Cake\Database\Exception\QueryException] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dental.consultas_registros' doesn't exist in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Driver.php on line 375
+Stack Trace:
+- CORE\src\Database\Driver.php:322
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:116
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [PDOException] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dental.consultas_registros' doesn't exist in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Statement\Statement.php on line 146
+Stack Trace:
+- CORE\src\Database\Statement\Statement.php:146
+- CORE\src\Database\Driver.php:320
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:116
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+2025-01-30 07:32:14 error: [Cake\Database\Exception\DatabaseException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Schema\Collection.php on line 158
+Stack Trace:
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [Cake\Database\Exception\QueryException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Driver.php on line 375
+Stack Trace:
+- CORE\src\Database\Driver.php:322
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [PDOException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Statement\Statement.php on line 146
+Stack Trace:
+- CORE\src\Database\Statement\Statement.php:146
+- CORE\src\Database\Driver.php:320
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+2025-01-30 07:32:25 error: [Cake\Database\Exception\DatabaseException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Schema\Collection.php on line 158
+Stack Trace:
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [Cake\Database\Exception\QueryException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Driver.php on line 375
+Stack Trace:
+- CORE\src\Database\Driver.php:322
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [PDOException] SQLSTATE[HY000]: General error: 1356 View 'dental.reportes_tratamientos' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\Dental\partidental\vendor\cakephp\cakephp\src\Database\Statement\Statement.php on line 146
+Stack Trace:
+- CORE\src\Database\Statement\Statement.php:146
+- CORE\src\Database\Driver.php:320
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+2025-05-14 14:02:54 error: [Cake\Database\Exception\DatabaseException] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dental2.pacientes1' doesn't exist in C:\xampp\htdocs\dental2\dental\vendor\cakephp\cakephp\src\Database\Schema\Collection.php on line 158
+Stack Trace:
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:116
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [Cake\Database\Exception\QueryException] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dental2.pacientes1' doesn't exist in C:\xampp\htdocs\dental2\dental\vendor\cakephp\cakephp\src\Database\Driver.php on line 375
+Stack Trace:
+- CORE\src\Database\Driver.php:322
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:116
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [PDOException] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'dental2.pacientes1' doesn't exist in C:\xampp\htdocs\dental2\dental\vendor\cakephp\cakephp\src\Database\Statement\Statement.php on line 146
+Stack Trace:
+- CORE\src\Database\Statement\Statement.php:146
+- CORE\src\Database\Driver.php:320
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:116
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+2025-05-14 14:37:42 error: [Cake\Database\Exception\DatabaseException] SQLSTATE[HY000]: General error: 1356 View 'dental2.reportes_pacientes' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\dental2\dental\vendor\cakephp\cakephp\src\Database\Schema\Collection.php on line 158
+Stack Trace:
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [Cake\Database\Exception\QueryException] SQLSTATE[HY000]: General error: 1356 View 'dental2.reportes_pacientes' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\dental2\dental\vendor\cakephp\cakephp\src\Database\Driver.php on line 375
+Stack Trace:
+- CORE\src\Database\Driver.php:322
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [PDOException] SQLSTATE[HY000]: General error: 1356 View 'dental2.reportes_pacientes' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\dental2\dental\vendor\cakephp\cakephp\src\Database\Statement\Statement.php on line 146
+Stack Trace:
+- CORE\src\Database\Statement\Statement.php:146
+- CORE\src\Database\Driver.php:320
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+2025-05-14 14:38:22 error: [Cake\Database\Exception\DatabaseException] SQLSTATE[HY000]: General error: 1356 View 'dental2.reportes_pacientes' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\dental2\dental\vendor\cakephp\cakephp\src\Database\Schema\Collection.php on line 158
+Stack Trace:
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [Cake\Database\Exception\QueryException] SQLSTATE[HY000]: General error: 1356 View 'dental2.reportes_pacientes' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\dental2\dental\vendor\cakephp\cakephp\src\Database\Driver.php on line 375
+Stack Trace:
+- CORE\src\Database\Driver.php:322
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [PDOException] SQLSTATE[HY000]: General error: 1356 View 'dental2.reportes_pacientes' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them in C:\xampp\htdocs\dental2\dental\vendor\cakephp\cakephp\src\Database\Statement\Statement.php on line 146
+Stack Trace:
+- CORE\src\Database\Statement\Statement.php:146
+- CORE\src\Database\Driver.php:320
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:509
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:255
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:164
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:117
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+2025-12-07 23:14:23 error: [Cake\Database\Exception\DatabaseException] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'cifaa.courses_topics' doesn't exist in C:\xampp\htdocs\cifaa\cifaa\vendor\cakephp\cakephp\src\Database\Schema\Collection.php on line 158
+Stack Trace:
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:116
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [Cake\Database\Exception\QueryException] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'cifaa.courses_topics' doesn't exist in C:\xampp\htdocs\cifaa\cifaa\vendor\cakephp\cakephp\src\Database\Driver.php on line 375
+Stack Trace:
+- CORE\src\Database\Driver.php:322
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:116
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+Caused by: [PDOException] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'cifaa.courses_topics' doesn't exist in C:\xampp\htdocs\cifaa\cifaa\vendor\cakephp\cakephp\src\Database\Statement\Statement.php on line 146
+Stack Trace:
+- CORE\src\Database\Statement\Statement.php:146
+- CORE\src\Database\Driver.php:320
+- CORE\src\Database\Driver.php:288
+- CORE\src\Database\Connection.php:255
+- CORE\src\Core\Retry\CommandRetry.php:71
+- CORE\src\Database\Connection.php:255
+- CORE\src\Database\Schema\Collection.php:156
+- CORE\src\Database\Schema\Collection.php:116
+- CORE\src\ORM\Table.php:546
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:116
+- ROOT\vendor\cakephp\bake\src\Command\ModelCommand.php:99
+- ROOT\vendor\cakephp\bake\src\Command\AllCommand.php:116
+- CORE\src\Console\BaseCommand.php:192
+- CORE\src\Console\CommandRunner.php:330
+- CORE\src\Console\CommandRunner.php:168
+- ROOT\bin\cake.php:10
+- [main]:
+
+2026-03-29 02:39:46 warning: The connection is going to be closed but there is an active transaction.
+2026-05-31 12:04:15 warning: The connection is going to be closed but there is an active transaction.
+2026-05-31 12:05:44 warning: The connection is going to be closed but there is an active transaction.
+2026-05-31 12:07:34 warning: The connection is going to be closed but there is an active transaction.
+2026-05-31 12:08:21 warning: The connection is going to be closed but there is an active transaction.
+2026-05-31 12:13:09 warning: The connection is going to be closed but there is an active transaction.
+2026-05-31 12:13:27 warning: The connection is going to be closed but there is an active transaction.
+2026-05-31 12:14:24 warning: The connection is going to be closed but there is an active transaction.
+2026-05-31 12:14:44 warning: The connection is going to be closed but there is an active transaction.

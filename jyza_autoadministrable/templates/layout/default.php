@@ -120,7 +120,7 @@
                 <!-- Custom Navigation Items -->
             
                 <?php if (isset($usuario) && $usuario->rol == 1): ?>
-                <li class="nav-item">
+                <li class="nav-item mt-3">
                     <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'index']) ?>" class="nav-link">
                         <i class="fas fa-users-cog nav-icon"></i>
                         <p>Usuarios</p>

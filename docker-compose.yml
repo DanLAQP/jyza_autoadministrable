@@ -1,0 +1,107 @@
+services:
+  # Base de datos MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: jyza-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: jyza_autoadministrable
+      MYSQL_USER: jyza_user
+      MYSQL_PASSWORD: jyza_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/jyza_autoadministrable.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - jyza_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Backend CakePHP - Panel Administrativo
+  jyza-admin:
+    build:
+      context: ./jyza_autoadministrable
+      dockerfile: Dockerfile
+    container_name: jyza-admin
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=jyza_autoadministrable
+      - DB_USER=jyza_user
+      - DB_PASSWORD=jyza_password
+      - APP_NAME=JYZA
+      - DEBUG=true
+      - SECURITY_SALT=fcbd0895618d6092e073d176b78fa73c1a923b7d3b7dc8ff98aa612e5974e5b5
+      - FULL_BASE_URL=http://localhost:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./jyza_autoadministrable:/var/www/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - jyza_network
+
+  # Frontend Astro - Sitio Público (DESARROLLO)
+  jyza-frontend-dev:
+    build:
+      context: ./jyza
+      dockerfile: Dockerfile.dev
+    container_name: jyza-frontend-dev
+    environment:
+      - PUBLIC_SITE_URL=http://localhost:4321
+      - PUBLIC_API_URL=http://jyza-admin:8000
+      - PUBLIC_DEBUG=true
+    ports:
+      - "4321:4321"
+    volumes:
+      - ./jyza:/app
+      - /app/node_modules
+    depends_on:
+      - jyza-admin
+    networks:
+      - jyza_network
+    command: npm run dev -- --host
+
+  # Frontend Astro - Sitio Público (PRODUCCIÓN)
+  jyza-frontend:
+    build:
+      context: ./jyza
+      dockerfile: Dockerfile
+    container_name: jyza-frontend
+    environment:
+      - SITE_URL=https://ginecologiajyza.pe
+    ports:
+      - "5174:5174"
+    networks:
+      - jyza_network
+    profiles:
+      - production
+
+  # PhpMyAdmin (opcional, para gestionar BD desde UI)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: jyza-phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: jyza_user
+      PMA_PASSWORD: jyza_password
+      PMA_ROOT_PASSWORD: root_password
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - jyza_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  jyza_network:
+    driver: bridge

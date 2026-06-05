@@ -1,0 +1,304 @@
+================================================================================
+                    🐳 JYZA DOCKERIZADA - GUÍA DE CONFIGURACIÓN
+================================================================================
+
+✅ SERVICIOS CREADOS
+================================================================================
+
+1. MYSQL (Base de Datos)
+   - Container: jyza-mysql
+   - Puerto: 3306
+   - Usuario: jyza_user
+   - Contraseña: jyza_password
+   - Base de datos: jyza_autoadministrable
+
+2. CakePHP (Backend / Panel Admin)
+   - Container: jyza-admin
+   - Puerto: 8000
+   - URL: http://localhost:8000
+   - Ruta: /var/www/app
+
+3. Astro (Frontend / Sitio Público)
+   - Container: jyza-frontend-dev (desarrollo)
+   - Puerto: 4321
+   - URL: http://localhost:4321
+   - Ruta: /app
+
+4. PhpMyAdmin (Gestor de BD)
+   - Container: jyza-phpmyadmin
+   - Puerto: 8080
+   - URL: http://localhost:8080
+
+
+🚀 CÓMO INICIAR
+================================================================================
+
+Opción A: Comando simple (Recomendado)
+---------------------------------------
+cd C:\xampp\htdocs\jyza_autoadministrable
+docker-compose up -d
+
+
+Opción B: Con Makefile
+-----------------------
+make up
+
+
+Opción C: Ver logs mientras inicia
+------------------------------------
+docker-compose up
+(Ctrl+C para salir)
+
+
+⏳ ESPERAR A QUE INICIE
+================================================================================
+
+Tiempo aproximado: 30-60 segundos
+
+Ver progreso:
+  docker-compose logs -f
+
+O ver estado:
+  docker-compose ps
+
+Espera a que veas algo como:
+  jyza-mysql          "mysql"                    Up (healthy)
+  jyza-admin          "php -S 0.0.0.0:8000"      Up
+  jyza-frontend-dev   "npm run dev"              Up
+  jyza-phpmyadmin     "docker-php-entrypoin..."  Up
+
+
+🌐 ACCESOS (Una vez iniciado)
+================================================================================
+
+Sitio Público (Astro):
+  http://localhost:4321
+
+Panel Admin (CakePHP):
+  http://localhost:8000
+  (Usa tus credenciales de usuario creadas)
+
+Base de Datos (PhpMyAdmin):
+  http://localhost:8080
+  Usuario: jyza_user
+  Contraseña: jyza_password
+
+
+📊 ARCHIVOS IMPORTANTES CREADOS
+================================================================================
+
+docker-compose.yml          - Configuración de todos los servicios
+DOCKER.md                   - Guía completa
+DOCKER_QUICKSTART.md        - Quick start para empezar rápido
+DOCKER_ARCHITECTURE.md      - Diagramas y arquitectura
+Makefile                    - Comandos abreviados
+
+jyza_autoadministrable/
+  Dockerfile                - Imagen de CakePHP
+  .dockerignore             - Archivos ignorados
+
+jyza/
+  Dockerfile                - Imagen de Astro (producción)
+  Dockerfile.dev            - Imagen de Astro (desarrollo)
+  .dockerignore             - Archivos ignorados
+
+.env.docker                 - Variables de desarrollo
+.env.docker.production      - Variables de producción
+
+
+🔄 COMANDOS ÚTILES
+================================================================================
+
+INICIAR/PARAR:
+  make up                   - Iniciar servicios
+  make down                 - Parar servicios
+  make restart              - Reiniciar
+  make clean                - Limpiar todo (⚠️ borra datos!)
+
+LOGS:
+  make logs                 - Ver todos los logs
+  make logs-admin           - Logs del backend
+  make logs-frontend        - Logs del frontend
+  make logs-db              - Logs de la BD
+
+ACCESO A CONTAINERS:
+  make shell-admin          - Entrar en CakePHP
+  make shell-frontend       - Entrar en Astro
+  make shell-db             - Entrar en MySQL
+
+BASE DE DATOS:
+  make backup-db            - Respaldar BD
+  make restore-db FILE=...  - Restaurar BD
+
+INFORMACIÓN:
+  make ps                   - Ver estado de servicios
+  make help                 - Ver todos los comandos
+
+
+💾 DATOS PERSISTENTES
+================================================================================
+
+La Base de Datos se guarda automáticamente en un volumen Docker:
+  mysql_data
+
+Los datos sobreviven incluso si ejecutas:
+  docker-compose down
+
+Para BORRAR datos (¡CUIDADO!):
+  docker-compose down -v
+
+
+🔐 VARIABLES DE ENTORNO
+================================================================================
+
+Archivo: .env.docker (desarrollo)
+  DB_HOST=mysql
+  DB_USER=jyza_user
+  DB_PASSWORD=jyza_password
+  API_URL=http://jyza-admin:8000
+  SITE_URL=http://localhost:4321
+  DEBUG=true
+
+Archivo: .env.docker.production (producción)
+  Cambiar antes de desplegar a producción
+
+
+🏗️ ARQUITECTURA
+================================================================================
+
+┌─────────────────────────────────────────┐
+│         Tu máquina (localhost)          │
+├─────────────────────────────────────────┤
+│                                         │
+│  :4321 ──→ Astro (Frontend)            │
+│  :8000 ──→ CakePHP (Backend)           │
+│  :3306 ──→ MySQL (Base de datos)       │
+│  :8080 ──→ PhpMyAdmin                  │
+│                                         │
+│  Todos en red Docker: jyza_network      │
+└─────────────────────────────────────────┘
+
+
+⚡ FLUJO DE FUNCIONAMIENTO
+================================================================================
+
+1. Usuario abre: http://localhost:4321
+2. Astro (frontend) carga la página
+3. JavaScript hace llamadas API: http://localhost:8000/api/...
+4. CakePHP (backend) procesa y consulta MySQL
+5. MySQL devuelve datos
+6. CakePHP retorna JSON
+7. Frontend renderiza resultado
+
+
+📝 PRÓXIMOS PASOS
+================================================================================
+
+1. Ejecuta: docker-compose up -d
+   (O: make up)
+
+2. Espera a que todos los servicios estén "Up"
+   (O: docker-compose ps)
+
+3. Abre: http://localhost:4321
+   (Deberías ver el sitio JYZA)
+
+4. Abre: http://localhost:8000
+   (Panel administrativo)
+
+5. Abre: http://localhost:8080
+   (Gestor de base de datos)
+
+6. Para más ayuda:
+   - Leer: DOCKER_QUICKSTART.md
+   - Leer: DOCKER.md
+   - Ejecutar: make help
+
+
+❓ PREGUNTAS FRECUENTES
+================================================================================
+
+P: ¿Necesito XAMPP?
+R: No, Docker reemplaza XAMPP completamente.
+
+P: ¿Necesito instalar MySQL, PHP, Node?
+R: No, Docker se encarga de todo automáticamente.
+
+P: ¿Se pierden los datos?
+R: No, están en un volumen persistente (mysql_data).
+
+P: ¿Puedo cambiar puertos?
+R: Sí, edita docker-compose.yml líneas con "ports:".
+
+P: ¿Es más lento?
+R: No, Docker es muy eficiente.
+
+P: ¿Y en producción?
+R: Funciona, usa .env.docker.production para configurar.
+
+P: ¿Cómo respaldar la BD?
+R: make backup-db (crea archivo SQL)
+
+P: ¿Cómo restaurar la BD?
+R: make restore-db FILE=backups/archivo.sql
+
+
+⚠️ IMPORTANTE
+================================================================================
+
+NO ejecutar en producción sin:
+  ❌ Cambiar credenciales de BD
+  ❌ Cambiar DEBUG a false
+  ❌ Configurar SSL/HTTPS
+  ❌ Usar reverse proxy (Nginx)
+  ❌ Configurar backups automáticos
+
+ANTES de iniciar por primera vez:
+  ✅ Verifica que Docker Desktop esté abierto
+  ✅ Verifica puertos 3306, 8000, 4321, 8080 libres
+  ✅ Verifica conexión a internet (descarga imágenes)
+
+
+🆘 PROBLEMAS COMUNES
+================================================================================
+
+"Port already in use"
+  → Cambiar puerto en docker-compose.yml
+  → O: docker-compose down (si hay contenedores viejos)
+
+"MySQL connection refused"
+  → docker-compose logs mysql
+  → Esperar más tiempo a que inicie
+  → docker-compose restart mysql
+
+"Frontend no puede conectar backend"
+  → docker-compose logs jyza-admin
+  → docker-compose restart jyza-admin
+
+"Cambios en código no aparecen"
+  → Los volúmenes están configurados
+  → A veces necesita recarga: Ctrl+Shift+R
+  → docker-compose restart [servicio]
+
+
+📚 DOCUMENTACIÓN COMPLETA
+================================================================================
+
+Leer en este orden:
+
+1. DOCKER_QUICKSTART.md      ← Empieza aquí (paso a paso)
+2. DOCKER.md                 ← Guía completa y detallada
+3. DOCKER_ARCHITECTURE.md    ← Diagramas de arquitectura
+4. docker-compose.yml        ← Ver configuración
+5. Makefile                  ← Ver todos los comandos
+
+
+================================================================================
+                        ¡Proyecto Dockerizado Exitosamente!
+================================================================================
+
+Siguiente paso: docker-compose up -d
+
+(O si prefieres: make up)
+
+================================================================================

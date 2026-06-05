@@ -69,8 +69,7 @@
                                     'type' => 'select',
                                     'options' => [
                                         1 => 'Administrador',
-                                        2 => 'Docente',
-                                        3 => 'Estudiante'
+                                        2 => 'Usuario'
                                     ],
                                     'empty' => 'Seleccione un rol',
                                     'required' => true

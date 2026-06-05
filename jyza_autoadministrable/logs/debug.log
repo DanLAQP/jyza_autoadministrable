@@ -37373,3 +37373,93 @@ Cake\Http\Server->run() C:\xampp\htdocs\cifaa\cifaa\webroot\index.php, line 37
 2026-06-05 16:04:50 debug: ContentController::edit checking image upload
 2026-06-05 16:04:50 debug: ContentController::edit processing block
 2026-06-05 16:04:50 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 info: ContentController::edit REQUEST METHOD
+2026-06-05 16:07:12 info: ContentController::edit CONTENT_TYPE
+2026-06-05 16:07:12 info: ContentController::edit FILES COUNT
+2026-06-05 16:07:12 info: ContentController::edit _FILES DATA
+2026-06-05 16:07:12 debug: ContentController::edit POST data received
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:12 debug: ContentController::edit processing block
+2026-06-05 16:07:12 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 info: ContentController::edit REQUEST METHOD
+2026-06-05 16:07:58 info: ContentController::edit CONTENT_TYPE
+2026-06-05 16:07:58 info: ContentController::edit FILES COUNT
+2026-06-05 16:07:58 info: ContentController::edit _FILES DATA
+2026-06-05 16:07:58 debug: ContentController::edit POST data received
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload
+2026-06-05 16:07:58 debug: ContentController::edit processing block
+2026-06-05 16:07:58 debug: ContentController::edit checking image upload

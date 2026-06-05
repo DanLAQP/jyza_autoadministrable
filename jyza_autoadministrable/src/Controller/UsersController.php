@@ -84,8 +84,7 @@ class UsersController extends AppController
         // Definir los roles para la vista
         $roles = [
             1 => 'Administrador',
-            2 => 'Docente',
-            3 => 'Estudiante'
+            2 => 'Usuario'
         ];
 
         $this->set(compact('users', 'roles', 'filtroEstado'));

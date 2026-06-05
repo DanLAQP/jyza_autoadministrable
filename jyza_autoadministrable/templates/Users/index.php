@@ -125,7 +125,7 @@
                                         <?= h($user->nombres) ?>
                                     </td>
                                     <td>
-                                        <span class="badge bg-<?= $user->rol == 1 ? 'danger' : ($user->rol == 2 ? 'warning text-dark' : 'info') ?>">
+                                        <span class="badge bg-<?= $user->rol == 1 ? 'danger' : 'info' ?>">
                                             <?= $roles[$user->rol] ?? 'Desconocido' ?>
                                         </span>
                                     </td>
@@ -235,8 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Definir roles para mostrar
     const roles = {
         1: 'Administrador',
-        2: 'Docente',
-        3: 'Estudiante'
+        2: 'Usuario'
     };
     
     buscarInput.addEventListener('input', function() {

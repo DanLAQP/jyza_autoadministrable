@@ -10,10 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-$dbHost = '127.0.0.1';
-$dbUser = 'root';
-$dbPass = '';
-$dbName = 'jyza_autoadministrable';
+$dbHost = getenv('DB_HOST') ?: 'mysql';
+$dbUser = getenv('DB_USER') ?: 'jyza_user';
+$dbPass = getenv('DB_PASSWORD') ?: 'jyza_password';
+$dbName = getenv('DB_NAME') ?: 'jyza_autoadministrable';
 
 $mysqli = @new mysqli($dbHost, $dbUser, $dbPass, $dbName);
 if ($mysqli->connect_errno) {

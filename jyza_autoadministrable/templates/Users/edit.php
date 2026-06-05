@@ -68,8 +68,7 @@
                                     'type' => 'select',
                                     'options' => [
                                         1 => 'Administrador',
-                                        2 => 'Docente',
-                                        3 => 'Estudiante'
+                                        2 => 'Usuario'
                                     ],
                                     'disabled' => ($user->id == 1) // Proteger admin principal
                                 ]) ?>

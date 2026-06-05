@@ -70,6 +70,74 @@ class ContentController extends AppController
             $data = $this->request->getData();
             $saved = 0;
 
+            // Procesar creación de nuevo convenio completo (Club JYZA)
+            if (!empty($data['create_convenio']) && $section->slug === 'clubjyza') {
+                try {
+                    $convenioNumber = (int)($data['new_convenio_number'] ?? 0);
+
+                    if ($convenioNumber < 1) {
+                        $this->Flash->error('Número de convenio inválido.');
+                    } else {
+                        $convenioFields = [
+                            'image' => ['type' => 'image', 'content' => ''],
+                            'category' => ['type' => 'text', 'content' => $data['new_convenio_category'] ?? ''],
+                            'category_color' => ['type' => 'text', 'content' => $data['new_convenio_category_color'] ?? ''],
+                            'tag' => ['type' => 'text', 'content' => $data['new_convenio_tag'] ?? ''],
+                            'tag_color' => ['type' => 'text', 'content' => $data['new_convenio_tag_color'] ?? ''],
+                            'name' => ['type' => 'text', 'content' => $data['new_convenio_name'] ?? ''],
+                            'specialty' => ['type' => 'text', 'content' => $data['new_convenio_specialty'] ?? ''],
+                            'description_1' => ['type' => 'textarea', 'content' => $data['new_convenio_description_1'] ?? ''],
+                            'description_2' => ['type' => 'textarea', 'content' => $data['new_convenio_description_2'] ?? ''],
+                            'quote' => ['type' => 'text', 'content' => $data['new_convenio_quote'] ?? ''],
+                            'benefit' => ['type' => 'text', 'content' => $data['new_convenio_benefit'] ?? ''],
+                            'benefit_color' => ['type' => 'text', 'content' => $data['new_convenio_benefit_color'] ?? ''],
+                            'facebook_url' => ['type' => 'text', 'content' => $data['new_convenio_facebook_url'] ?? ''],
+                            'instagram_url' => ['type' => 'text', 'content' => $data['new_convenio_instagram_url'] ?? ''],
+                        ];
+
+                        $createdCount = 0;
+                        $sortOrder = ($section->content_blocks ? count($section->content_blocks) + 1 : 1);
+
+                        foreach ($convenioFields as $fieldName => $fieldData) {
+                            $blockKey = "convenio_{$convenioNumber}_{$fieldName}";
+
+                            // Verificar que no exista ya
+                            $existingBlock = $contentBlocksTable->find()
+                                ->where(['section_id' => $section->id, 'block_key' => $blockKey])
+                                ->first();
+
+                            if (!$existingBlock) {
+                                $newBlock = $contentBlocksTable->newEntity([
+                                    'section_id' => $section->id,
+                                    'block_key' => $blockKey,
+                                    'block_type' => $fieldData['type'],
+                                    'content' => $fieldData['content'],
+                                    'sort_order' => $sortOrder++,
+                                    'is_active' => 1,
+                                ]);
+
+                                if ($contentBlocksTable->save($newBlock)) {
+                                    $createdCount++;
+                                } else {
+                                    Log::error('ContentController::edit failed to create convenio field', ['block_key' => $blockKey, 'errors' => $newBlock->getErrors()]);
+                                }
+                            }
+                        }
+
+                        if ($createdCount > 0) {
+                            $this->Flash->success("Convenio #{$convenioNumber} creado con {$createdCount} campos.");
+                            Log::info('ContentController::edit created new convenio', ['convenio_number' => $convenioNumber, 'fields_created' => $createdCount]);
+                            return $this->redirect(['action' => 'edit', $id]);
+                        } else {
+                            $this->Flash->error('No se pudo crear el convenio.');
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    Log::error('ContentController::edit error creating convenio', ['error' => $e->getMessage()]);
+                    $this->Flash->error('Error al crear el convenio: ' . $e->getMessage());
+                }
+            }
+
             // Procesar creación de nuevo bloque (para Citas y Club JYZA)
             if (!empty($data['create_block']) && !empty($data['new_block_key']) && in_array($section->slug, ['citas', 'clubjyza'])) {
                 try {

@@ -53,40 +53,121 @@
                                     <?php if ($section->slug === 'citas'): ?>
                                         servicio/especialista
                                     <?php else: ?>
-                                        convenio
+                                        convenio completo
                                     <?php endif; ?>
                                 </h5>
                             </div>
                             <div class="card-body">
-                                <p class="text-muted small mb-3">
-                                    <?php if ($section->slug === 'citas'): ?>
-                                        Crea un nuevo bloque para servicios (servicio_7, servicio_8...) o especialistas (especialista_3, especialista_4...)
-                                    <?php else: ?>
-                                        Crea un nuevo convenio (convenio1_category, convenio1_name, etc.). Los convenios deben tener: _category, _category_color, _tag, _tag_color, _name, _specialty, _image, _description_1, _description_2, _quote, _benefit, _benefit_color, _facebook_url, _instagram_url
-                                    <?php endif; ?>
-                                </p>
+                                <?php if ($section->slug === 'citas'): ?>
+                                    <p class="text-muted small mb-3">Crea un nuevo bloque para servicios (servicio_7, servicio_8...) o especialistas (especialista_3, especialista_4...)</p>
 
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Clave del bloque</label>
-                                        <input type="text" name="new_block_key" class="form-control" placeholder="<?php echo $section->slug === 'citas' ? 'ej: servicio_7' : 'ej: convenio1_category'; ?>" />
-                                        <small class="text-muted d-block mt-1">
-                                            <?php if ($section->slug === 'citas'): ?>
-                                                Ej: <code>servicio_7</code>, <code>especialista_3</code>
-                                            <?php else: ?>
-                                                Ej: <code>convenio1_category</code>, <code>convenio1_name</code>, <code>convenio2_image</code>
-                                            <?php endif; ?>
-                                        </small>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Clave del bloque</label>
+                                            <input type="text" name="new_block_key" class="form-control" placeholder="ej: servicio_7" />
+                                            <small class="text-muted d-block mt-1">Ej: <code>servicio_7</code>, <code>especialista_3</code></small>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Contenido</label>
+                                            <input type="text" name="new_block_content" class="form-control" placeholder="Ej: Ginecología Avanzada" />
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Contenido</label>
-                                        <input type="text" name="new_block_content" class="form-control" placeholder="<?php echo $section->slug === 'citas' ? 'Ej: Ginecología Avanzada' : 'Ej: Ginecología'; ?>" />
-                                    </div>
-                                </div>
 
-                                <button type="submit" name="create_block" value="1" class="btn btn-primary mt-3">
-                                    <i class="fas fa-plus"></i> Crear bloque
-                                </button>
+                                    <button type="submit" name="create_block" value="1" class="btn btn-primary mt-3">
+                                        <i class="fas fa-plus"></i> Crear bloque
+                                    </button>
+
+                                <?php else: ?>
+                                    <!-- FORMULARIO ESPECIAL PARA CLUB JYZA -->
+                                    <p class="text-muted small mb-3">Crea un convenio completo con todos los datos necesarios para aparecer en el carousel</p>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Número del convenio</label>
+                                            <input type="number" name="new_convenio_number" class="form-control" placeholder="5" min="1" />
+                                            <small class="text-muted d-block mt-1">Ej: 5, 6, 7... (para convenio_5, convenio_6, etc.)</small>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Nombre del convenio</label>
+                                            <input type="text" name="new_convenio_name" class="form-control" placeholder="Ej: Clínica Nueva" />
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Dirección/Teléfono</label>
+                                            <input type="text" name="new_convenio_specialty" class="form-control" placeholder="Jr. Calle 123 – Huánuco · +51 999 999 999" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Categoría</label>
+                                            <input type="text" name="new_convenio_category" class="form-control" placeholder="Ej: Ginecología" />
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Color categoría</label>
+                                            <select name="new_convenio_category_color" class="form-select">
+                                                <option value="">Selecciona...</option>
+                                                <option value="cat-gine">🩷 Ginecología (cat-gine)</option>
+                                                <option value="cat-ped">🧡 Pediatría (cat-ped)</option>
+                                                <option value="cat-odonto">💚 Odontología (cat-odonto)</option>
+                                                <option value="cat-estim">💛 Estimulación (cat-estim)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Etiqueta (tag)</label>
+                                            <input type="text" name="new_convenio_tag" class="form-control" placeholder="Ej: Fundador, Alianza" />
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Color etiqueta</label>
+                                            <select name="new_convenio_tag_color" class="form-select">
+                                                <option value="">Selecciona...</option>
+                                                <option value="tag-fundador">tag-fundador</option>
+                                                <option value="tag-alianza">tag-alianza</option>
+                                                <option value="tag-convenio">tag-convenio</option>
+                                                <option value="tag-bienest">tag-bienest</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Descripción 1</label>
+                                            <textarea name="new_convenio_description_1" class="form-control" rows="2" placeholder="Primera descripción..."></textarea>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Descripción 2</label>
+                                            <textarea name="new_convenio_description_2" class="form-control" rows="2" placeholder="Segunda descripción..."></textarea>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Frase destacada (quote)</label>
+                                            <input type="text" name="new_convenio_quote" class="form-control" placeholder="Ej: Tu sonrisa es nuestra especialidad" />
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Beneficio/Descuento</label>
+                                            <input type="text" name="new_convenio_benefit" class="form-control" placeholder="Ej: 15% de descuento" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Color del beneficio</label>
+                                            <select name="new_convenio_benefit_color" class="form-select">
+                                                <option value="">Selecciona...</option>
+                                                <option value="pill-purple">💜 Púrpura (pill-purple)</option>
+                                                <option value="pill-amber">🟠 Ámbar (pill-amber)</option>
+                                                <option value="pill-green">💚 Verde (pill-green)</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">URL Facebook</label>
+                                            <input type="url" name="new_convenio_facebook_url" class="form-control" placeholder="https://www.facebook.com/..." />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">URL Instagram</label>
+                                            <input type="url" name="new_convenio_instagram_url" class="form-control" placeholder="https://www.instagram.com/..." />
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" name="create_convenio" value="1" class="btn btn-primary mt-4">
+                                        <i class="fas fa-plus"></i> Crear convenio completo (14 campos)
+                                    </button>
+                                <?php endif; ?>
                             </div>
                         </div>
                     <?php endif; ?>

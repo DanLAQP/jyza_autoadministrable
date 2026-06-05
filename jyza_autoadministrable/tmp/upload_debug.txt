@@ -20931,3 +20931,171 @@ array (
   ),
 )
 ---
+[2026-06-05T17:59:50-05:00] 172.20.0.1
+array (
+  '_FILES' => 
+  array (
+    'image_files' => 
+    array (
+      'name' => 
+      array (
+        19 => 'herofondo.webp',
+        20 => '',
+        21 => '',
+        22 => '',
+        23 => '',
+      ),
+      'full_path' => 
+      array (
+        19 => 'herofondo.webp',
+        20 => '',
+        21 => '',
+        22 => '',
+        23 => '',
+      ),
+      'type' => 
+      array (
+        19 => 'image/webp',
+        20 => '',
+        21 => '',
+        22 => '',
+        23 => '',
+      ),
+      'tmp_name' => 
+      array (
+        19 => '/tmp/phpBOBg1X',
+        20 => '',
+        21 => '',
+        22 => '',
+        23 => '',
+      ),
+      'error' => 
+      array (
+        19 => 0,
+        20 => 4,
+        21 => 4,
+        22 => 4,
+        23 => 4,
+      ),
+      'size' => 
+      array (
+        19 => 60570,
+        20 => 0,
+        21 => 0,
+        22 => 0,
+        23 => 0,
+      ),
+    ),
+  ),
+  'data' => 
+  array (
+    'is_active' => 
+    array (
+      3 => '1',
+      4 => '1',
+      5 => '1',
+      6 => '1',
+      7 => '1',
+      8 => '1',
+      9 => '1',
+      10 => '1',
+      11 => '1',
+      12 => '1',
+      13 => '1',
+      14 => '1',
+      15 => '1',
+      16 => '1',
+      17 => '1',
+      18 => '1',
+      19 => '1',
+      20 => '1',
+      21 => '1',
+      22 => '1',
+      23 => '1',
+      575 => '1',
+      576 => '1',
+      577 => '1',
+    ),
+    'blocks' => 
+    array (
+      3 => 'Clínica especializada en ginecología y obstetricia con más de 10 años cuidando la salud integral de la mujer. Tecnología avanzada y atención personalizada',
+      4 => 'CITAS DISPONIBLES ESTA SEMANA',
+      5 => 'Agendar Cita por WhatsApp',
+      6 => 'https://wa.me/51961295024?text=Hola,%20deseo%20agendar%20una%20cita',
+      7 => 'Ver servicios',
+      8 => 'Jr. Dos de Mayo 1600 - Parque Amarilis, Huánuco',
+      9 => 'Lunes a Domingo: 8:00 am - 9:00 pm',
+      10 => '+51 961 295 024',
+      11 => 'Clínica Ginecología Huánuco | Especialistas en Salud Femenina',
+      12 => 'Clínica de ginecología y obstetricia en Huánuco. Más de 10 años de experiencia. Tecnología avanzada y atención personalizada para la salud de la mujer.',
+      13 => 'Parque Amarilis, Huanuco',
+      14 => '8:00 am - 9:00 pm',
+      15 => 'Únete',
+      16 => 'Club JYZA',
+      17 => 'https://wa.me/51961295024?text=Hola,%20deseo%20inscribirme%20al%20Club%20JYZA',
+      18 => 'Inscríbete al Club JYZA por WhatsApp',
+      19 => '82',
+      20 => '83',
+      21 => '84',
+      22 => '85',
+      23 => '86',
+      575 => 'Tu Salud Femenina en las',
+      576 => 'Mejores Manos',
+      577 => 'de Huánuco',
+    ),
+    'image_files' => 
+    array (
+      19 => 
+      \Laminas\Diactoros\UploadedFile::__set_state(array(
+         'error' => 0,
+         'file' => '/tmp/phpBOBg1X',
+         'moved' => false,
+         'stream' => NULL,
+         'size' => 60570,
+         'clientFilename' => 'herofondo.webp',
+         'clientMediaType' => 'image/webp',
+      )),
+      20 => 
+      \Laminas\Diactoros\UploadedFile::__set_state(array(
+         'error' => 4,
+         'file' => NULL,
+         'moved' => false,
+         'stream' => NULL,
+         'size' => 0,
+         'clientFilename' => '',
+         'clientMediaType' => '',
+      )),
+      21 => 
+      \Laminas\Diactoros\UploadedFile::__set_state(array(
+         'error' => 4,
+         'file' => NULL,
+         'moved' => false,
+         'stream' => NULL,
+         'size' => 0,
+         'clientFilename' => '',
+         'clientMediaType' => '',
+      )),
+      22 => 
+      \Laminas\Diactoros\UploadedFile::__set_state(array(
+         'error' => 4,
+         'file' => NULL,
+         'moved' => false,
+         'stream' => NULL,
+         'size' => 0,
+         'clientFilename' => '',
+         'clientMediaType' => '',
+      )),
+      23 => 
+      \Laminas\Diactoros\UploadedFile::__set_state(array(
+         'error' => 4,
+         'file' => NULL,
+         'moved' => false,
+         'stream' => NULL,
+         'size' => 0,
+         'clientFilename' => '',
+         'clientMediaType' => '',
+      )),
+    ),
+  ),
+)
+---

@@ -46,28 +46,31 @@ server {
     root /var/www/app/webroot;
     index index.php;
 
+    # Denegar acceso a archivos sensibles (PRIMERO)
+    location ~ /\\\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
     # Servir archivos estáticos directamente
-    location ~ ^/(img|js|css|uploads|files)/ {
-        try_files \$uri \$uri/ =404;
+    location ~ ^/(img|js|css|uploads|files|favicon\\.ico|robots\\.txt)/ {
+        try_files \$uri =404;
         expires 30d;
     }
 
     # Pasar requests PHP a FPM
-    location ~ \.php$ {
+    location ~ \\\\.php$ {
+        try_files \$uri =404;
         fastcgi_pass 127.0.0.1:9000;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
         include fastcgi_params;
     }
 
-    # Rewrite para CakePHP
+    # Rewrite para CakePHP - Esto debe ser lo ÚLTIMO
     location / {
-        try_files \$uri \$uri/ /index.php?\$args;
-    }
-
-    # Denegar acceso a archivos sensibles
-    location ~ /\. {
-        deny all;
+        try_files \$uri \$uri/ /index.php?\$query_string;
     }
 }
 EOF

@@ -1,0 +1,34 @@
+# Dependencias
+vendor/
+node_modules/
+
+# Directorio de construcción
+jyza/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Caché
+tmp/
+.cache/
+
+# Archivos sensibles
+.env
+.env.local
+config/app_local.php
+
+# Directorios de sesiones
+jyza_autoadministrable/tmp/sessions/
+jyza_autoadministrable/tmp/cache/

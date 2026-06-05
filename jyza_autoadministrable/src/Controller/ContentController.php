@@ -70,8 +70,8 @@ class ContentController extends AppController
             $data = $this->request->getData();
             $saved = 0;
 
-            // Procesar creación de nuevo bloque (solo para Citas)
-            if (!empty($data['create_block']) && !empty($data['new_block_key']) && $section->slug === 'citas') {
+            // Procesar creación de nuevo bloque (para Citas y Club JYZA)
+            if (!empty($data['create_block']) && !empty($data['new_block_key']) && in_array($section->slug, ['citas', 'clubjyza'])) {
                 try {
                     $newBlockKey = trim($data['new_block_key']);
                     $newBlockContent = trim($data['new_block_content'] ?? '');

@@ -1,0 +1,306 @@
+[33mcommit 0d311fc36dabf7c10fd1363818b7d38f02148b25[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Fri Jun 5 01:53:48 2026 -0500
+
+    dañado la parte de club jyza
+
+[33mcommit a7f63ce148c3752fe660c71cdd1f85473317e327[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Fri Jun 5 00:58:18 2026 -0500
+
+    secciones avanzadas
+
+[33mcommit 5200f2199a729c4d7412193c5e263a9726dda120[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Thu Jun 4 23:30:01 2026 -0500
+
+    las primeras secciones agregadas correctamente
+
+[33mcommit 4ceaa22bc6882491c299293fb3fe5cdcc034a2b7[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Thu Jun 4 23:11:14 2026 -0500
+
+    las primeras secciones agregadas correctamente
+
+[33mcommit 79ec07fff4d300dd8ce87af982cc9d3fa3a5f52d[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Thu Jun 4 22:52:54 2026 -0500
+
+    las primeras secciones agregadas correctamente
+
+[33mcommit 249feea1b990c01e68d355c4599a277ed3a3e470[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Thu Jan 29 16:51:30 2026 -0500
+
+    asdas
+
+[33mcommit fa63efe052df310e34b44565d058a7d94e60e08d[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Sat Dec 20 20:34:26 2025 -0500
+
+    terminado
+
+[33mcommit e06c7b02b391ce78cff453c49e9026872b97b239[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Fri Dec 19 14:15:26 2025 -0500
+
+    removido certificados
+
+[33mcommit b98e5936e3ff7c83e3a16eacdbb75c3cb841762c[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Wed Dec 17 23:51:41 2025 -0500
+
+    limpiando datos y archivos innecesarios, y quitando deprecado de inscripciones
+
+[33mcommit 79d039e8f3ea28007fa3b20871186d534ee1c524[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Wed Dec 17 23:34:12 2025 -0500
+
+    mejora de ui en matricula de cursos
+
+[33mcommit 6de703f84b86464eb51fdd9470dd1cf0943ec080[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Wed Dec 17 23:19:06 2025 -0500
+
+    colores y removidos los botones cancelar
+
+[33mcommit 9b7fd14231af712f17b2b3f44abdeb3a67c3db1a[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Wed Dec 17 23:09:02 2025 -0500
+
+    arreglado los modales por versiones
+
+[33mcommit 0d4afd726e6b80f32ab5b1f4ce3b9e2dc557dca6[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Wed Dec 17 22:34:27 2025 -0500
+
+    arreglada la parte de usuarios
+
+[33mcommit be082a2684e2543a9e8c84db22b7f22fc763e887[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Wed Dec 17 20:57:09 2025 -0500
+
+    Solucionado errores con permisos al inabilitar cursos
+
+[33mcommit 0782890c93ccfe4b0673e14658ed562431c5c174[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Wed Dec 17 19:31:56 2025 -0500
+
+    resuelto deprecados en produccion
+
+[33mcommit 755f58ef7a9908bfac78226bd34f1a98ba46db95[m[33m ([m[1;31morigin/interfaces[m[33m, [m[1;32minterfaces[m[33m)[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Wed Dec 17 14:04:53 2025 -0500
+
+    Interfaces de cursos y rutas arreglada
+
+[33mcommit 26b296d5c233c748c6326613bc75ecde80569fc2[m
+Merge: 13ccd99 ecf67a0
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Wed Dec 17 10:35:23 2025 -0500
+
+    Conflictos resueltos
+
+[33mcommit ecf67a0422c3165f789acb219d9a511cbcadb77e[m[33m ([m[1;31morigin/cifa_yoset[m[33m, [m[1;32mcifa_yoset[m[33m)[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Tue Dec 16 02:11:23 2025 -0500
+
+    usar como base de datos dump_cifa.sql
+
+[33mcommit 277c8e9bad7eee58c7835a9c02abdeaf3db2758e[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Tue Dec 16 01:59:35 2025 -0500
+
+    certificado y diplomados corregidos, funciona con busqueda o estilo manual se registra en una tabla aparte si es que el usuario no existe falta validad la creacion de un usuario con uno creado al momento de generar certificado
+
+[33mcommit d718f7d0ab598213633f4b7640b98e623fe121b4[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Mon Dec 15 22:09:29 2025 -0500
+
+    se trabajo certificaoddos
+
+[33mcommit 13ccd99780d36647480e2c1253b632f9fcbee032[m[33m ([m[1;31morigin/prueba[m[33m, [m[1;32mprueba[m[33m)[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Mon Dec 15 22:03:48 2025 -0500
+
+    algunas interfaces corregidas
+
+[33mcommit bf2d454fc743e462fb78343fe65a4d81ae117d4b[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Mon Dec 15 21:12:29 2025 -0500
+
+     se corrigio vista de cursos, redirecciones
+
+[33mcommit f5fde5cf5bf8f160556c4bf81eb4c9e7f6933920[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Mon Dec 15 20:41:51 2025 -0500
+
+     certificados update
+
+[33mcommit a8ad3890bb41af7464c704eabf2850194fc827a8[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Sun Dec 14 22:20:16 2025 -0500
+
+    logica de desactivar agregado
+
+[33mcommit 3c9bf0576d0b11736094e5ed7cf21caad2fdb59d[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Sun Dec 14 21:41:21 2025 -0500
+
+     se agrego busqueda y redirecciones se ha corregido
+
+[33mcommit ca2075afdf1b4dcf31841bbdf087b076d3d69373[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Sun Dec 14 20:54:58 2025 -0500
+
+     editar curso modulos lecciones contenidos
+
+[33mcommit 128bb83033bbcd10128677b7d5a1b8d19a569a38[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Sun Dec 14 20:43:24 2025 -0500
+
+     calculadora  corregida falta estiulos
+
+[33mcommit b198b19c90e23a9c9954b9e55ac71f74397d86ca[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Sun Dec 14 19:38:08 2025 -0500
+
+     funcion certificados corregido
+
+[33mcommit 7ee1534ad30e2516187ec1b138130fdc6a20262e[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Sat Dec 13 22:36:03 2025 -0500
+
+     .\cifaa_optimizado.sql debe usarse como base de datos
+
+[33mcommit 2a2a76c6ac5f24c6059fe995ee5889251c8ad3e8[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Sat Dec 13 08:06:34 2025 -0500
+
+     se corrigio layout de certificado
+
+[33mcommit 8a4c13e2d2b66549469c1f2150b901508ff7a048[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Sat Dec 13 07:35:59 2025 -0500
+
+    readme update:  se agrego miniguia de como hace run resgistro de curso con lecciones
+
+[33mcommit 49f31ec6da6effe5869dcdf9830f03b45f3f0fb0[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Sat Dec 13 07:26:36 2025 -0500
+
+     se restringio acceso a descarga de recursos de sesion
+
+[33mcommit 0250ee4e9abbe729c06add726daee1dd0cf09e5d[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Fri Dec 12 01:51:15 2025 -0500
+
+    falta corregir la carga de miniatura y estilo del pdf de cerfiticado
+
+[33mcommit 5201a829ad77525fecb95099d4838f56fbf5bf5f[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Fri Dec 12 00:58:50 2025 -0500
+
+     se agrego la opcion de crear certificado, estudiantes pueden ver certificado creadoy desacargar el pdf, administradores pueden gengerar y ver el pdf
+
+[33mcommit 36180cfbdbc94872c25d951eb277fb0fe10784c2[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Fri Dec 12 00:30:25 2025 -0500
+
+    funciona correctamtenel nuevo atributo dni
+
+[33mcommit 5251342278a9776a23b07aa97c44f565e783221a[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Fri Dec 12 00:10:29 2025 -0500
+
+    se desarrollode pruebas con php para el proyecto completo , queda fuincional la parte de inscricpiones, calculadoras, proximo commit generar certificado
+
+[33mcommit b9a77ffcf87944cf67454877ff3997d406765724[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Thu Dec 11 21:53:19 2025 -0500
+
+    d
+
+[33mcommit 28bcbfd9c7a548dd62a7ba7b41424edeb3714f2d[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Wed Dec 10 21:35:41 2025 -0500
+
+     falta acabar certificados
+
+[33mcommit 9a013a58b4e38c93c1342172fdcc4a91aa204aad[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Wed Dec 10 20:19:40 2025 -0500
+
+    se agrtego calculadoras
+
+[33mcommit cd94fd514b2b724fb7bf77860de3b49925b515b9[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Wed Dec 10 20:03:20 2025 -0500
+
+    codigo previo a usar mensajes de depuracion
+
+[33mcommit 203dc134b2bdaf63263485c7d52491ed5c41964e[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Tue Dec 9 22:06:46 2025 -0500
+
+    se mejoro la interacion de acuertdo a roles en inscripciones
+
+[33mcommit a459741a067a5428c0b45b9bc06de90ee345a2ef[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Tue Dec 9 21:34:31 2025 -0500
+
+    se haran cambios en politica de inscripcion, actualmente segun permisos el usuario puede listar y aprobar inscricpiones globalmente
+
+[33mcommit 2693b5435e00cba6b8f1168a9c2d2cb46a571133[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Tue Dec 9 21:15:08 2025 -0500
+
+    se creo un sistema de control de acceso funcion, falta actualizar para usarlo en las vistas
+
+[33mcommit ce5182e0e29c442acb03773aba0c7310357cc618[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Tue Dec 9 07:54:00 2025 -0500
+
+    se actualizo vista cursos
+
+[33mcommit d0a77c13109eb8f1712d3fdef21b1701dfbe7c44[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Tue Dec 9 07:37:09 2025 -0500
+
+    modificacion previoo a corregir vista de cursos
+
+[33mcommit 660ce0a849560f9eca028ef53f2c9c3200778115[m
+Author: ycozco <ycozco@unsa.edu.pe>
+Date:   Tue Dec 9 07:22:34 2025 -0500
+
+    se agrego dos users a sql
+
+[33mcommit e9439f0db2945548fc9b7069640efd9dc2bbc309[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Mon Dec 8 11:23:49 2025 -0500
+
+    Cuncionalidad de cursos, modulos y lecciones en general
+
+[33mcommit e35035a3c4ab71e733fda2566f10e066d7277224[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Thu Nov 27 02:20:10 2025 -0500
+
+    first commit
+
+[33mcommit 7e24704d6fcbc5548e84413722d873cc655264c3[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Thu Nov 27 02:19:59 2025 -0500
+
+    first commit
+
+[33mcommit bd1c4a316ca1bca3fc8d26a6460a93a51fa4b1bc[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Thu Oct 9 18:04:41 2025 -0500
+
+    Odontograma Escalado
+
+[33mcommit 179c9a15c7e562f55ea17e342b93a4829759f617[m
+Author: DanLAQP <laguero@unsa.edu.pe>
+Date:   Thu Oct 9 16:48:53 2025 -0500
+
+    odontogramafuncioanaldo mixto

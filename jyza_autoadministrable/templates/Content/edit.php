@@ -44,24 +44,43 @@
 
                     <?= $this->Form->create(null, ['type' => 'file']) ?>
 
-                    <!-- FORMULARIO PARA CREAR NUEVOS BLOQUES (solo para Citas) -->
-                    <?php if ($section->slug === 'citas'): ?>
+                    <!-- FORMULARIO PARA CREAR NUEVOS BLOQUES (para Citas y Club JYZA) -->
+                    <?php if (in_array($section->slug, ['citas', 'clubjyza'])): ?>
                         <div class="card mb-4 border-primary">
                             <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0">✨ Agregar nuevo servicio/especialista</h5>
+                                <h5 class="mb-0">
+                                    ✨ Agregar nuevo
+                                    <?php if ($section->slug === 'citas'): ?>
+                                        servicio/especialista
+                                    <?php else: ?>
+                                        convenio
+                                    <?php endif; ?>
+                                </h5>
                             </div>
                             <div class="card-body">
-                                <p class="text-muted small mb-3">Crea un nuevo bloque para servicios (servicio_7, servicio_8...) o especialistas (especialista_3, especialista_4...)</p>
+                                <p class="text-muted small mb-3">
+                                    <?php if ($section->slug === 'citas'): ?>
+                                        Crea un nuevo bloque para servicios (servicio_7, servicio_8...) o especialistas (especialista_3, especialista_4...)
+                                    <?php else: ?>
+                                        Crea un nuevo convenio (convenio1_category, convenio1_name, etc.). Los convenios deben tener: _category, _category_color, _tag, _tag_color, _name, _specialty, _image, _description_1, _description_2, _quote, _benefit, _benefit_color, _facebook_url, _instagram_url
+                                    <?php endif; ?>
+                                </p>
 
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold">Clave del bloque</label>
-                                        <input type="text" name="new_block_key" class="form-control" placeholder="ej: servicio_7" />
-                                        <small class="text-muted d-block mt-1">Ej: <code>servicio_7</code>, <code>especialista_3</code></small>
+                                        <input type="text" name="new_block_key" class="form-control" placeholder="<?php echo $section->slug === 'citas' ? 'ej: servicio_7' : 'ej: convenio1_category'; ?>" />
+                                        <small class="text-muted d-block mt-1">
+                                            <?php if ($section->slug === 'citas'): ?>
+                                                Ej: <code>servicio_7</code>, <code>especialista_3</code>
+                                            <?php else: ?>
+                                                Ej: <code>convenio1_category</code>, <code>convenio1_name</code>, <code>convenio2_image</code>
+                                            <?php endif; ?>
+                                        </small>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold">Contenido</label>
-                                        <input type="text" name="new_block_content" class="form-control" placeholder="Ej: Ginecología Avanzada" />
+                                        <input type="text" name="new_block_content" class="form-control" placeholder="<?php echo $section->slug === 'citas' ? 'Ej: Ginecología Avanzada' : 'Ej: Ginecología'; ?>" />
                                     </div>
                                 </div>
 

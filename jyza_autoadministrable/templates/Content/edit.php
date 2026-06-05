@@ -44,10 +44,46 @@
 
                     <?= $this->Form->create(null, ['type' => 'file']) ?>
 
+                    <!-- FORMULARIO PARA CREAR NUEVOS BLOQUES (solo para Citas) -->
+                    <?php if ($section->slug === 'citas'): ?>
+                        <div class="card mb-4 border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">✨ Agregar nuevo servicio/especialista</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted small mb-3">Crea un nuevo bloque para servicios (servicio_7, servicio_8...) o especialistas (especialista_3, especialista_4...)</p>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Clave del bloque</label>
+                                        <input type="text" name="new_block_key" class="form-control" placeholder="ej: servicio_7" />
+                                        <small class="text-muted d-block mt-1">Ej: <code>servicio_7</code>, <code>especialista_3</code></small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Contenido</label>
+                                        <input type="text" name="new_block_content" class="form-control" placeholder="Ej: Ginecología Avanzada" />
+                                    </div>
+                                </div>
+
+                                <button type="submit" name="create_block" value="1" class="btn btn-primary mt-3">
+                                    <i class="fas fa-plus"></i> Crear bloque
+                                </button>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
                     <?php if (!empty($section->content_blocks)): ?>
                         <?php foreach ($section->content_blocks as $block): ?>
                             <div class="mb-4 pb-4 border-bottom" id="block-<?= $block->id ?>">
-                                <label class="form-label fw-bold"><?= h($block->block_key) ?> <span class="badge bg-info"><?= h($block->block_type) ?></span></label>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <label class="form-label fw-bold mb-0"><?= h($block->block_key) ?> <span class="badge bg-info"><?= h($block->block_type) ?></span></label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="is_active_<?= $block->id ?>" name="is_active[<?= $block->id ?>]" value="1" <?= ($block->is_active ?? 1) ? 'checked' : '' ?> />
+                                        <label class="form-check-label small" for="is_active_<?= $block->id ?>">
+                                            <?= ($block->is_active ?? 1) ? 'Activo' : 'Inactivo' ?>
+                                        </label>
+                                    </div>
+                                </div>
                                 
                                 <?php if (in_array($block->block_type, ['text', 'textarea', 'wysiwyg'])): ?>
                                     <?= $this->Form->control('blocks.' . $block->id, ['type' => 'textarea', 'value' => $block->content, 'label' => false, 'class' => 'form-control', 'rows' => 4]) ?>

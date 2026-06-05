@@ -53,7 +53,7 @@ class ContentController extends AppController
             try {
                 Log::info('ContentController::edit REQUEST METHOD', ['method' => $this->request->getMethod()]);
                 Log::info('ContentController::edit CONTENT_TYPE', ['content_type' => $_SERVER['CONTENT_TYPE'] ?? 'N/A']);
-                Log::info('ContentController::edit FILES COUNT', ['count' => count($_FILES), 'keys' => array_keys($_FILES)]);
+                Log::info('ContentController::edit FILES COUNT', ['count' => is_array($_FILES) ? count($_FILES) : 0, 'keys' => is_array($_FILES) ? array_keys($_FILES) : []]);
                 Log::info('ContentController::edit _FILES DATA', $_FILES ?? []);
             } catch (\Throwable $e) {
                 Log::error('ContentController::edit error getting request data', ['error' => $e->getMessage()]);
@@ -70,12 +70,56 @@ class ContentController extends AppController
             $data = $this->request->getData();
             $saved = 0;
 
+            // Procesar creación de nuevo bloque (solo para Citas)
+            if (!empty($data['create_block']) && !empty($data['new_block_key']) && $section->slug === 'citas') {
+                try {
+                    $newBlockKey = trim($data['new_block_key']);
+                    $newBlockContent = trim($data['new_block_content'] ?? '');
+
+                    // Validar que la clave sea válida (solo letras, números, guiones bajos)
+                    if (!preg_match('/^[a-z0-9_]+$/', $newBlockKey)) {
+                        $this->Flash->error('La clave del bloque debe contener solo letras, números y guiones bajos.');
+                    } else {
+                        // Verificar que no exista ya
+                        $existingBlock = $contentBlocksTable->find()
+                            ->where(['section_id' => $section->id, 'block_key' => $newBlockKey])
+                            ->first();
+
+                        if ($existingBlock) {
+                            $this->Flash->error('Ya existe un bloque con esta clave.');
+                        } else {
+                            // Crear el nuevo bloque
+                            $newBlock = $contentBlocksTable->newEntity([
+                                'section_id' => $section->id,
+                                'block_key' => $newBlockKey,
+                                'block_type' => 'text',
+                                'content' => $newBlockContent,
+                                'sort_order' => ($section->content_blocks ? count($section->content_blocks) + 1 : 1),
+                                'is_active' => 1,
+                            ]);
+
+                            if ($contentBlocksTable->save($newBlock)) {
+                                $this->Flash->success("Bloque '{$newBlockKey}' creado exitosamente.");
+                                Log::info('ContentController::edit created new block', ['block_key' => $newBlockKey]);
+                                return $this->redirect(['action' => 'edit', $id]);
+                            } else {
+                                $this->Flash->error('No se pudo crear el bloque.');
+                                Log::error('ContentController::edit failed to create block', ['errors' => $newBlock->getErrors()]);
+                            }
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    Log::error('ContentController::edit error creating block', ['error' => $e->getMessage()]);
+                    $this->Flash->error('Error al crear el bloque: ' . $e->getMessage());
+                }
+            }
+
             // DEBUG: Log completo de los datos recibidos
             Log::debug('ContentController::edit POST data received', [
                 'has_image_file' => !empty($data['image_file']),
                 'has_image_files' => !empty($data['image_files']),
-                'image_files_count' => is_array($data['image_files'] ?? []) ? count($data['image_files']) : 0,
-                'blocks_count' => is_array($data['blocks'] ?? []) ? count($data['blocks']) : 0,
+                'image_files_count' => count($data['image_files'] ?? []),
+                'blocks_count' => count($data['blocks'] ?? []),
             ]);
 
             // Procesar carga única (formulario superior)
@@ -136,6 +180,13 @@ class ContentController extends AppController
 
                     /** @var \App\Model\Entity\ContentBlock $block */
                     $block = $contentBlocksTable->get($blockId);
+
+                    // Actualizar estado is_active si se envió
+                    if (isset($data['is_active'][$blockId])) {
+                        $block->set('is_active', 1);
+                    } else {
+                        $block->set('is_active', 0);
+                    }
 
                     // Si existe un archivo subido específicamente para este bloque, procesarlo
                     $uploadedBlocks = $data['image_files'] ?? [];

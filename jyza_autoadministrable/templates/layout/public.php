@@ -207,9 +207,9 @@
         <div class="col-12 text-center">
           <p>
             &copy; <?= date('Y') ?> 
-            <span class="footer-brand">SemzoDerm</span>
+            <span class="footer-brand">Ginecologia</span>
             <span class="footer-divider">•</span>
-            Centro de Capacitación SemzoDerm
+            Ginecologia Jyza 
             <span class="footer-divider">•</span> RUC: 20611567783
             
           </p>

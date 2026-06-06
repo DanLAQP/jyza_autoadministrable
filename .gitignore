@@ -1,9 +1,9 @@
 # Dependencias
 vendor/
 node_modules/
-
-# Directorio de construcción (repositorio independiente)
-jyza/
+jyza/node_modules/
+jyza/dist/
+jyza/.astro/
 
 # Archivos de sistema
 .DS_Store

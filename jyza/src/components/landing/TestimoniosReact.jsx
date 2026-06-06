@@ -258,7 +258,7 @@ export default function TestimoniosReact() {
           margin-bottom: 1.25rem;
         }
 
-        .section-title {
+        .testimonials-section .section-title {
           font-size: 2.5rem;
           font-weight: 700;
           color: white !important;
@@ -542,12 +542,12 @@ export default function TestimoniosReact() {
             box-sizing: border-box;
           }
 
-          .section-title { font-size: 1.75rem; }
+          .testimonials-section .section-title { font-size: 1.75rem; }
         }
 
         @media (max-width: 640px) {
           .testimonials-section { padding: 3rem 0; }
-          .section-title { font-size: 1.5rem; }
+          .testimonials-section .section-title { font-size: 1.5rem; }
           .section-subtitle { font-size: 0.85rem; }
           .testimony-card { padding: 1rem; }
           .card-text { font-size: 0.825rem; }

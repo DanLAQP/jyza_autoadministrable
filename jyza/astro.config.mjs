@@ -1,43 +1,30 @@
 import { defineConfig } from 'astro/config';
-
 import tailwind from "@astrojs/tailwind";
 import react from "@astrojs/react";
+import node from "@astrojs/node";
 
-// https://astro.build/config
 export default defineConfig({
+  output: 'server',
+  adapter: node({ mode: 'standalone' }),
   site: process.env.SITE_URL || 'https://ginecologiajyza.pe',
   integrations: [tailwind(), react()],
-  build: {
-    // Nunca inlinear - serviremos CSS sin bloquear con media="print"
-    inlineStylesheets: 'never',
-  },
   vite: {
     build: {
       minify: 'terser',
-      cssCodeSplit: false, // Combinar en un solo archivo para mejor compresión
-      // Comprimir CSS agresivamente
+      cssCodeSplit: false,
       cssMinify: true,
       terserOptions: {
-        compress: {
-          drop_console: true, // Remover console.log
-          drop_debugger: true,
-        },
-        output: {
-          comments: false,
-        },
+        compress: { drop_console: true, drop_debugger: true },
+        output: { comments: false },
       },
       rollupOptions: {
-        output: {
-          manualChunks: undefined,
-        },
+        output: { manualChunks: undefined },
         onwarn(warning, warn) {
           if (warning.code === 'UNUSED_EXTERNAL_IMPORT') return;
           warn(warning);
         }
       }
     },
-    ssr: {
-      external: ['svgo']
-    }
+    ssr: { external: ['svgo'] }
   }
 });

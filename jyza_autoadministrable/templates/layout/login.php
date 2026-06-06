@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= __('Iniciar Sesión') ?></title>
     <!-- Bootstrap 5 -->
-    <link rel="icon" type="image/png" href="iconoCifa.png">
+    <link rel="icon" type="image/webp" href="logoJiza.webp">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -47,7 +47,7 @@
     <div class="login-container">
         <!-- Panel Izquierdo con Logo -->
         <div class="login-left">
-            <img src="<?= $this->Url->image('LogoLogin.png') ?>" alt="Logo Clínica">
+            <img src="<?= $this->Url->image('logoJiza.webp') ?>" alt="Logo Clínica">
         </div>
 
         <!-- Panel Derecho con Formulario -->

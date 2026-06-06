@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SemzoDerm | <?= $this->fetch('title') ?></title>
-  <?= $this->Html->meta('icon', 'iconoSemzo.png', ['type' => 'icon']) ?>
+  <title>Jiza | <?= $this->fetch('title') ?></title>
+  <?= $this->Html->meta('icon', 'logoJiza.webp', ['type' => 'icon']) ?>
 <!-- Google Font: Source Sans Pro -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
 
@@ -100,8 +100,8 @@
     <a href="<?= isset($usuario) && (int)$usuario->rol === 1
         ? $this->Url->build(['controller' => 'Users', 'action' => 'index'])
         : $this->Url->build(['controller' => 'Users', 'action' => 'view', $usuario->id ?? null]) ?>" class="brand-link">
-    <img src="<?= $this->Url->image('iconoSemzo.png') ?>" alt="SemzoDerm Logo" class="brand-image img-circle elevation-3" style="opacity: .8; max-height: 40px;">
-    <p class=" font-weight-light nav-icon" style="margin-left: 8px; display: inline-block;">SemzoDerm</p>
+    <img src="<?= $this->Url->image('logoJiza.webp') ?>" alt="Logo Jiza Logo" class="brand-image img-circle elevation-3" style="opacity: .8; max-height: 40px;">
+    <p class=" font-weight-light nav-icon" style="margin-left: 8px; display: inline-block;">Jiza</p>
 </a>
 
 
@@ -223,7 +223,7 @@
             <div class="modal-content">
             <div class="modal-header">
             <h5 class="modal-title" id="modalLabelLg">
-                <img src="<?= $this->Url->image('iconoSemzo.png') ?>" alt="Logo Clínica" style="max-height: 50px;">
+                <img src="<?= $this->Url->image('logoJiza.webp') ?>" alt="Logo Clínica" style="max-height: 50px;">
             </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -240,7 +240,7 @@
             <div class="modal-content">
             <div class="modal-header">
             <h5 class="modal-title" id="modalLabelLg">
-                <img src="<?= $this->Url->image('iconoSemzo.png') ?>" alt="Logo Clínica" style="max-height: 50px;">
+                <img src="<?= $this->Url->image('logoJiza.webp') ?>" alt="Logo Clínica" style="max-height: 50px;">
             </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -257,7 +257,7 @@
             <div class="modal-content">
             <div class="modal-header">
             <h5 class="modal-title" id="modalLabelLg">
-                <img src="<?= $this->Url->image('iconoSemzo.png') ?>" alt="Logo Clínica" style="max-height: 50px;">
+                <img src="<?= $this->Url->image('logoJiza.webp') ?>" alt="Logo Clínica" style="max-height: 50px;">
             </h5>
 
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -275,7 +275,7 @@
             <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalLabelLg">
-                    <img src="<?= $this->Url->image('iconoSemzo.png') ?>" alt="Logo Clínica" style="max-height: 50px;">
+                    <img src="<?= $this->Url->image('logoJiza.webp') ?>" alt="Logo Clínica" style="max-height: 50px;">
                 </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -380,7 +380,7 @@ window.closeModal = function() {
 
   <!-- Main Footer -->
   <footer class="main-footer">
-    <strong >Semzoderm</strong>
+    <strong >Logo Jiza</strong>
     Capacitaciones 2026.
     <div class="float-right d-none d-sm-inline-block">
       <b>Version</b> 1.0

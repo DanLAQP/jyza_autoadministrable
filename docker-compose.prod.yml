@@ -1,0 +1,63 @@
+services:
+  jyza-mysql:
+    image: mysql:8.0
+    container_name: jyza-mysql
+    env_file: .env.production
+    volumes:
+      - jyza_mysql_data:/var/lib/mysql
+      - ./database/jyza_autoadministrable.sql:/docker-entrypoint-initdb.d/init.sql
+    expose:
+      - "3306"
+    networks:
+      - jyza_internal
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  jyza-admin:
+    build:
+      context: ./jyza_autoadministrable
+      dockerfile: Dockerfile
+    image: jyza-admin-img:latest
+    container_name: jyza-admin
+    env_file: .env.production
+    expose:
+      - "8000"
+    volumes:
+      - ./jyza_autoadministrable/webroot/uploads:/var/www/app/webroot/uploads
+    depends_on:
+      jyza-mysql:
+        condition: service_healthy
+    networks:
+      - jyza_internal
+      - npm_proxy
+    restart: unless-stopped
+
+  jyza-landing:
+    build:
+      context: ./jyza
+      dockerfile: Dockerfile
+    image: landingjyza-landingjyza:latest
+    container_name: jyza-landing
+    env_file: .env.production
+    expose:
+      - "5174"
+    depends_on:
+      jyza-mysql:
+        condition: service_healthy
+    networks:
+      - jyza_internal
+      - npm_proxy
+    restart: unless-stopped
+
+volumes:
+  jyza_mysql_data:
+    driver: local
+
+networks:
+  jyza_internal:
+    driver: bridge
+  npm_proxy:
+    external: true

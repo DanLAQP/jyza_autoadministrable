@@ -1,0 +1,721 @@
+---
+import Header from "./Header.astro";
+---
+
+<!-- <Header /> -->
+ 
+ <div class="underwater-container">
+    <!-- Caustics effect -->
+    <div class="caustics"></div>
+
+    <!-- Light rays from surface -->
+    <div class="light-rays">
+      <div class="ray"></div>
+      <div class="ray"></div>
+      <div class="ray"></div>
+      <div class="ray"></div>
+    </div>
+
+    <!-- Subtle background bubbles (purely visual, non-interactive) split to left and right side strips -->
+    <div class="subtle-bubbles subtle-bubbles-left" aria-hidden="true">
+      <div class="bg-bubble" style="left:6%; --size:10px; --duration:18s; --drift: 6px;"></div>
+      <div class="bg-bubble" style="left:14%; --size:12px; --duration:20s; --drift: -8px;"></div>
+      <div class="bg-bubble" style="left:22%; --size:8px; --duration:16s; --drift: 4px;"></div>
+      <div class="bg-bubble" style="left:30%; --size:14px; --duration:22s; --drift: -6px;"></div>
+      <div class="bg-bubble" style="left:38%; --size:9px; --duration:24s; --drift: 10px;"></div>
+      <div class="bg-bubble" style="left:46%; --size:11px; --duration:26s; --drift: -4px;"></div>
+      <div class="bg-bubble" style="left:54%; --size:7px; --duration:20s; --drift: 6px;"></div>
+      <div class="bg-bubble" style="left:62%; --size:13px; --duration:28s; --drift: -10px;"></div>
+      <div class="bg-bubble" style="left:70%; --size:9px; --duration:22s; --drift: 8px;"></div>
+      <div class="bg-bubble" style="left:78%; --size:12px; --duration:30s; --drift: -6px;"></div>
+    </div>
+
+    <div class="subtle-bubbles subtle-bubbles-right" aria-hidden="true">
+      <div class="bg-bubble" style="left:6%; --size:9px; --duration:20s; --drift: -6px;"></div>
+      <div class="bg-bubble" style="left:14%; --size:11px; --duration:22s; --drift: 6px;"></div>
+      <div class="bg-bubble" style="left:22%; --size:8px; --duration:18s; --drift: -4px;"></div>
+      <div class="bg-bubble" style="left:30%; --size:12px; --duration:24s; --drift: 8px;"></div>
+      <div class="bg-bubble" style="left:38%; --size:10px; --duration:26s; --drift: -10px;"></div>
+      <div class="bg-bubble" style="left:46%; --size:7px; --duration:20s; --drift: 4px;"></div>
+      <div class="bg-bubble" style="left:54%; --size:13px; --duration:28s; --drift: -8px;"></div>
+      <div class="bg-bubble" style="left:62%; --size:9px; --duration:22s; --drift: 6px;"></div>
+      <div class="bg-bubble" style="left:70%; --size:11px; --duration:24s; --drift: -6px;"></div>
+      <div class="bg-bubble" style="left:78%; --size:8px; --duration:30s; --drift: 4px;"></div>
+    </div>
+
+    <!-- Interactive canvas -->
+    <canvas id="waterCanvas"></canvas>
+
+    <!-- Content -->
+    <div class="content">
+      <h1>Desarrollo de Software a Medida</h1>
+      <p class="subtitle">Creamos sistemas web que se adaptan como el agua.</p>
+      <a href="https://wa.me/51929746720?text=Hola,%20quiero%20cotizar%20un%20proyecto%20de%20software%20personalizado." class="cta-button">Comenzar Proyecto</a>
+    </div>
+
+    <!-- Instructions -->
+    <div class="instruction">
+       La innovación comienza aquí • Explora lo que podemos crear juntos
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14"></path>
+        <path d="M5 12l7 7 7-7"></path>
+      </svg>
+    </div>
+  </div>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      overflow: auto; /* allow page scrolling so sections below the hero are reachable */
+      cursor: default;
+    }
+
+    /* Hero container: keep visuals contained and show crosshair only here */
+    .underwater-container {
+      position: relative;
+      width: 100%;
+      height: 100vh; /* full-screen hero */
+      overflow: hidden; /* keep hero visuals contained */
+      cursor: crosshair;
+      box-sizing: border-box;
+    }
+
+    /* .underwater-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(to bottom, 
+        #1a5f7a 0%,
+        #159895 30%,
+        #0d7377 60%,
+        #0a4d5c 100%
+      );
+      overflow: hidden;
+    } */
+
+    /* Caustics effect - light rays from surface */
+    .caustics {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(ellipse at 20% 10%, rgba(255,255,255,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 5%, rgba(255,255,255,0.12) 0%, transparent 45%),
+        radial-gradient(ellipse at 85% 15%, rgba(255,255,255,0.1) 0%, transparent 40%);
+      animation: caustics-move 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes caustics-move {
+      0%, 100% { 
+        transform: translate(0, 0) scale(1);
+        opacity: 0.6;
+      }
+      50% { 
+        transform: translate(30px, -20px) scale(1.1);
+        opacity: 0.8;
+      }
+    }
+
+    /* Light rays from surface */
+    .light-rays {
+      position: absolute;
+      top: -10%;
+      left: 0;
+      width: 100%;
+      height: 120%;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+
+    .ray {
+      position: absolute;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(to bottom, 
+        rgba(255,255,255,0.6) 0%,
+        rgba(255,255,255,0.3) 20%,
+        transparent 60%
+      );
+      transform-origin: top center;
+    }
+
+    .ray:nth-child(1) { left: 15%; animation: sway 6s ease-in-out infinite; }
+    .ray:nth-child(2) { left: 35%; animation: sway 7s ease-in-out infinite 1s; }
+    .ray:nth-child(3) { left: 55%; animation: sway 8s ease-in-out infinite 2s; }
+    .ray:nth-child(4) { left: 75%; animation: sway 7s ease-in-out infinite 1.5s; }
+
+    @keyframes sway {
+      0%, 100% { transform: translateX(0) rotate(2deg); }
+      50% { transform: translateX(30px) rotate(-2deg); }
+    }
+
+    /* Canvas for interactive water distortion */
+    .caustics { z-index: 0; }
+    .light-rays { z-index: 0; }
+
+    #waterCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: auto;
+      z-index: 5; /* put canvas above subtle background bubbles but below content */
+    }
+
+    /* Subtle background bubbles base (used for side strips) */
+    .subtle-bubbles {
+      position: absolute;
+      bottom: 0;
+      height: 60vh; /* Soft-rise: show bubbles through most of the hero but protect central area */
+      pointer-events: none; /* never intercept mouse events */
+      z-index: 6; /* above the canvas so bubbles are visible, but below content (content z-index:10) */
+      overflow: hidden; /* clip rising bubbles so they don't overflow outside the hero area */
+      display: block;
+      width: 12%; /* default side strip width */
+      will-change: transform; /* hint for smoother parallax */
+    }
+
+    .subtle-bubbles-left { left: 0; }
+    .subtle-bubbles-right { right: 0; }
+
+    .bg-bubble {
+      position: absolute;
+      bottom: -8px; /* start just below the visible area so they appear to emerge */
+      border-radius: 50%;
+      width: var(--size, 12px);
+      height: var(--size, 12px);
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.98), rgba(255,255,255,0.3) 36%, rgba(200,240,255,0.15));
+      opacity: 0.45; /* increased from 0.25 */
+      filter: blur(0.8px); /* slightly less blur for better visibility */
+      border: 1px solid rgba(255,255,255,0.25); /* more visible border */
+      box-shadow: 0 2px 6px rgba(0,0,0,0.10) inset;
+      transform: translateY(0) translateX(0) scale(1);
+      will-change: transform, opacity;
+      mix-blend-mode: screen;
+      animation: rise var(--duration, 20s) linear infinite;
+    }
+
+    /* small variations provided inline via style vars (--size --duration --drift) */
+    @keyframes rise {
+      0% {
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 0.25; /* increased from 0.10 */
+      }
+      25% { opacity: 0.35; } /* increased from 0.14 */
+      45% { opacity: 0.30; } /* increased from 0.10 */
+      65% { 
+        opacity: 0.15; /* increased from 0.04 */
+        transform: translateY(-70%) translateX(var(--drift, 0px)) scale(1.01); 
+      }
+      100% {
+        /* move up but mostly invisible before reaching the hero content */
+        transform: translateY(-120%) translateX(var(--drift, 0px)) scale(1.02);
+        opacity: 0;
+      }
+    }
+
+    /* Accessibility: respect reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .bg-bubble {
+        animation: none !important;
+        opacity: 0.2; /* increased from 0.09 */
+      }
+    }
+
+    /* Mobile: show bubbles but with subtle opacity */
+    @media (max-width: 640px) {
+      .subtle-bubbles { 
+        display: block; /* changed from none */
+        width: 15%; /* slightly wider strips on mobile */
+      }
+      
+      .bg-bubble {
+        opacity: 0.35; /* subtle but visible on mobile */
+      }
+    }
+
+    /* Content */
+    .content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      text-shadow: 
+        0 0 40px rgba(0,0,0,0.8),
+        0 10px 30px rgba(0,0,0,0.6);
+      margin-bottom: 1rem;
+      animation: float-text 4s ease-in-out infinite;
+    }
+
+    @keyframes float-text {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 3vw, 2rem);
+      font-weight: 300;
+      opacity: 0.9;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.7);
+      margin-bottom: 2rem;
+    }
+
+    .cta-button {
+      display: inline-block;
+      padding: 1.2rem 3rem;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 300;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      pointer-events: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .cta-button:hover {
+      background: rgba(255,255,255,0.25);
+      transform: scale(1.05);
+    }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.6);
+      animation: bounce 2s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-10px); }
+    }
+
+    /* Bubbles */
+    .bubble {
+      position: absolute;
+      background: radial-gradient(circle at 30% 30%, 
+        rgba(255,255,255,0.8), 
+        rgba(200,240,255,0.4)
+      );
+      border-radius: 50%;
+      pointer-events: none;
+      animation: rise linear forwards;
+      box-shadow: 
+        inset -2px -2px 4px rgba(255,255,255,0.5),
+        0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    @keyframes rise {
+      to {
+        transform: translateY(-100vh) translateX(var(--drift));
+        opacity: 0;
+      }
+    }
+
+    /* Ripple effect (lighter) */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      /* default timing can be overridden by inline styles; keep a shorter base duration */
+      animation: ripple-expand 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      filter: blur(0.6px);
+      will-change: transform, opacity;
+    }
+
+    @keyframes ripple-expand {
+      0% {
+        width: 10px;
+        height: 10px;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+        box-shadow: 
+          0 0 0 0 rgba(255,255,255,0.35),
+          0 0 0 0 rgba(200,240,255,0.28),
+          0 0 0 0 rgba(150,220,255,0.22);
+      }
+      5% {
+        opacity: 1;
+      }
+      30% {
+        opacity: 0.8;
+      }
+      100% {
+        /* smaller final size for a subtler ripple */
+        width: 260px;
+        height: 260px;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 
+          0 0 12px 1px rgba(255,255,255,0),
+          0 0 28px 6px rgba(200,240,255,0),
+          0 0 40px 12px rgba(150,220,255,0);
+      }
+    }
+
+    /* Instruction text */
+    .instruction {
+      position: absolute;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.5);
+      font-size: 0.9rem;
+      font-weight: 300;
+      pointer-events: none;
+      text-align: center;
+    }
+  </style>
+
+  <script>
+    const canvas = document.getElementById('waterCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.querySelector('.underwater-container');
+
+    // Set canvas size
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Water distortion variables
+    let time = 0;
+    let mouseX = canvas.width / 2;
+    let mouseY = canvas.height / 2;
+    let targetMouseX = mouseX;
+    let targetMouseY = mouseY;
+    let waves = [];
+    let cursorTrail = [];
+    let lastMouseX = mouseX;
+    let lastMouseY = mouseY;
+
+    // Mouse tracking with smooth interpolation
+    canvas.addEventListener('mousemove', (e) => {
+      targetMouseX = e.clientX;
+      targetMouseY = e.clientY;
+      
+      // Calculate mouse velocity for cursor waves
+      const velocityX = targetMouseX - lastMouseX;
+      const velocityY = targetMouseY - lastMouseY;
+      const velocity = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
+      
+      // Create subtle cursor waves when moving
+      if (velocity > 3) {
+        cursorTrail.push({
+          x: targetMouseX,
+          y: targetMouseY,
+          radius: 0,
+          maxRadius: 80 + velocity * 0.3,
+          speed: 1.8 + velocity * 0.03,
+          strength: Math.min(velocity * 0.25, 12),
+          opacity: Math.min(velocity * 0.018, 0.5)
+        });
+      }
+      
+      lastMouseX = targetMouseX;
+      lastMouseY = targetMouseY;
+    });
+
+    // Click to create bubbles and ripple
+    canvas.addEventListener('click', (e) => {
+      createBubbles(e.clientX, e.clientY);
+      createRipple(e.clientX, e.clientY);
+      
+      // Primera onda: inicia inmediatamente en el punto exacto del click
+      waves.push({
+        x: e.clientX,
+        y: e.clientY,
+        radius: 0,
+        maxRadius: 280 + Math.random() * 100,
+        speed: 1.5 + Math.random() * 0.5, 
+        strength: 12 + Math.random() * 8,
+        opacity: 0.5 + Math.random() * 0.08,
+        noiseOffset: Math.random() * 100
+      });
+      
+      // Segunda onda: aparece después con ligera variación
+      setTimeout(() => {
+        const offsetX = (Math.random() - 0.5) * 8;
+        const offsetY = (Math.random() - 0.5) * 8;
+        
+        waves.push({
+          x: e.clientX + offsetX,
+          y: e.clientY + offsetY,
+          radius: 0,
+          maxRadius: 250 + Math.random() * 90,
+          speed: 1.1 + Math.random() * 0.5, 
+          strength: 10 + Math.random() * 8,
+          opacity: 0.35 + Math.random() * 0.08,
+          noiseOffset: Math.random() * 100
+        });
+      }, 450);
+      
+      // Onda secundaria: más tarde, más alejada
+      setTimeout(() => {
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 20 + Math.random() * 25;
+        const offsetX = Math.cos(angle) * distance;
+        const offsetY = Math.sin(angle) * distance;
+        
+        waves.push({
+          x: e.clientX + offsetX,
+          y: e.clientY + offsetY,
+          radius: 0,
+          maxRadius: 150 + Math.random() * 70,
+          speed: 0.9 + Math.random() * 0.5, // Un poco más rápida
+          strength: 6 + Math.random() * 6,
+          opacity: 0.1 + Math.random() * 0.08,
+          noiseOffset: Math.random() * 100
+        });
+      }, 750);
+    });
+
+    // Create bubbles
+    function createBubbles(x, y) {
+      const bubbleCount = Math.floor(Math.random() * 8) + 5;
+      
+      for (let i = 0; i < bubbleCount; i++) {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        
+        const size = Math.random() * 20 + 10;
+        const drift = (Math.random() - 0.5) * 100;
+        const duration = Math.random() * 3 + 2;
+        const delay = Math.random() * 0.5;
+        
+        bubble.style.width = size + 'px';
+        bubble.style.height = size + 'px';
+        bubble.style.left = (x + (Math.random() - 0.5) * 50) + 'px';
+        bubble.style.top = y + 'px';
+        bubble.style.setProperty('--drift', drift + 'px');
+        bubble.style.animationDuration = duration + 's';
+        bubble.style.animationDelay = delay + 's';
+        
+        container.appendChild(bubble);
+        
+        setTimeout(() => bubble.remove(), (duration + delay) * 1000);
+      }
+    }
+
+    // Create ripple effect
+    function createRipple(x, y) {
+      const rippleCount = 4;
+      for (let i = 0; i < rippleCount; i++) {
+        setTimeout(() => {
+          const ripple = document.createElement('div');
+          ripple.className = 'ripple';
+          
+          const scaleVariation = 0.9 + Math.random() * 0.2;
+          const durationVariation = 2.3 + Math.random() * 0.4;
+          
+          ripple.style.left = x + 'px';
+          ripple.style.top = y + 'px';
+          ripple.style.animationDuration = durationVariation + 's';
+          ripple.style.transform = `translate(-50%, -50%) scale(${scaleVariation})`;
+          
+          container.appendChild(ripple);
+          
+          setTimeout(() => ripple.remove(), durationVariation * 1000);
+        }, i * 200);
+      }
+    }
+
+    // Draw water distortion
+    function drawWaterDistortion() {
+      // Smooth mouse interpolation for natural movement
+      mouseX += (targetMouseX - mouseX) * 0.1;
+      mouseY += (targetMouseY - mouseY) * 0.1;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw cursor trail waves (subtle movement waves)
+      cursorTrail = cursorTrail.filter(wave => {
+        wave.radius += wave.speed;
+        const progress = wave.radius / wave.maxRadius;
+        const opacity = Math.pow(1 - progress, 2.5) * wave.opacity;
+        
+        if (wave.radius < wave.maxRadius) {
+          ctx.beginPath();
+          
+          const segments = 36;
+          for (let i = 0; i <= segments; i++) {
+            const angle = (i / segments) * Math.PI * 2;
+            const noise = Math.sin(angle * 3 + time * 2.5) * 1;
+            const r = wave.radius + noise;
+            const x = wave.x + Math.cos(angle) * r;
+            const y = wave.y + Math.sin(angle) * r;
+            
+            if (i === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+          
+          ctx.closePath();
+          ctx.strokeStyle = `rgba(200, 240, 255, ${opacity})`;
+          ctx.lineWidth = 1.2; // Más gruesa y visible
+          ctx.stroke();
+          
+          return true;
+        }
+        return false;
+      });
+      
+      // Draw click waves (stronger waves)
+      waves = waves.filter(wave => {
+        wave.radius += wave.speed;
+        const progress = wave.radius / wave.maxRadius;
+        const opacity = Math.pow(1 - progress, 3) * wave.opacity;
+        
+        if (wave.radius < wave.maxRadius) {
+          ctx.beginPath();
+          
+          const segments = 60;
+          for (let i = 0; i <= segments; i++) {
+            const angle = (i / segments) * Math.PI * 2;
+            
+            const noise1 = Math.sin(angle * 3 + time * 1.5 + wave.noiseOffset) * 2;
+            const noise2 = Math.cos(angle * 5 - time * 1.2 + wave.noiseOffset * 0.5) * 1.5;
+            const noise3 = Math.sin(angle * 7 + progress * 8 + wave.noiseOffset * 0.3) * 1;
+            const noise4 = Math.cos(angle * 2 + time * 2.5) * 1.8;
+            
+            const r = wave.radius + noise1 + noise2 + noise3 + noise4;
+            const x = wave.x + Math.cos(angle) * r;
+            const y = wave.y + Math.sin(angle) * r;
+            
+            if (i === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+          
+          ctx.closePath();
+          
+          ctx.lineWidth = 0.7 + (wave.maxRadius / 350) * 0.8;
+          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.35})`;
+          ctx.stroke();
+          
+          if (wave.radius > 20) {
+            ctx.beginPath();
+            for (let i = 0; i <= segments; i++) {
+              const angle = (i / segments) * Math.PI * 2;
+              const noise = Math.sin(angle * 4 + time * 2 + wave.noiseOffset) * 1.2;
+              const noise2 = Math.cos(angle * 6 - time * 1.5 + wave.noiseOffset * 0.7) * 0.8;
+              const r = (wave.radius - 14) + noise + noise2;
+              const x = wave.x + Math.cos(angle) * r;
+              const y = wave.y + Math.sin(angle) * r;
+              
+              if (i === 0) {
+                ctx.moveTo(x, y);
+              } else {
+                ctx.lineTo(x, y);
+              }
+            }
+            ctx.closePath();
+            ctx.strokeStyle = `rgba(200, 240, 255, ${opacity * 0.22})`;
+            ctx.lineWidth = 0.6 + (wave.maxRadius / 400) * 0.6;
+            ctx.stroke();
+          }
+          
+          if (wave.radius > 40 && wave.maxRadius > 180) {
+            ctx.beginPath();
+            for (let i = 0; i <= segments; i++) {
+              const angle = (i / segments) * Math.PI * 2;
+              const noise = Math.sin(angle * 5 + time * 2.5 + wave.noiseOffset * 1.2) * 0.6;
+              const r = (wave.radius - 28) + noise;
+              const x = wave.x + Math.cos(angle) * r;
+              const y = wave.y + Math.sin(angle) * r;
+              
+              if (i === 0) {
+                ctx.moveTo(x, y);
+              } else {
+                ctx.lineTo(x, y);
+              }
+            }
+            ctx.closePath();
+            ctx.strokeStyle = `rgba(150, 200, 255, ${opacity * 0.15})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+          
+          return true;
+        }
+        return false;
+      });
+      
+      time += 0.02;
+      requestAnimationFrame(drawWaterDistortion);
+    }
+
+    drawWaterDistortion();
+
+    // Stagger initial bubble appearance and randomize animation delays
+    (function staggerBubbles() {
+      try {
+        const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced) return;
+
+        const bubbles = document.querySelectorAll('.subtle-bubbles .bg-bubble');
+        if (!bubbles || bubbles.length === 0) return;
+
+        bubbles.forEach(b => {
+          // compute target opacity from CSS (fallback to 0.11)
+          const cs = window.getComputedStyle(b);
+          const targetOpacity = parseFloat(cs.opacity) || 0.11;
+
+          // start invisible and fade in with a small random delay
+          b.style.opacity = '0';
+          const appearDelay = Math.random() * 2.5; // up to 2.5s stagger
+          b.style.transition = `opacity 700ms ease ${appearDelay}s`;
+
+          // randomize the ongoing rise animation so waves don't sync
+          const animDelay = Math.random() * 6; // up to 6s
+          b.style.animationDelay = `${animDelay}s`;
+
+          // after the small stagger, restore to the target opacity (triggers transition)
+          setTimeout(() => { b.style.opacity = String(targetOpacity); }, appearDelay * 1000 + 50);
+        });
+      } catch (err) {
+        // non-fatal: don't break the rest of the script
+        console.warn('staggerBubbles error', err);
+      }
+    })();
+
+    // Parallax removed — kept CSS-only bubble strips to preserve visuals and avoid interfering with the canvas waves.
+  </script>

@@ -1,0 +1,122 @@
+/* Variables de color base */
+:root {
+    --color-primary: #BA2986;
+    --color-light: #FCEAF6;
+    --color-secondary: #8D4CA5;
+    --color-violeta: #B458D4;
+    --color-btn-primary: #892CA0;
+    --color-btn-primary-hover:#7d2294;
+    --color-dark: #1A061A;
+    --color-citas: rgba(96, 49, 81, 0.2);
+    --color-border-citas: #5F3F5E;
+    --color-violeta-light: #D5C1DC;
+    --color-plomo: rgba(52, 51, 52, 0.4);
+    --color-border-plomo:#463C45;
+    --color-fondo-icon: #412941;
+    /* segunda seccion */
+    --color-segunda-bg: #F8F2FC;
+    --color-fondo-badge: #F5E7FF;
+    --color-border-badge:#E6D3F6;
+    --color-texto-badge: #6B2DA7; /* Mejorado para contraste WCAG AA */
+    --color-text: #1A0A1F;
+    /* seccion especialidades */
+    --color-especialidades-bg: #FFF;
+    --color-especialidades-title: #1A0A1F;
+    --color-especialidades-border-1: #F9CBAF;
+    --color-especialidades-border-2: #BE77CF;
+    --color-especialidades-border-3: #F487BD;
+    --color-especialidades-border-4: #7094CF;
+    /* Con 20% de transparencia */ 
+    --color-especialidades-border-1-transparent: rgba(249, 203, 175, 0.2);
+    --color-especialidades-border-2-transparent: rgba(190, 119, 207, 0.2);
+    --color-especialidades-border-3-transparent: rgba(244, 135, 189, 0.2);
+    --color-especialidades-border-4-transparent: rgba(112, 148, 207, 0.2);
+    --color-especialidades-border-5-transparent: rgba(199, 126, 155, 0.3);
+    /* secciion medicos */
+    --color-text-badge-secondary: #6B2DA7; /* Mejorado para contraste */
+    --color-text-subbadge: #5A2347; /* Mejorado para contraste */
+    --color-fondo-suave-badge: rgba(76, 69, 80, 0.4);
+    --borde-clinico-badge-medic: 1px solid #675760;
+    --blur-fondo-badge-medic: blur(10px);
+    --color-descripcion-doctor: #BBB1B9;
+    /* seccion paquetes */
+    --color-paquetes-titulo-sup: #8739C7;
+    --color-paquetes-incluye: #994ADA;
+    --color-paquetes-bg-check :#EDE9FE;
+    --color-paquetes-bg-list: #F9F8FE;
+    --color-paquetes-bg-list-hover: #F3F2FE;
+
+}
+
+/* System fonts stack para máxima velocidad - Sin dependencias externas */
+:root {
+    --font-serif: Georgia, 'Times New Roman', serif;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Reset más completo para scroll */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: auto;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background: #202020;
+    color: #fff;
+    min-height: 100vh;
+    contain: layout style paint;
+    content-visibility: auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0;
+    padding: 0;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.1rem; }
+h6 { font-size: 1rem; }
+
+p, span, li {
+    font-family: var(--font-sans);
+    line-height: 1.5;
+}
+
+.highlight {
+    font-family: var(--font-sans);
+    font-weight: 700;
+}
+
+/* Contenedor principal que permite scroll */
+.main-container {
+    width: 100%;
+    height: auto;
+    position: relative;
+}
+
+/* Optimizaciones críticas para componentes */
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    flex-shrink: 0; /* Prevenir que se comprima en flex containers */
+}
+
+img[width], img[height] {
+    aspect-ratio: attr(width) / attr(height);
+}

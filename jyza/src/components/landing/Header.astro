@@ -1,0 +1,282 @@
+<header class="header">
+    <div class="header-container">
+        <!-- Logo -->
+        <div class="logo">
+            <img src="/logoCifa.webp" alt="logo CIFAA" class="logo-img" width="120" height="60">
+        </div>
+
+        <!-- Hamburger Menu Toggle -->
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+
+        <!-- Navigation Menu -->
+        <nav class="nav-menu" id="navMenu">
+            <a href="#inicio" class="nav-link">Inicio</a>
+            <a href="#nosotros" class="nav-link">Nosotros</a>
+            <a href="#plataforma" class="nav-link">Plataforma</a>
+            <a href="#asesorias" class="nav-link">Asesorias</a>
+            <a href="#proceso" class="nav-link">Proceso</a>
+            <a href="https://sistemacifaa.cifaaedu.com/cifaa" class="login-btn mobile-login" target="_blank">Iniciar Sesión</a>
+        </nav>
+
+        <!-- Login Button -->
+        <div class="auth-section">
+            <a href="https://sistemacifaa.cifaaedu.com/cifaa" class="login-btn" target="_blank">Iniciar Sesión</a>
+        </div>
+    </div>
+</header>
+
+<script>
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.getElementById('navMenu');
+
+    hamburger?.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navMenu.classList.toggle('active');
+    });
+
+    // Cerrar menú al hacer click en un link
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            navMenu.classList.remove('active');
+        });
+    });
+</script>
+
+<style>
+    .header {
+        width: 100%;
+        /* background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); */
+                    background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+
+        /* backdrop-filter: blur(10px); */
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); */
+    }
+
+    .header-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px 20px;
+        gap: 30px;
+        position: relative;
+    }
+
+    .logo {
+        flex-shrink: 0;
+    }
+
+    .logo-img {
+        height: 60px;
+        width: auto;
+        object-fit: contain;
+    }
+
+    .hamburger {
+        display: none;
+        flex-direction: column;
+        background: none;
+        border: none;
+        cursor: pointer;
+        gap: 6px;
+        padding: 6px;
+        z-index: 1001;
+    }
+
+    .hamburger-line {
+        width: 25px;
+        height: 3px;
+        background: linear-gradient(90deg, #4b9aab 0%, #5aafbf 100%);
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        display: block;
+    }
+
+    .hamburger.active .hamburger-line:nth-child(1) {
+        transform: rotate(45deg) translate(10px, 10px);
+    }
+
+    .hamburger.active .hamburger-line:nth-child(2) {
+        opacity: 0;
+    }
+
+    .hamburger.active .hamburger-line:nth-child(3) {
+        transform: rotate(-45deg) translate(8px, -8px);
+    }
+
+    .nav-menu {
+        display: flex;
+        align-items: center;
+        gap: 35px;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .nav-link {
+        color: white;
+        text-decoration: none;
+        font-size: 1.05rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        letter-spacing: 0.5px;
+        position: relative;
+    }
+
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #4b9aab 0%, #5aafbf 100%);
+        transition: width 0.3s ease;
+    }
+
+    .nav-link:hover {
+        color: #4b9aab;
+    }
+
+    .nav-link:hover::after {
+        width: 100%;
+    }
+
+        .auth-section {
+            flex-shrink: 0;
+        }
+
+        .login-btn {
+            background: linear-gradient(90deg, #4b9aab 0%, #5aafbf 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(75, 154, 171, 0.15);
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(90deg, #5aafbf 0%, #4b9aab 100%);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(75, 154, 171, 0.25);
+        }
+
+        .mobile-login {
+            display: none;
+        }    /* Responsive - Tablet */
+    @media (max-width: 1024px) {
+        .header-container {
+            padding: 16px 40px;
+            gap: 12px;
+        }
+        .logo-img {
+            height: 42px;
+        }
+        .nav-link {
+            font-size: 15px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .header-container {
+            padding: 15px 30px;
+            gap: 15px;
+        }
+
+        .nav-menu {
+            gap: 15px;
+        }
+
+        .nav-link {
+            font-size: 14px;
+        }
+
+        .logo-img {
+            height: 40px;
+        }
+
+        .login-btn {
+            padding: 8px 20px;
+            font-size: 12px;
+        }
+    }
+
+    /* Responsive - Mobile */
+    @media (max-width: 600px) {
+        .header-container {
+            padding: 16px 25px;
+        }
+
+        .hamburger {
+            display: flex;
+        }
+
+        .nav-menu {
+            position: fixed;
+            top: 75px;
+            left: 0;
+            right: 0;
+            flex-direction: column;
+            background: rgba(26, 26, 26, 0.98);
+            gap: 0;
+            justify-content: flex-start;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            border-top: 1px solid rgba(75, 154, 171, 0.18);
+        }
+
+        .nav-menu.active {
+            max-height: 350px;
+        }
+
+        .nav-link {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(75, 154, 171, 0.12);
+            display: block;
+        }
+
+        .nav-link::after {
+            display: none;
+        }
+
+        .nav-link:hover {
+            background: rgba(75, 154, 171, 0.08);
+            padding-left: 25px;
+        }
+
+        .mobile-login {
+            display: none !important;
+        }
+
+        .logo-img {
+            height: 45px;
+        }
+
+        .auth-section {
+            display: none;
+        }
+
+        .login-btn {
+            padding: 7px 15px;
+            font-size: 11px;
+        }
+    }
+</style>

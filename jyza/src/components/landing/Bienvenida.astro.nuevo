@@ -1,0 +1,531 @@
+---
+/**
+ * Bienvenida.astro - VERSIÓN ACTUALIZADA
+ * 
+ * INSTRUCCIONES DE IMPLEMENTACIÓN:
+ * 1. Reemplaza el contenido del archivo actual con este código
+ * 2. Asegúrate de tener configurada la variable PUBLIC_API_URL en .env.local
+ *    PUBLIC_API_URL=http://localhost:3000
+ * 3. Los estilos se pueden ajustar según tu diseño actual
+ */
+
+interface ContentBlock {
+  type: string;
+  content: string;
+  metadata?: Record<string, any>;
+}
+
+interface SectionContent {
+  id: number;
+  slug: string;
+  blocks: Record<string, ContentBlock>;
+  images: Array<{
+    id: number;
+    url: string;
+    alt: string;
+  }>;
+}
+
+interface Props {
+  content?: SectionContent;
+}
+
+const { content } = Astro.props;
+
+// Contenido por defecto (fallback)
+const defaultContent = {
+  titulo: 'Tu Salud Femenina en las Mejores Manos de Huánuco',
+  subtitulo: 'Especialización en Ginecología y Obstetricia',
+  descripcion: 'Clínica especializada en ginecología y obstetricia con más de 10 años cuidando la salud integral de la mujer. Tecnología avanzada y atención personalizada.',
+  badgeText: 'CITAS DISPONIBLES ESTA SEMANA',
+  ctaButtonText: 'Agendar Cita por WhatsApp',
+  ctaButtonUrl: 'https://wa.me/51961295024?text=Hola,%20deseo%20agendar%20una%20cita',
+  ctaSecundarioText: 'Ver servicios',
+  ubicacion: 'Jr. Dos de Mayo 1600 - Parque Amarilis, Huanuco',
+  horarios: 'Lunes a Domingo: 8:00 am - 9:00 pm',
+  telefono: '+51 961 295 024',
+};
+
+// Extraer contenido de bloques
+const getBlockContent = (blockKey: string, fallback: string = ''): string => {
+  return content?.blocks?.[blockKey]?.content || fallback;
+};
+
+const titulo = getBlockContent('titulo', defaultContent.titulo);
+const subtitulo = getBlockContent('subtitulo', defaultContent.subtitulo);
+const descripcion = getBlockContent('descripcion', defaultContent.descripcion);
+const badgeText = getBlockContent('badge_text', defaultContent.badgeText);
+const ctaButtonText = getBlockContent('cta_button_text', defaultContent.ctaButtonText);
+const ctaButtonUrl = getBlockContent('cta_button_url', defaultContent.ctaButtonUrl);
+const ctaSecundarioText = getBlockContent('cta_secundario_text', defaultContent.ctaSecundarioText);
+const ubicacion = getBlockContent('ubicacion', defaultContent.ubicacion);
+const horarios = getBlockContent('horarios', defaultContent.horarios);
+
+// Obtener primera imagen si existe
+const heroImage = content?.images?.[0];
+---
+
+<section class="hero" id="inicio">
+  <div class="hero-background">
+    <div class="hero-gradient"></div>
+    <picture>
+      <source media="(max-width: 1024px)" srcset="./herofondot.webp" />
+      <img 
+        src={heroImage?.url || './herofondo.webp'}
+        alt={heroImage?.alt || 'Clínica Ginecología Huánuco'} 
+        loading="eager" 
+        width="1920" 
+        height="1080" 
+        fetchpriority="high"
+      />
+    </picture>
+  </div>
+
+  <!-- Botón flotante Club JYZA -->
+  <a 
+    href="https://wa.me/51961295024?text=Hola,%20deseo%20inscribirme%20al%20Club%20JYZA" 
+    class="club-jyza-btn" 
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Inscríbete al Club JYZA por WhatsApp"
+  >
+    <svg class="club-jyza-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 2.5l2.9 5.88 6.49.94-4.69 4.57 1.11 6.46L12 17.95 6.19 20.35l1.11-6.46-4.69-4.57 6.49-.94L12 2.5z" fill="currentColor"/>
+    </svg>
+    <div class="club-jyza-text">
+      <span class="club-jyza-label">Únete</span>
+      <span class="club-jyza-title">Club JYZA</span>
+    </div>
+    <svg class="club-jyza-arrow" width="16" height="16" viewBox="0 0 20 20" fill="none">
+      <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </a>
+
+  <div class="hero-container">
+    <img src="./logoJiza.webp" alt="Logo Jiza" class="logo-hero" width="200" height="200" />
+    
+    <div class="hero-content">
+      <img src="./logoJiza.webp" alt="Logo Jiza" class="logo-hero-mobile" width="120" height="120" />
+      
+      <!-- Badge con información dinámico -->
+      <div class="hero-badge">
+        <span class="badge-icon"></span>
+        <span class="badge-text">{badgeText}</span>
+      </div>
+      
+      <!-- Título dinámico -->
+      <h1 class="hero-title">
+        {titulo}
+      </h1>
+      
+      <!-- Descripción dinámica -->
+      <p class="hero-description" set:html={descripcion} />
+      
+      <!-- Botones de acción -->
+      <div class="hero-actions">
+        <a 
+          href={ctaButtonUrl} 
+          class="btn-primary" 
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={ctaButtonText}
+        >
+          <img src="iconBtn.webp" alt="icono whatsapp" width="20" height="20">
+          {ctaButtonText}
+        </a>
+
+        <a href="#servicios" class="btn-secondary">
+          <span class="btn-separator">ó</span>
+          {ctaSecundarioText}
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="arrow-down">
+            <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </a>
+      </div>
+      
+      <!-- Información de contacto -->
+      <div class="hero-info">
+        <div class="info-card">
+          <div class="info-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M12 2C7.58 2 4 5.58 4 10c0 7 8 13 8 13s8-6 8-13c0-4.42-3.58-8-8-8zm0 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/>
+            </svg>
+          </div>
+          <div class="info-text">
+            <span class="info-label">{ubicacion}</span>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <div class="info-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <path d="M16 2v4M8 2v4M3 10h18"/>
+            </svg>
+          </div>
+          <div class="info-text">
+            <span class="info-label">{horarios}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  :root {
+    --color-citas: rgba(255, 255, 255, 0.1);
+    --color-border-citas: rgba(255, 255, 255, 0.3);
+  }
+
+  .hero {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+  
+  .hero-background {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  
+  .hero-background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  
+  .hero-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(21, 0, 18, 1) 0%,
+      rgba(21, 0, 18, 0.85) 40%,
+      rgba(72, 41, 59, 0.6) 60%,
+      rgba(21, 0, 18, 0.2) 100%
+    );
+  }
+  
+  .hero-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .hero-content {
+    max-width: 580px;
+  }
+  
+  .logo-hero {
+    max-width: 100px;
+    height: auto;
+    position: absolute;
+    top: -2rem;
+    left: 2rem;
+    z-index: 10;
+    display: block;
+  }
+
+  .logo-hero-mobile {
+    display: none;
+  }
+  
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--color-citas);
+    border: 1px solid var(--color-border-citas);
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: white;
+  }
+  
+  .badge-icon {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-border-citas);
+    border-radius: 50%;
+    vertical-align: middle;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+  
+  .hero-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.2;
+    margin: 0 0 1.5rem 0;
+    color: white;
+  }
+
+  .highlight {
+    color: #10b981;
+    display: block;
+  }
+  
+  .hero-description {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0 0 2rem 0;
+  }
+  
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+    box-shadow: 0 10px 25px rgba(5, 150, 105, 0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(5, 150, 105, 0.4);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .btn-separator {
+    opacity: 0.6;
+  }
+
+  .arrow-down {
+    transition: transform 0.3s ease;
+  }
+
+  .btn-secondary:hover .arrow-down {
+    transform: translateY(4px);
+  }
+  
+  .hero-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .info-card {
+    display: flex;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .info-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+    color: white;
+  }
+
+  .info-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .info-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: white;
+  }
+
+  .info-detail {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    color: white;
+  }
+
+  .club-jyza-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    border-radius: 9999px;
+    text-decoration: none;
+    font-weight: 600;
+    z-index: 50;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+  }
+
+  .club-jyza-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 35px rgba(245, 158, 11, 0.4);
+  }
+
+  .club-jyza-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .club-jyza-label {
+    font-size: 0.625rem;
+    opacity: 0.9;
+  }
+
+  .club-jyza-title {
+    font-size: 0.875rem;
+  }
+
+  .club-jyza-arrow {
+    transition: transform 0.3s ease;
+  }
+
+  .club-jyza-btn:hover .club-jyza-arrow {
+    transform: translateX(4px);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero-container {
+      padding: 2rem 1rem;
+    }
+
+    .logo-hero {
+      width: 80px;
+      height: 80px;
+      top: 1rem;
+      left: 1rem;
+    }
+
+    .logo-hero-mobile {
+      display: block;
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 1rem;
+    }
+
+    .hero-title {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+    }
+
+    .hero-description {
+      font-size: 1rem;
+    }
+
+    .hero-actions {
+      flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .hero-info {
+      grid-template-columns: 1fr;
+    }
+
+    .club-jyza-btn {
+      bottom: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem;
+      gap: 0.5rem;
+    }
+
+    .club-jyza-text {
+      display: flex;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero-description {
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+    }
+
+    .club-jyza-btn {
+      bottom: 0.5rem;
+      right: 0.5rem;
+      padding: 0.5rem 0.75rem;
+    }
+
+    .club-jyza-text {
+      display: none;
+    }
+
+    .club-jyza-icon {
+      width: 24px;
+      height: 24px;
+    }
+  }
+</style>

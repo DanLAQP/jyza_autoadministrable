@@ -1,0 +1,19 @@
+services:
+  landingjyza:
+    build: .
+    container_name: landingjyza
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - PORT=${PORT:-5174}
+      - DOMAIN=${DOMAIN}
+      - SERVER_IP=${SERVER_IP}
+    expose:
+      - "${PORT:-5174}"
+    networks:
+      - npm_proxy
+
+networks:
+  npm_proxy:
+    external: true

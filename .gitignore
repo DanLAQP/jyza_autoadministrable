@@ -1,6 +1,8 @@
 # Dependencias
+vendor/
+node_modules/
 
-# Directorio de construcción
+# Directorio de construcción (repositorio independiente)
 jyza/
 
 # Archivos de sistema
@@ -23,10 +25,15 @@ tmp/
 .cache/
 
 # Archivos sensibles
-
+.env
+.env.local
+config/app_local.php
 
 # Directorios de sesiones y uploads
-
+jyza_autoadministrable/tmp/sessions/
+jyza_autoadministrable/tmp/cache/
+jyza_autoadministrable/webroot/uploads/
+cifaa/webroot/uploads/
 
 # Archivos grandes (deben usar Git LFS)
 *.mp4

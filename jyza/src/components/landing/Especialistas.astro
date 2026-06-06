@@ -1,0 +1,872 @@
+---
+interface ContentBlock {
+  type: string;
+  content: string;
+  metadata?: Record<string, any>;
+}
+
+interface SectionContent {
+  id: number;
+  slug: string;
+  title?: string;
+  description?: string;
+  blocks?: Record<string, ContentBlock>;
+  images?: Array<{
+    id: number;
+    url: string;
+    alt: string;
+    title?: string;
+  }>;
+}
+
+const content = Astro.props.content as SectionContent | undefined;
+const blocks = content?.blocks ?? {};
+const images = content?.images ?? [];
+
+const getBlockContent = (blockKey: string): string | undefined => {
+  return blocks?.[blockKey]?.content;
+};
+
+const getImageUrl = (imageId: string | number): string => {
+  if (!imageId) return '';
+  const image = images.find(img => String(img.id) === String(imageId));
+  return image?.url || '';
+};
+
+const sectionLabel = getBlockContent('section_label');
+const tituloParte1 = getBlockContent('titulo_parte1');
+const tituloParte2 = getBlockContent('titulo_parte2');
+const descripcion = getBlockContent('descripcion');
+
+// Doctor 1
+const doctor1Image = getImageUrl(blocks['doctor1_image']?.content);
+const doctor1Name = getBlockContent('doctor1_name');
+const doctor1Specialty = getBlockContent('doctor1_specialty');
+const doctor1Desc1 = getBlockContent('doctor1_description_1');
+const doctor1Desc2 = getBlockContent('doctor1_description_2');
+const doctor1StatsNumber = getBlockContent('doctor1_stats_number');
+const doctor1StatsLabel = getBlockContent('doctor1_stats_label');
+const doctor1Rating = getBlockContent('doctor1_rating');
+const doctor1Quote = getBlockContent('doctor1_quote');
+const doctor1WhatsappUrl = getBlockContent('doctor1_whatsapp_url');
+const doctor1TiktokUrl = getBlockContent('doctor1_tiktok_url');
+const doctor1FacebookUrl = getBlockContent('doctor1_facebook_url');
+const doctor1InstagramUrl = getBlockContent('doctor1_instagram_url');
+
+// Doctor 2
+const doctor2Image = getImageUrl(blocks['doctor2_image']?.content);
+const doctor2Name = getBlockContent('doctor2_name');
+const doctor2Specialty = getBlockContent('doctor2_specialty');
+const doctor2Desc1 = getBlockContent('doctor2_description_1');
+const doctor2Desc2 = getBlockContent('doctor2_description_2');
+const doctor2StatsNumber = getBlockContent('doctor2_stats_number');
+const doctor2StatsLabel = getBlockContent('doctor2_stats_label');
+const doctor2Rating = getBlockContent('doctor2_rating');
+const doctor2Quote = getBlockContent('doctor2_quote');
+const doctor2WhatsappUrl = getBlockContent('doctor2_whatsapp_url');
+const doctor2TiktokUrl = getBlockContent('doctor2_tiktok_url');
+const doctor2FacebookUrl = getBlockContent('doctor2_facebook_url');
+const doctor2InstagramUrl = getBlockContent('doctor2_instagram_url');
+
+// Team
+const team1Image = getImageUrl(blocks['team1_image']?.content);
+const team1Name = getBlockContent('team1_name');
+const team1Specialty = getBlockContent('team1_specialty');
+const team1Description = getBlockContent('team1_description');
+
+const team2Image = getImageUrl(blocks['team2_image']?.content);
+const team2Name = getBlockContent('team2_name');
+const team2Specialty = getBlockContent('team2_specialty');
+const team2Description = getBlockContent('team2_description');
+
+const team3Image = getImageUrl(blocks['team3_image']?.content);
+const team3Name = getBlockContent('team3_name');
+const team3Specialty = getBlockContent('team3_specialty');
+const team3Description = getBlockContent('team3_description');
+---
+
+<section class="doctor-section">
+  <div class="container">
+
+    <!-- Encabezado centrado -->
+    <div class="section-header">
+      {sectionLabel && (
+        <div class="info-badge">
+          <img src="/ritmoico.webp" alt="Icono" width="16" height="16" />
+          <span>{sectionLabel}</span>
+        </div>
+      )}
+      {(tituloParte1 || tituloParte2) && (
+        <h2 class="section-title">
+          {tituloParte1}<br />
+          {tituloParte2 && <span class="highlight">{tituloParte2}</span>}
+        </h2>
+      )}
+      {descripcion && (
+        <p class="section-description">
+          {descripcion}
+        </p>
+      )}
+    </div>
+
+    <!-- Carousel -->
+    <div class="carousel-wrapper" id="especialistasCarousel">
+      <div class="carousel-track" id="especialistasTrack">
+
+        <!-- Slide 1: Doctor 1 -->
+        {doctor1Name && (
+          <div class="carousel-slide">
+            <div class="doctor-content">
+              <div class="doctor-card">
+                <div class="doctor-image-wrapper">
+                  <img src={doctor1Image || '/equipo1.webp'} alt={doctor1Name} class="doctor-image" loading="lazy" width="500" height="600" />
+                  <div class="image-gradient"></div>
+                  {doctor1StatsNumber && (
+                    <div class="doctor-stats">
+                      <div class="stat-avatars">
+                        <img src="/avatar1.webp" alt="Paciente" class="avatar" loading="lazy" />
+                        <img src="/avatar2.webp" alt="Paciente" class="avatar" loading="lazy" />
+                        <img src="/avatar3.webp" alt="Paciente" class="avatar" loading="lazy" />
+                        <img src="/avatar4.webp" alt="Paciente" class="avatar" loading="lazy" />
+                      </div>
+                      <div class="stat-text">
+                        <span class="stat-number">+ {doctor1StatsNumber} {doctor1StatsLabel}</span>
+                        <span class="stat-rating">Calificación {doctor1Rating}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div class="doctor-info">
+                <div class="doctor-name-card">
+                  <h3 class="doctor-name">{doctor1Name}</h3>
+                  {doctor1Specialty && <p class="doctor-specialty">{doctor1Specialty}</p>}
+                </div>
+                {doctor1Desc1 && <p class="doctor-description">{doctor1Desc1}</p>}
+                {doctor1Desc2 && <p class="doctor-description">{doctor1Desc2}</p>}
+                {doctor1Quote && <div class="doctor-quote">"{doctor1Quote}"</div>}
+                <div class="doctor-actions">
+                  <a href={doctor1WhatsappUrl || '#'} class="btn-consult" target="_blank">
+                    <img src="/iconBtn.webp" alt="Agendar" width="20" height="20" />
+                    Agendar Consulta
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </a>
+                  <div class="social-links">
+                    {doctor1TiktokUrl && (
+                      <a href={doctor1TiktokUrl} class="btn-social" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+                        <i class="fa-brands fa-tiktok" aria-hidden="true"></i>
+                        TikTok
+                      </a>
+                    )}
+                    {doctor1FacebookUrl && (
+                      <a href={doctor1FacebookUrl} class="btn-social" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                        <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
+                        Facebook
+                      </a>
+                    )}
+                    {doctor1InstagramUrl && (
+                      <a href={doctor1InstagramUrl} class="btn-social" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                        <i class="fa-brands fa-instagram" aria-hidden="true"></i>
+                        Instagram
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <!-- Slide 2: Doctor 2 -->
+        {doctor2Name && (
+        <div class="carousel-slide">
+          <div class="doctor-content">
+            <div class="doctor-card">
+              <div class="doctor-image-wrapper">
+                <img src={doctor2Image || '/equipo2.webp'} alt={doctor2Name} class="doctor-image" loading="lazy" width="500" height="600" />
+                <div class="image-gradient"></div>
+                {doctor2StatsNumber && (
+                  <div class="doctor-stats">
+                    <div class="stat-avatars">
+                      <img src="/avatar1.webp" alt="Paciente" class="avatar" loading="lazy" />
+                      <img src="/avatar2.webp" alt="Paciente" class="avatar" loading="lazy" />
+                      <img src="/avatar3.webp" alt="Paciente" class="avatar" loading="lazy" />
+                      <img src="/avatar4.webp" alt="Paciente" class="avatar" loading="lazy" />
+                    </div>
+                    <div class="stat-text">
+                      <span class="stat-number">+ {doctor2StatsNumber} {doctor2StatsLabel}</span>
+                      <span class="stat-rating">Calificación {doctor2Rating}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div class="doctor-info">
+              <div class="doctor-name-card">
+                <h3 class="doctor-name">{doctor2Name}</h3>
+                {doctor2Specialty && <p class="doctor-specialty">{doctor2Specialty}</p>}
+              </div>
+              {doctor2Desc1 && <p class="doctor-description">{doctor2Desc1}</p>}
+              {doctor2Desc2 && <p class="doctor-description">{doctor2Desc2}</p>}
+              {doctor2Quote && <div class="doctor-quote">"{doctor2Quote}"</div>}
+              <div class="doctor-actions">
+                <a href={doctor2WhatsappUrl || '#'} class="btn-consult" target="_blank">
+                  <img src="/iconBtn.webp" alt="Agendar" width="20" height="20" />
+                  Agendar Consulta
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+                <div class="social-links">
+                  {doctor2TiktokUrl && (
+                    <a href={doctor2TiktokUrl} class="btn-social" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+                      <i class="fa-brands fa-tiktok" aria-hidden="true"></i>
+                      TikTok
+                    </a>
+                  )}
+                  {doctor2FacebookUrl && (
+                    <a href={doctor2FacebookUrl} class="btn-social" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                      <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
+                      Facebook
+                    </a>
+                  )}
+                  {doctor2InstagramUrl && (
+                    <a href={doctor2InstagramUrl} class="btn-social" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                      <i class="fa-brands fa-instagram" aria-hidden="true"></i>
+                      Instagram
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        )}
+
+        <!-- Slide 3: Equipo -->
+        <div class="carousel-slide">
+          <div class="team-grid">
+            {team1Name && (
+              <div class="team-card">
+                <div class="team-image-wrapper">
+                  <img src={team1Image || '/equipo3.webp'} alt={team1Name} class="team-image" loading="lazy" width="350" height="400" />
+                </div>
+                <div class="team-info">
+                  <h3 class="team-name">{team1Name}</h3>
+                  {team1Specialty && <p class="team-specialty">{team1Specialty}</p>}
+                  {team1Description && <p class="team-description">{team1Description}</p>}
+                </div>
+              </div>
+            )}
+            {team2Name && (
+              <div class="team-card">
+                <div class="team-image-wrapper">
+                  <img src={team2Image || '/equipo4.webp'} alt={team2Name} class="team-image" loading="lazy" width="350" height="400" />
+                </div>
+                <div class="team-info">
+                  <h3 class="team-name">{team2Name}</h3>
+                  {team2Specialty && <p class="team-specialty">{team2Specialty}</p>}
+                  {team2Description && <p class="team-description">{team2Description}</p>}
+                </div>
+              </div>
+            )}
+            {team3Name && (
+              <div class="team-card">
+                <div class="team-image-wrapper">
+                  <img src={team3Image || '/equipo5.webp'} alt={team3Name} class="team-image" loading="lazy" width="350" height="400" />
+                </div>
+                <div class="team-info">
+                  <h3 class="team-name">{team3Name}</h3>
+                  {team3Specialty && <p class="team-specialty">{team3Specialty}</p>}
+                  {team3Description && <p class="team-description">{team3Description}</p>}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Dots -->
+      <div class="carousel-dots">
+        <button class="dot active" data-index="0" aria-label="Ver médico 1"></button>
+        <button class="dot" data-index="1" aria-label="Ver médico 2"></button>
+        <button class="dot" data-index="2" aria-label="Ver médico 3"></button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .doctor-section {
+    padding: 5rem 0 3rem;
+    background: radial-gradient(circle, #250925 0%, #180518 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+
+  .info-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: var(--color-text-badge-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 20px;
+    border: 1.5px solid var(--color-text-badge-secondary);
+    margin-bottom: 1.25rem;
+    width: fit-content;
+  }
+
+  .section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: white !important;
+    margin: 0 0 1rem 0;
+  }
+
+  .highlight { color: var(--color-violeta); }
+
+  .section-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.7);
+    margin: 0;
+  }
+
+  /* Carousel */
+  .carousel-wrapper {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+  }
+
+  .carousel-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .carousel-slide {
+    flex: 0 0 100%;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  /* Slides 1 & 2 */
+  .doctor-content {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 4rem;
+    align-items: stretch;
+  }
+
+  .doctor-card { position: relative; display: flex; align-items: stretch; }
+
+  .doctor-image-wrapper {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(186,41,134,0.2) 0%, rgba(141,76,165,0.1) 100%);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .doctor-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+    border-radius: 24px;
+    flex: 1;
+    min-height: 420px;
+  }
+
+  .image-gradient {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .doctor-stats {
+    position: absolute;
+    bottom: 1.5rem; left: 1.5rem; right: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 2;
+  }
+
+  .stat-avatars { display: flex; margin-left: -0.5rem; }
+
+  .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.3);
+    margin-left: -0.5rem;
+    object-fit: cover;
+  }
+
+  .stat-text { display: flex; flex-direction: column; gap: 0.25rem; }
+  .stat-number { font-size: 0.875rem; font-weight: 600; color: white; }
+  .stat-rating { font-size: 0.75rem; color: rgba(255,255,255,0.85); }
+
+  .doctor-info {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .doctor-name-card {
+    background: var(--color-fondo-suave-badge);
+    border: var(--borde-clinico-badge-medic);
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    width: fit-content;
+  }
+
+  .doctor-name { font-size: 1.025rem; font-weight: 700; color: white; margin: 0 0 0.25rem 0; }
+  .doctor-specialty { font-size: 0.9rem; color: var(--color-violeta); margin: 0; }
+
+  .doctor-description {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--color-descripcion-doctor);
+    margin: 0 0 1.25rem 0;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .doctor-quote {
+    font-size: 1.125rem;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--color-especialidades-bg);
+    padding-left: 1.5rem;
+    margin: 1rem 0 1.5rem;
+    border-left: 3px solid var(--color-violeta);
+    width: fit-content;
+  }
+
+  .doctor-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+  .social-links {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-consult {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--color-btn-primary);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-consult:hover { background: var(--color-btn-primary-hover); transform: translateY(-2px); }
+
+  .btn-social {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: transparent;
+    color: white;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-social i {
+    font-size: 1rem;
+  }
+
+  .btn-social:hover { border-color: var(--color-violeta); background: rgba(180,88,212,0.1); }
+
+  /* Slide 3 */
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+    max-width: 85%;
+    margin: 0 auto;
+  }
+
+  .team-card {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .team-image-wrapper {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  .team-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: bottom;
+    display: block;
+  }
+
+  .team-info {
+    color: white;
+    padding: 1rem 1.25rem 1.25rem;
+    text-align: center;
+  }
+
+  .team-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 0.2rem 0;
+  }
+
+  .team-specialty {
+    font-size: 0.68rem;
+    color: var(--color-violeta);
+    margin: 0 0 0.6rem 0;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .team-description {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Dots */
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+
+  .dot {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .dot::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.6);
+    transition: all 0.3s ease;
+  }
+
+  .dot.active {
+    background: rgba(124,58,237,0.15);
+  }
+
+  .dot.active::before {
+    width: 24px;
+    background: var(--color-violeta);
+    border-radius: 4px;
+  }
+
+  /* Tablet */
+  @media (min-width: 768px) and (max-width: 968px) {
+    .doctor-content {
+      grid-template-columns: 280px 1fr;
+      gap: 2rem;
+    }
+
+    .doctor-image {
+      min-height: 320px;
+    }
+
+    .doctor-card {
+      display: flex;
+    }
+
+    .doctor-title { font-size: 1.75rem; }
+    .doctor-description { font-size: 0.9rem; }
+    .doctor-quote { font-size: 0.95rem; }
+
+    .btn-consult, .btn-social {
+      padding: 0.75rem 1.25rem;
+      font-size: 0.85rem;
+    }
+  }
+
+    /* Tablet: 2-col layout with smaller image */
+  @media (min-width: 768px) and (max-width: 968px) {
+    .doctor-section { padding: 2.5rem 0 2rem; }
+    .section-title { font-size: 1.75rem; }
+    .section-description br { display: none; }
+
+    .doctor-content {
+      grid-template-columns: 260px 1fr;
+      gap: 2.5rem;
+    }
+
+    .doctor-card { display: flex; }
+
+    .doctor-image {
+      min-height: 360px;
+    }
+
+    .doctor-description { font-size: 0.9rem; }
+    .doctor-quote { font-size: 0.95rem; }
+
+    .btn-consult, .btn-social {
+      padding: 0.75rem 1.25rem;
+      font-size: 0.85rem;
+    }
+
+    .team-grid {
+      max-width: 100%;
+    }
+  }
+
+  /* Mobile */
+  @media (max-width: 767px) {
+    .doctor-section {
+      padding: 2rem 0 1.5rem;
+    }
+
+    .section-header { margin-bottom: 1.5rem; }
+    .section-title { font-size: 1.5rem; }
+    .section-description br { display: none; }
+    .section-description { font-size: 0.825rem; }
+
+    /* Slides 1 & 2: imagen arriba, texto abajo */
+    .doctor-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .doctor-card {
+      display: block;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .doctor-image {
+      width: 100%;
+      height: 320px;
+      min-height: unset;
+      object-fit: cover;
+      object-position: top;
+      border-radius: 20px;
+    }
+
+    .doctor-stats {
+      bottom: 1rem;
+      left: 1rem;
+      right: 1rem;
+    }
+
+    .doctor-info {
+      position: static;
+      padding: 0;
+    }
+
+    .doctor-name-card {
+      margin-bottom: 0.75rem;
+      padding: 0.6rem 1rem;
+      border-radius: 12px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .doctor-name { font-size: 0.9rem; }
+    .doctor-specialty { font-size: 0.775rem; }
+
+    .doctor-description {
+      font-size: 0.825rem;
+      line-height: 1.5;
+      margin-bottom: 0.6rem;
+    }
+
+    .doctor-quote {
+      font-size: 0.875rem;
+      margin: 0.5rem 0 1rem;
+      padding-left: 1rem;
+    }
+
+    .doctor-actions {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .social-links {
+      justify-content: center;
+    }
+
+    .btn-consult, .btn-social {
+      width: fit-content;
+      padding: 0.65rem 1.5rem;
+      font-size: 0.825rem;
+      border-radius: 12px;
+    }
+
+    /* Slide 3 */
+    .team-grid {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      max-width: 100%;
+    }
+
+    .team-card {
+      flex-direction: row;
+      max-width: 100%;
+      margin: 0;
+      align-items: center;
+    }
+
+    .team-image-wrapper {
+      width: 140px;
+      min-width: 140px;
+      height: 140px;
+      aspect-ratio: 1/1;
+      max-height: unset;
+      border-radius: 0;
+      border-top-left-radius: 16px;
+      border-bottom-left-radius: 16px;
+    }
+
+    .team-info {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      flex: 1;
+    }
+
+    .team-name { font-size: 0.825rem; }
+    .team-specialty { font-size: 0.65rem; margin-bottom: 0.3rem; }
+    .team-description { font-size: 0.75rem; }
+  }
+</style>
+
+<script>
+  function initEspecialistasCarousel() {
+    const carousel = document.getElementById('especialistasCarousel');
+    const track = document.getElementById('especialistasTrack');
+
+    if (!carousel || !track) {
+      console.warn('Especialistas carousel elements not found');
+      return;
+    }
+
+    const dots = carousel.querySelectorAll('.dot');
+
+    if (dots.length === 0) {
+      console.warn('Especialistas carousel dots not found');
+      return;
+    }
+
+    let current = 0;
+    const total = dots.length;
+    let timer: ReturnType<typeof setInterval>;
+
+    function updateDots() {
+      dots.forEach((d) => {
+        d.classList.remove('active');
+      });
+      const activeDot = dots[current];
+      if (activeDot) {
+        activeDot.classList.add('active');
+      }
+    }
+
+    function goTo(index: number) {
+      current = index % total;
+      track.style.transform = `translateX(-${current * 100}%)`;
+      updateDots();
+    }
+
+    function next() {
+      goTo(current + 1);
+    }
+
+    function startTimer() {
+      timer = setInterval(next, 10000);
+    }
+
+    function resetTimer() {
+      clearInterval(timer);
+      startTimer();
+    }
+
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const index = parseInt((dot as HTMLElement).dataset.index ?? '0');
+        goTo(index);
+        resetTimer();
+      });
+    });
+
+    // Inicializar
+    updateDots();
+    startTimer();
+  }
+
+  // Ejecutar cuando el DOM esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEspecialistasCarousel);
+  } else {
+    initEspecialistasCarousel();
+  }
+</script>

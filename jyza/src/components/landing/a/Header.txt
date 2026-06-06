@@ -1,0 +1,115 @@
+---
+
+---
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<input type="checkbox" id="toggle-menu">
+    <header>
+        
+        <img src="/logoSD.png" alt="logo de Clínica Dental">
+        <nav class="responsive" id="nav">
+            <ul>
+                <li>
+                    <a href="/#inicio">Inicio</a>
+                </li>
+                <li>
+                    <a href="/#nosotros">nosotros</a>
+                </li>
+                <li>
+                    <a href="/#servicios">Servicios</a>
+                </li>
+                <li>
+                    <a href="/#ubicacion">Ubicación</a>
+                </li>
+                <li>
+                    <a href="/#contacto">Contacto</a>
+                </li>
+            </ul>
+        </nav>
+        <label for="toggle-menu" class="menu-toggle"><i class="fas fa-bars"></i></label>
+    </header>
+
+<style>
+    /* header */
+    header{
+        max-width: 1100px;
+        margin: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 30px 10px;
+    }
+
+    header img{
+        width: 80px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+    }
+    header nav ul{
+        display: flex;
+        list-style: none;
+    }
+    header nav ul li{
+        padding: 10px 0;
+        border-bottom: 3px solid transparent;
+        transition: border-bottom 0.6s;
+        margin: 0 30px;
+    }
+    header nav ul li a{
+        text-decoration: none;
+        font-size: 16px;
+        color: #fff;
+        text-transform: uppercase;
+    }
+    header nav ul li:hover{
+        border-bottom: 3px solid #fff;
+    }
+    header button{
+        display: none;
+    }
+    /* Estilo para el checkbox */
+    #toggle-menu {
+        display: none;
+    }
+    /* Estilo para el botón del menú */
+    .menu-toggle {
+        display: none;
+        cursor: pointer;
+        font-size: 22px;
+    }
+    /* Estilo para mostrar el menú responsivo cuando el checkbox está marcado */
+    #toggle-menu:checked + header nav {
+        display: block;
+    }
+    /* Estilo para mostrar el botón del menú */
+    #toggle-menu:checked + header .menu-toggle {
+        display: block;
+    }
+    
+    @media screen and (max-width:920px){
+        header nav{
+            display: none;
+        }
+        .menu-toggle {
+            display: block;
+        }
+        header nav.responsive{
+            display: none;
+            position: absolute;
+            right: 10px;
+            top: 68px;
+            background-color:#1d1d1d;
+            border: 1px solid #555555;
+            z-index: 1;
+        }
+        header nav.responsive ul{
+            display: block;  
+        }
+        header nav.responsive ul li a{
+            font-size: 13px;  
+        }
+        #toggle-menu:checked + header nav.responsive {
+            display: block;
+        }
+    }
+</style>

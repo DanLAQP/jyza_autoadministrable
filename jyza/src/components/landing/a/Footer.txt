@@ -1,0 +1,122 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" >
+<footer>
+    <img src="/logoSD.png" alt="" class="logo animado">
+    <div class="social-icons-container animado">
+        <a href="https://www.facebook.com/SpazioDentaleSJM" class="social-icon" target="_blank"> <i class="fab fa-facebook-f icono"></i></a>
+        <a href="https://wa.me/995078149?text=¡Hola!%20Quisiera%20saber%20más%20sobre%20sus%20servicios.%20¿Podrían%20ayudarme?" class="social-icon" target="_blank"> <i class="fab fa-whatsapp icono"></i></a>
+        <a href="https://www.tiktok.com/@spazio_dentale" class="social-icon" target="_blank"> <i class="fab fa-tiktok icono"></i></a>
+        <a href="https://www.instagram.com/clinicaspaziodentale/" class="social-icon" target="_blank"> <i class="fab fa-instagram icono"></i></a>
+    </div>
+    <ul class="footer-menu-container animado">
+        
+        <a href="/#inicio"><li class="menu-item">inicio</li></a>
+        <a href="/#nosotros"><li class="menu-item">Nosotros</li></a>
+        <a href="/#servicios"><li class="menu-item">Servicios</li></a>
+        <a href="/#ubicacion"><li class="menu-item">Ubicacion</li></a>
+        <a href="/#contacto"><li class="menu-item">Contacto</li></a>
+    </ul>
+    <span class="copyright animado">Spazio Dentale SJM - ✆ 995 078 149</span>
+</footer>
+
+<style>
+    footer{
+        width: 100%;
+        padding: 40px 20px;
+        background-color: #0e0e0e;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .logo{
+        height: 80px;
+        margin-bottom: 20px;
+        opacity: 0; 
+        transform: scale(0.8); 
+        transition: opacity 1s ease-in-out, transform 1s;
+    }
+    .logo.visible {
+        opacity: 1;
+        transform: scale(1);
+    }
+    .footer-menu-container{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+        opacity: 0; 
+        transform: scale(0.8); 
+        transition: opacity 1s ease-in-out, transform 1s;
+    }
+    .footer-menu-container.visible {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .social-icons-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+        opacity: 0; 
+        transform: scale(0.8); 
+        transition: opacity 1s ease-in-out, transform 1s;
+    }
+    .social-icons-container.visible{
+        opacity: 1;
+        transform: scale(1);
+    }
+    .social-icon {
+        display: flex; 
+        justify-content: center; 
+        align-items: center;
+        height: 50px;
+        width: 50px;
+        border-radius: 50px;
+        border: 1px solid #f2f2f2;
+        margin: 15px;
+    }
+
+    .social-icon:hover{
+        /* box-shadow: 0px 5px 20px rgba(130, 97, 238, 0.3); */
+        background-color: #111;
+        filter: invert();
+        
+    }
+
+    .social-icon i {
+        font-size: 18px;
+        
+    }
+    .footer-menu-container{
+        list-style-type: none;
+        color: #fff;
+        font-size: 17px;
+    }
+
+    .menu-item{
+        margin: 10px 15px;
+        cursor: pointer;
+        opacity: 0.6;
+    }
+
+    .menu-item:hover{
+        opacity: 1;
+    }
+
+    .copyright{
+        color: #fff;
+        opacity: 0.3;
+        text-align: center;
+        opacity: 0; 
+        transform: scale(0.8); 
+        transition: opacity 1s ease-in-out, transform 1s;
+    }
+    .copyright.visible{
+        opacity: 1;
+        transform: scale(1);
+    }
+</style>

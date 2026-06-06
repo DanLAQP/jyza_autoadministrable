@@ -1,0 +1,1026 @@
+
+    <style>
+        /* Fondo submarino igual que Servicios */
+        .casos-exito {
+            position: relative;
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Rayos de luz desde arriba */
+        .casos-exito .light-rays {
+            position: absolute;
+            top: -10%;
+            left: 0;
+            width: 100%;
+            height: 120%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.3;
+        }
+
+        .casos-exito .light-ray {
+            position: absolute;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, 
+                rgba(255, 255, 255, 0.6) 0%,
+                rgba(255, 255, 255, 0.3) 20%,
+                transparent 60%
+            );
+            transform-origin: top center;
+        }
+
+        .casos-exito .light-ray:nth-child(1) {
+            left: 15%;
+            animation: sway 6s ease-in-out infinite;
+        }
+
+        .casos-exito .light-ray:nth-child(2) {
+            left: 35%;
+            animation: sway 7s ease-in-out infinite 1s;
+        }
+
+        .casos-exito .light-ray:nth-child(3) {
+            left: 55%;
+            animation: sway 8s ease-in-out infinite 2s;
+        }
+
+        .casos-exito .light-ray:nth-child(4) {
+            left: 75%;
+            animation: sway 7s ease-in-out infinite 1.5s;
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: translateX(0) rotate(2deg); }
+            50% { transform: translateX(30px) rotate(-2deg); }
+        }
+
+        /* Burbujas laterales */
+        .subtle-bubbles {
+            position: absolute;
+            bottom: 0;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 4;
+            overflow: visible;
+            display: block;
+            width: 12%;
+        }
+
+        .subtle-bubbles-left { left: 0; }
+        .subtle-bubbles-right { right: 0; }
+
+        .bg-bubble {
+            position: absolute;
+            bottom: 0;
+            border-radius: 50%;
+            width: var(--size, 12px);
+            height: var(--size, 12px);
+            background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.98), rgba(255,255,255,0.3) 36%, rgba(200,240,255,0.15));
+            opacity: 0;
+            filter: blur(0.8px);
+            border: 1px solid rgba(255,255,255,0.25);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.10) inset;
+            will-change: transform, opacity;
+            mix-blend-mode: screen;
+            animation: riseSide var(--duration, 20s) linear infinite;
+        }
+
+        .bg-bubble:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .bg-bubble:nth-child(2) { left: 25%; animation-delay: 3s; }
+        .bg-bubble:nth-child(3) { left: 40%; animation-delay: 6s; }
+        .bg-bubble:nth-child(4) { left: 55%; animation-delay: 9s; }
+        .bg-bubble:nth-child(5) { left: 70%; animation-delay: 12s; }
+        .bg-bubble:nth-child(6) { left: 85%; animation-delay: 15s; }
+
+        @keyframes riseSide {
+            0% {
+                bottom: 0;
+                transform: translateX(0) scale(1);
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.45;
+            }
+            25% { 
+                opacity: 0.5;
+            }
+            50% { 
+                opacity: 0.4;
+            }
+            75% { 
+                opacity: 0.25;
+                transform: translateX(var(--drift, 0px)) scale(1.1);
+            }
+            95% {
+                opacity: 0.1;
+            }
+            100% {
+                bottom: 100vh;
+                transform: translateX(var(--drift, 0px)) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .bg-bubble {
+                animation: none !important;
+                opacity: 0.2;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .subtle-bubbles { 
+                display: block;
+                width: 15%;
+            }
+            
+            .bg-bubble {
+                opacity: 0.35;
+            }
+        }
+        
+        
+        .casos-container {
+            position: relative;
+            width: 90%;
+            max-width: 1200px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .caso-item {
+            position: absolute;
+            width: 100%;
+            display: flex;
+            gap: 4rem;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+            transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+            pointer-events: none;
+        }
+
+        /* Desktop: mostrar contenido en dos columnas */
+        @media (min-width: 769px) {
+            .caso-contenido {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .caso-numero {
+                display: none; /* Ocultar en desktop */
+            }
+
+            .caso-imagen {
+                flex: 1;
+            }
+
+            /* Proyecto 1 (impar): Contenido a la izquierda (más arriba), imagen a la derecha (más abajo) */
+            .caso-item:nth-child(odd) .caso-contenido {
+                order: 1;
+                align-self: flex-start;
+                transform: translateY(-3rem);
+            }
+
+            .caso-item:nth-child(odd) .caso-imagen {
+                order: 2;
+                align-self: flex-end;
+                transform: translateY(3rem);
+            }
+
+            /* Proyecto 2 (par): Imagen a la izquierda (más arriba), contenido a la derecha (más abajo) */
+            .caso-item:nth-child(even) .caso-contenido {
+                order: 2;
+                align-self: flex-end;
+                transform: translateY(3rem);
+            }
+
+            .caso-item:nth-child(even) .caso-imagen {
+                order: 1;
+                align-self: flex-start;
+                transform: translateY(-3rem);
+            }
+        }
+
+        .caso-item.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: all;
+        }
+
+        .caso-item.prev {
+            opacity: 0;
+            transform: scale(0.95) translateY(-20px);
+        }
+
+        .caso-item.next {
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+        }
+
+        .caso-contenido {
+            color: white;
+        }
+
+        /* Animación de flotación */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .caso-imagen {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            background: linear-gradient(135deg, 
+                rgba(70, 130, 180, 0.25), 
+                rgba(100, 149, 237, 0.15)
+            );
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(135, 206, 250, 0.3);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.4s ease;
+            width: 465px;
+            height: 337px;
+            flex: 0 0 465px;
+            animation: float 4s ease-in-out infinite;
+        }
+        .caso-imagen:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 
+                0 15px 45px rgba(135, 206, 250, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border-color: rgba(135, 206, 250, 0.5);
+        }
+
+        .caso-imagen img {
+            width: 465px;
+            height: 337px;
+            object-fit: contain;
+            transition: transform 0.4s ease;
+        }
+
+        .caso-imagen:hover img {
+            transform: scale(1.03);
+        }
+
+        .caso-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(9, 169, 181, 0.25), rgba(9, 169, 181, 0.15));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .caso-imagen:hover .caso-overlay {
+            opacity: 1;
+        }
+
+        /* Delays diferentes para cada imagen para crear efecto escalonado */
+        .caso-item:nth-child(1) .caso-imagen {
+            animation-delay: 0s;
+        }
+
+        .caso-item:nth-child(2) .caso-imagen {
+            animation-delay: 0.8s;
+        }
+
+        .caso-item:nth-child(3) .caso-imagen {
+            animation-delay: 1.6s;
+        }
+
+        .caso-item:nth-child(4) .caso-imagen {
+            animation-delay: 2.4s;
+        }
+
+        .caso-item:nth-child(5) .caso-imagen {
+            animation-delay: 3.2s;
+        }
+
+        .caso-contenido {
+            color: white;
+        }
+
+        .caso-numero {
+            /* font-size: 1rem; */
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #e0e0e0;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .caso-titulo {
+            font-size: clamp(2rem, 4.5vw, 3rem);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            color: #e0e0e0;
+            line-height: 1.2;
+            animation: float-title 4s ease-in-out infinite;
+        }
+
+        @keyframes float-title {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .caso-descripcion {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            color: #cccccc;
+        }
+
+        .caso-stats {
+            display: none; /* Ocultamos las estadísticas */
+        }
+
+        .stat-item {
+            text-align: center;
+            /* line-height: 1.8; */
+        }
+
+        .stat-numero {
+            font-size: 2rem;
+            line-height: 1.2;
+            font-weight: bold;
+            /* color: #a855f7; */
+            line-height: 1.8;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 1.125rem;
+            color: #e0e0e0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.8;
+        }
+
+        .caso-btn {
+            display: inline-block;
+            color: #09a9b5;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1.125rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .caso-btn::after {
+            content: '→';
+            margin-left: 0.5rem;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .caso-btn:hover {
+            color: #00b8cc;
+            transform: translateX(3px);
+        }
+
+        .caso-btn:hover::after {
+            opacity: 1;
+            transform: translateX(2px);
+        }
+        
+
+        /* Progress indicator */
+        .progress-indicator {
+            position: absolute;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .progress-dot.active {
+            background: #09a9b5;
+            transform: scale(1.5);
+        }
+
+        /* Botones de navegación móvil */
+        .mobile-nav-buttons {
+            display: none; /* Ocultos por defecto, se muestran con JS cuando estás en la sección */
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 110;
+            gap: 2rem;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .mobile-nav-prev,
+        .mobile-nav-next {
+            background: linear-gradient(135deg, rgba(9, 169, 181, 0.95), rgba(0, 184, 204, 0.95));
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(9, 169, 181, 0.4);
+        }
+
+        .mobile-nav-prev::before {
+            content: '←';
+        }
+
+        .mobile-nav-next::after {
+            content: '→';
+        }
+
+        .mobile-nav-prev:active,
+        .mobile-nav-next:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 15px rgba(9, 169, 181, 0.6);
+        }
+
+        .mobile-nav-separator {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
+
+        @media (max-width: 768px) {
+            .progress-indicator {
+                right: 0.5rem;
+            }
+            
+            /* Los botones se muestran/ocultan con JavaScript según la sección */
+        }
+
+     
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .caso-item {
+                padding: 1rem;
+                flex-direction: column;
+            }
+
+            /* Reordenar elementos para móvil */
+            .caso-contenido {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+            }
+
+            /* 1. Ocultar número del proyecto en móvil */
+            .caso-numero {
+                display: none;
+            }
+
+            /* 2. Imagen primero */
+            .caso-imagen {
+                order: 1;
+                height: 217px; /* Mantener proporción 1.38:1 (300px/217px) */
+                margin-bottom: 1rem;
+                width: 100%;
+                max-width: 300px;
+                margin-left: auto;
+                margin-right: auto;
+                flex: none;
+            }
+
+            .caso-imagen img {
+                width: 100%;
+                height: 217px;
+                object-fit: contain;
+            }
+
+            /* 2. Título después de la imagen */
+            .caso-titulo {
+                order: 2;
+                font-size: clamp(1.5rem, 4vw, 2.5rem);
+                margin-bottom: 1rem;
+            }
+
+            /* 3. Descripción después del título */
+            .caso-descripcion {
+                order: 3;
+                font-size: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            /* 4. Stats (si se muestran) */
+            .caso-stats {
+                order: 4;
+                justify-content: space-around;
+                gap: 1rem;
+                flex-wrap: wrap;
+            }
+
+            /* 5. Link al final */
+            .caso-btn {
+                order: 5;
+                width: 100%;
+                text-align: center;
+            }
+
+            .stat-numero {
+                font-size: 1.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.875rem;
+            }
+
+            .progress-indicator {
+                right: 0.5rem;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .progress-dot {
+                width: 8px;
+                height: 8px;
+                margin: 0.5rem 0;
+            }
+
+            .progress-dot.active {
+                transform: scale(1.3);
+            }
+
+            .casos-container {
+                width: 95%;
+            }
+
+            .caso-btn {
+                font-size: 1rem;
+                padding: 0.6rem 1.5rem;
+            }
+        }
+
+        
+    </style>
+
+    <!-- Casos de Éxito Section -->
+    <section class="casos-exito">
+        <!-- Rayos de luz -->
+        <div class="light-rays">
+            <div class="light-ray"></div>
+            <div class="light-ray"></div>
+            <div class="light-ray"></div>
+            <div class="light-ray"></div>
+        </div>
+
+        <!-- Burbujas laterales izquierdas -->
+        <div class="subtle-bubbles subtle-bubbles-left" aria-hidden="true">
+            <div class="bg-bubble" style="--size:7px; --duration:18s; --drift: -6px;"></div>
+            <div class="bg-bubble" style="--size:9px; --duration:22s; --drift: 4px;"></div>
+            <div class="bg-bubble" style="--size:11px; --duration:20s; --drift: -8px;"></div>
+            <div class="bg-bubble" style="--size:8px; --duration:24s; --drift: 6px;"></div>
+            <div class="bg-bubble" style="--size:10px; --duration:26s; --drift: -4px;"></div>
+            <div class="bg-bubble" style="--size:12px; --duration:28s; --drift: 8px;"></div>
+        </div>
+
+        <!-- Burbujas laterales derechas -->
+        <div class="subtle-bubbles subtle-bubbles-right" aria-hidden="true">
+            <div class="bg-bubble" style="--size:8px; --duration:20s; --drift: 6px;"></div>
+            <div class="bg-bubble" style="--size:11px; --duration:24s; --drift: -6px;"></div>
+            <div class="bg-bubble" style="--size:9px; --duration:22s; --drift: 4px;"></div>
+            <div class="bg-bubble" style="--size:7px; --duration:26s; --drift: -8px;"></div>
+            <div class="bg-bubble" style="--size:10px; --duration:28s; --drift: 6px;"></div>
+            <div class="bg-bubble" style="--size:12px; --duration:30s; --drift: -4px;"></div>
+        </div>
+
+        <div class="casos-container">
+           
+            <!-- Proyecto 1 -->
+            <div class="caso-item" data-caso="1">
+                <div class="caso-imagen">
+                    <img src="./proyecto1.png?w=600&h=400&fit=crop" alt="Página Web Clínica Dental">
+                    <div class="caso-overlay"></div>
+                </div>
+                <div class="caso-contenido">
+                    <h2 class="caso-titulo">Página Web para OnixDent</h2>
+                    <p class="caso-descripcion">
+                    Landing page responsiva para OnixDent. Informativa,
+                    optimizada para SEO y enfocada en conversión, con detalle de tratamientos y llamados a la acción.
+                    </p>
+                    
+                    <a href="https://onixdentaqp.com" target="_blank" rel="noopener noreferrer" class="caso-btn">
+                        Visitar sitio
+                    </a>
+                </div>
+            </div>
+
+            <!-- Proyecto 2 -->
+             <div class="caso-item" data-caso="2">
+                <div class="caso-imagen">
+                    <img src="./proyecto2.png?w=600&h=400&fit=crop" alt="Página Web Celemit">
+                    <div class="caso-overlay"></div>
+                </div>
+                <div class="caso-contenido">
+                    <h2 class="caso-titulo">Página Web para Celemit</h2>
+                    <p class="caso-descripcion">
+                        Landing page para conectar personas en cafeterías.
+                        Diseñada para atraer nuevos usuarios, con sistema interno para gestionar reuniones, ver detalles y facilitar encuentros
+                    </p>
+                    
+                    <a href="https://celemit.com/" target="_blank" rel="noopener noreferrer" class="caso-btn">
+                        Visitar sitio
+                    </a>
+                </div>
+            </div>
+
+            <!-- Proyecto 3 -->
+            <div class="caso-item" data-caso="3">
+                <div class="caso-imagen">
+                    <img src="./proyecto3.png?w=566&h=280" alt="Página Web Electrisa">
+                    <div class="caso-overlay"></div>
+                </div>
+                <div class="caso-contenido">
+                    <h2 class="caso-titulo">Página Web para ElectrisaPeru</h2>
+                    <p class="caso-descripcion">
+                        Sitio web corporativo para empresa del sector eléctrico.
+                        Enfocado en generar conversiones, con catálogo de productos y tienda virtual integrada para contacto directo vía WhatsApp.
+                    </p>
+                    
+                    <a href="https://electrisaperu.com/" target="_blank" rel="noopener noreferrer" class="caso-btn">
+                        Visitar sitio
+                    </a>
+                </div>
+            </div>
+
+            <!-- Proyecto 4 -->
+            <div class="caso-item" data-caso="4">
+                <div class="caso-imagen">
+                    <img src="./proyecto4.png?w=600&h=400&fit=crop" alt="Sistema Clínicas Dentales">
+                    <div class="caso-overlay"></div>
+                </div>
+                <div class="caso-contenido">
+                    <h2 class="caso-titulo">Sistema para Clínicas Dentales</h2>
+                    <p class="caso-descripcion">
+                        Software de gestión integral para clínicas dentales. Gestión de pacientes, citas, historiales médicos, 
+                        facturación y reportes. Interfaz intuitiva y base de datos segura.
+                    </p>
+                    <a href="https://dentaldemo.danlaqp.com/danldemodental/login" target="_blank" rel="noopener noreferrer" class="caso-btn">
+                        Visitar sitio
+                    </a>
+                </div>
+            </div>
+
+            <!-- Proyecto 5 -->
+            <div class="caso-item" data-caso="5">
+                <div class="caso-imagen">
+                    <img src="./proyecto5.png?w=600&h=400&fit=crop" alt="Sistema Laboratorios Dentales">
+                    <div class="caso-overlay"></div>
+                </div>
+                <div class="caso-contenido">
+                    <h2 class="caso-titulo">Sistema para Laboratorios Dentales</h2>
+                    <p class="caso-descripcion">
+                        Plataforma especializada para laboratorios dentales. Control de pedidos, seguimiento de trabajos, 
+                        gestión de materiales, facturación y comunicación con clínicas asociadas.
+                    </p>
+                    
+                    <a href="https://febrero.danlaqp.com/labLogin/" target="_blank" rel="noopener noreferrer" class="caso-btn">
+                        Visitar sitio
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-indicator">
+            <div class="progress-dot active" data-target="1"></div>
+            <div class="progress-dot" data-target="2"></div>
+            <div class="progress-dot" data-target="3"></div>
+            <div class="progress-dot" data-target="4"></div>
+            <div class="progress-dot" data-target="5"></div>
+        </div>
+
+        <!-- Botones de navegación móvil -->
+        <div class="mobile-nav-buttons">
+            <button class="mobile-nav-prev" aria-label="Proyecto anterior"></button>
+            <span class="mobile-nav-separator">|</span>
+            <button class="mobile-nav-next" aria-label="Siguiente proyecto"></button>
+        </div>
+    </section>
+
+   <script>
+    class CasosExitoZoom {
+        constructor() {
+            this.casos = document.querySelectorAll('.caso-item');
+            this.progressDots = document.querySelectorAll('.progress-dot');
+            this.casosSection = document.querySelector('.casos-exito');
+            this.currentCaso = 0;
+            this.isScrolling = false;
+            this.globalScrollDisabled = false;
+            this.touchStartY = 0;
+            this.touchStartX = 0;
+            this.touchStartTime = 0;
+            this.hasMoved = false;
+
+            this.init();
+        }
+
+        init() {
+            this.showCaso(0);
+
+            // Escucha el evento wheel con passive false
+            this.casosSection.addEventListener('wheel', (e) => this.handleWheel(e), { passive: false });
+
+            // NO usar swipe en móvil - dejar scroll natural
+            // Comentado para que el swipe funcione con el scroll global
+            // this.casosSection.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: true });
+            // this.casosSection.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+
+            // Dots de progreso
+            this.progressDots.forEach((dot, index) => {
+                dot.addEventListener('click', () => this.showCaso(index));
+            });
+
+            // Navegación con teclado
+            document.addEventListener('keydown', (e) => {
+                const rect = this.casosSection.getBoundingClientRect();
+                const isInViewport = rect.top <= 100 && rect.bottom >= 100;
+
+                if (isInViewport) {
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                        if (this.currentCaso < this.casos.length - 1) {
+                            e.preventDefault();
+                            this.nextCaso();
+                        }
+                    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                        if (this.currentCaso > 0) {
+                            e.preventDefault();
+                            this.prevCaso();
+                        }
+                    }
+                }
+            });
+
+            // Desactivar scroll global cuando estés en esta sección
+            this.detectSectionEntry();
+            
+            // Inicializar botones móviles
+            this.initMobileButtons();
+            
+            // Listener para cambios de tamaño de pantalla
+            window.addEventListener('resize', () => {
+                const mobileButtons = document.querySelector('.mobile-nav-buttons');
+                const isMobile = window.innerWidth <= 768;
+                const isInSection = this.casosSection.getBoundingClientRect().top < window.innerHeight / 2 &&
+                                   this.casosSection.getBoundingClientRect().bottom > window.innerHeight / 2;
+                
+                if (mobileButtons) {
+                    // Mostrar solo si estamos en móvil Y en la sección
+                    mobileButtons.style.display = (isMobile && isInSection) ? 'flex' : 'none';
+                }
+            });
+        }
+
+        detectSectionEntry() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const mobileButtons = document.querySelector('.mobile-nav-buttons');
+                    const isMobile = window.innerWidth <= 768;
+                    
+                    if (entry.isIntersecting) {
+                        // Estamos en la sección de proyectos
+                        this.disableGlobalScroll();
+                        // Mostrar botones móviles solo en pantallas pequeñas
+                        if (mobileButtons && isMobile) {
+                            mobileButtons.style.display = 'flex';
+                        }
+                    } else {
+                        // Salimos de la sección
+                        this.enableGlobalScroll();
+                        // Ocultar botones móviles
+                        if (mobileButtons) {
+                            mobileButtons.style.display = 'none';
+                        }
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            observer.observe(this.casosSection);
+        }
+
+        disableGlobalScroll() {
+            this.globalScrollDisabled = true;
+            // Emitir evento personalizado para que scripts.js lo escuche
+            window.dispatchEvent(new CustomEvent('disableGlobalScroll'));
+        }
+
+        enableGlobalScroll() {
+            this.globalScrollDisabled = false;
+            // Emitir evento personalizado
+            window.dispatchEvent(new CustomEvent('enableGlobalScroll'));
+        }
+
+        handleWheel(e) {
+            if (this.isScrolling) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+
+            const isAtFirst = this.currentCaso === 0;
+            const isAtLast = this.currentCaso === this.casos.length - 1;
+
+            if (e.deltaY > 0) {
+                // Scroll hacia abajo
+                if (isAtLast) {
+                    // En el ÚLTIMO proyecto, permitir salir hacia la siguiente sección
+                    this.enableGlobalScroll();
+                    // NO prevenir el evento, dejar que el scroll global lo maneje
+                } else {
+                    // En cualquier otro proyecto, navegar dentro de la sección
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.isScrolling = true;
+                    this.nextCaso();
+                    setTimeout(() => this.isScrolling = false, 1000);
+                }
+            } else {
+                // Scroll hacia arriba
+                if (isAtFirst) {
+                    // En el PRIMER proyecto, permitir salir hacia la sección anterior
+                    this.enableGlobalScroll();
+                    // NO prevenir el evento, dejar que el scroll global lo maneje
+                } else {
+                    // En cualquier otro proyecto, navegar dentro de la sección
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.isScrolling = true;
+                    this.prevCaso();
+                    setTimeout(() => this.isScrolling = false, 1000);
+                }
+            }
+        }
+
+        handleTouchStart(e) {
+            this.touchStartY = e.touches[0].clientY;
+            this.touchStartX = e.touches[0].clientX;
+            this.touchStartTime = Date.now();
+            this.hasMoved = false;
+        }
+
+        handleTouchMove(e) {
+            if (this.isScrolling || this.hasMoved) return;
+
+            const currentY = e.touches[0].clientY;
+            const currentX = e.touches[0].clientX;
+            const currentTime = Date.now();
+            
+            const diffY = this.touchStartY - currentY;
+            const diffX = this.touchStartX - currentX;
+            const timeDiff = currentTime - this.touchStartTime;
+
+            // Detectar si es un swipe rápido y vertical
+            const isVerticalSwipe = Math.abs(diffY) > Math.abs(diffX);
+            const isSignificantSwipe = Math.abs(diffY) > 80;
+            const isFastSwipe = timeDiff < 500;
+
+            if (isVerticalSwipe && isSignificantSwipe && isFastSwipe) {
+                this.hasMoved = true;
+                e.preventDefault();
+                
+                const isAtFirst = this.currentCaso === 0;
+                const isAtLast = this.currentCaso === this.casos.length - 1;
+
+                if (diffY > 0) {
+                    // Swipe hacia arriba (siguiente proyecto)
+                    if (!isAtLast) {
+                        this.isScrolling = true;
+                        this.nextCaso();
+                        setTimeout(() => this.isScrolling = false, 800);
+                    }
+                } else {
+                    // Swipe hacia abajo (proyecto anterior)
+                    if (!isAtFirst) {
+                        this.isScrolling = true;
+                        this.prevCaso();
+                        setTimeout(() => this.isScrolling = false, 800);
+                    }
+                }
+            }
+        }
+
+        initMobileButtons() {
+            const prevBtn = document.querySelector('.mobile-nav-prev');
+            const nextBtn = document.querySelector('.mobile-nav-next');
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    if (this.currentCaso > 0) {
+                        this.prevCaso();
+                    }
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    if (this.currentCaso < this.casos.length - 1) {
+                        this.nextCaso();
+                    }
+                });
+            }
+
+            // Actualizar visibilidad de botones
+            this.updateMobileButtons();
+        }
+
+        updateMobileButtons() {
+            const prevBtn = document.querySelector('.mobile-nav-prev');
+            const nextBtn = document.querySelector('.mobile-nav-next');
+
+            if (prevBtn) {
+                prevBtn.style.opacity = this.currentCaso > 0 ? '1' : '0.3';
+                prevBtn.style.pointerEvents = this.currentCaso > 0 ? 'auto' : 'none';
+            }
+
+            if (nextBtn) {
+                nextBtn.style.opacity = this.currentCaso < this.casos.length - 1 ? '1' : '0.3';
+                nextBtn.style.pointerEvents = this.currentCaso < this.casos.length - 1 ? 'auto' : 'none';
+            }
+        }
+
+        nextCaso() {
+            if (this.currentCaso < this.casos.length - 1) {
+                this.showCaso(this.currentCaso + 1);
+                return true;
+            }
+            return false;
+        }
+
+        prevCaso() {
+            if (this.currentCaso > 0) {
+                this.showCaso(this.currentCaso - 1);
+                return true;
+            }
+            return false;
+        }
+
+        showCaso(index) {
+            this.casos.forEach((caso, i) => {
+                caso.classList.remove('active', 'prev', 'next');
+                if (i === index) {
+                    caso.classList.add('active');
+                } else if (i < index) {
+                    caso.classList.add('prev');
+                } else {
+                    caso.classList.add('next');
+                }
+            });
+
+            this.progressDots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+
+            this.currentCaso = index;
+            this.updateMobileButtons();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        new CasosExitoZoom();
+    });
+</script>

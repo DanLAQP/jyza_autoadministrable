@@ -1,0 +1,980 @@
+---
+// src/components/landing/Bienvenida.astro
+interface ContentBlock {
+  type: string;
+  content: string;
+  metadata?: Record<string, any>;
+}
+
+interface SectionContent {
+  id: number;
+  slug: string;
+  title?: string;
+  description?: string;
+  metadata?: Record<string, any>;
+  blocks?: Record<string, ContentBlock>;
+  images?: Array<{
+    id: number;
+    url: string;
+    alt: string;
+    title?: string;
+    dimensions?: string;
+  }>;
+}
+
+const content = Astro.props.content as SectionContent | undefined;
+const blocks = content?.blocks ?? {};
+const images = content?.images ?? [];
+const imageById = new Map(images.map((image) => [String(image.id), image]));
+
+const getBlockContent = (blockKey: string, fallback: string): string => {
+  return blocks?.[blockKey]?.content || fallback;
+};
+
+const getImageByBlock = (blockKeys: string[], fallback?: (typeof images)[number]) => {
+  for (const blockKey of blockKeys) {
+    const raw = blocks?.[blockKey]?.content?.trim?.();
+    if (!raw) {
+      continue;
+    }
+
+    // Si el contenido parece una URL o ruta, devolverla directamente
+    if (raw.startsWith('/') || raw.startsWith('http')) {
+      return {
+        id: 0,
+        url: raw,
+        alt: blocks?.[blockKey]?.metadata?.alt || '',
+        title: blocks?.[blockKey]?.metadata?.title || undefined,
+      };
+    }
+
+    // Si es un id, buscar en images
+    const image = imageById.get(raw);
+    if (image) {
+      return image;
+    }
+  }
+
+  return fallback;
+};
+
+const tituloParte1 = blocks?.['titulo_parte1']?.content;
+const tituloParte2 = blocks?.['titulo_parte2']?.content;
+const tituloParte3 = blocks?.['titulo_parte3']?.content;
+const description = blocks?.['descripcion']?.content;
+const badgeText = blocks?.['badge_text']?.content;
+const ctaButtonText = getBlockContent('cta_button_text', 'Agendar Cita por WhatsApp');
+const ctaButtonUrl = getBlockContent('cta_button_url', 'https://wa.me/51961295024?text=Hola,%20deseo%20agendar%20una%20cita');
+const ctaSecondaryText = blocks?.['cta_secundario_text']?.content;
+const ubicacion = blocks?.['ubicacion']?.content;
+const ubicacionDetail = blocks?.['ubicacion_detail']?.content;
+const horarios = blocks?.['horarios']?.content;
+const horariosDetail = blocks?.['horarios_detail']?.content;
+const clubButtonLabel = blocks?.['club_button_label']?.content ?? 'Únete';
+const clubButtonTitle = blocks?.['club_button_title']?.content ?? 'Club JYZA';
+const clubButtonUrl = blocks?.['club_button_url']?.content ?? 'https://wa.me/51961295024?text=Hola,%20deseo%20inscribirme%20al%20Club%20JYZA';
+const clubButtonAria = blocks?.['club_button_aria']?.content ?? 'Inscríbete al Club JYZA por WhatsApp';
+
+const heroImage = getImageByBlock(['hero_background_image', 'background_image', 'hero_image'], images[0]);
+const heroMobileImage = getImageByBlock(['hero_background_mobile_image', 'background_mobile_image'], heroImage);
+const logoImage = getImageByBlock(['logo_image', 'hero_logo_image'], undefined);
+const logoMobileImage = getImageByBlock(['logo_mobile_image', 'hero_logo_mobile_image'], logoImage);
+const buttonIconImage = getImageByBlock(['button_icon_image', 'cta_icon_image'], undefined);
+---
+<section class="hero">
+  <div class="hero-background">
+    <div class="hero-gradient"></div>
+    <picture>
+      <source media="(max-width: 1024px)" srcset={heroMobileImage?.url || './herofondot.webp'} />
+      <img src={heroImage?.url || './herofondo.webp'} alt={heroImage?.alt || 'Clínica Ginecología Huánuco'} loading="eager" width="1920" height="1080" />
+    </picture>
+  </div>
+  <a
+    href={clubButtonUrl}
+    class="club-jyza-btn"
+    target="_blank"
+    aria-label={clubButtonAria}
+  >
+    <svg class="club-jyza-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 2.5l2.9 5.88 6.49.94-4.69 4.57 1.11 6.46L12 17.95 6.19 20.35l1.11-6.46-4.69-4.57 6.49-.94L12 2.5z" fill="currentColor"/>
+    </svg>
+    <div class="club-jyza-text">
+      <span class="club-jyza-label">{clubButtonLabel}</span>
+      <span class="club-jyza-title">{clubButtonTitle}</span>
+    </div>
+    <svg class="club-jyza-arrow" width="16" height="16" viewBox="0 0 20 20" fill="none">
+      <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </a>
+  <div class="hero-container">
+    <img src={logoImage?.url || './logoJiza.webp'} alt={logoImage?.alt || 'Logo Jiza'} class="logo-hero" width="200" height="200" />
+
+    <div class="hero-content">
+      <img src={logoMobileImage?.url || './logoJiza.webp'} alt={logoMobileImage?.alt || 'Logo Jiza'} class="logo-hero-mobile" width="120" height="120" />
+
+      {badgeText && (
+        <div class="hero-badge">
+          <span class="badge-icon"></span>
+          <span class="badge-text">{badgeText}</span>
+        </div>
+      )}
+
+      {(tituloParte1 || tituloParte2 || tituloParte3) && (
+        <h1 class="hero-title">
+          {tituloParte1 && <>{tituloParte1}<br /></>}
+          {tituloParte2 && <><span class="highlight">{tituloParte2}</span><br /></>}
+          {tituloParte3 && <>{tituloParte3}</>}
+        </h1>
+      )}
+
+      {description && <p class="hero-description" set:html={description} />}
+
+      {(ctaButtonText || ctaSecondaryText) && (
+        <div class="hero-actions">
+          {ctaButtonText && (
+            <a href={ctaButtonUrl} class="btn-primary" target="_blank">
+              <img src={buttonIconImage?.url || 'iconBtn.webp'} alt={buttonIconImage?.alt || 'icono'} width="20" height="20">
+              {ctaButtonText}
+            </a>
+          )}
+
+          {ctaSecondaryText && (
+            <a href="#servicios" class="btn-secondary">
+              <span class="btn-separator">ó</span>
+              {ctaSecondaryText}
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="arrow-down">
+                <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </a>
+          )}
+        </div>
+      )}
+
+      <div class="hero-info">
+        {ubicacion && (
+          <div class="info-card">
+            <div class="info-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 2C7.58 2 4 5.58 4 10c0 7 8 13 8 13s8-6 8-13c0-4.42-3.58-8-8-8zm0 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/>
+              </svg>
+            </div>
+            <div class="info-text">
+              <span class="info-label">{ubicacion}</span>
+              <span class="info-detail">{ubicacionDetail}</span>
+            </div>
+          </div>
+        )}
+
+        {horarios && (
+          <div class="info-card">
+            <div class="info-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <path d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+            </div>
+            <div class="info-text">
+              <span class="info-label">{horarios}</span>
+              <span class="info-detail">{horariosDetail}</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+  
+  .hero-background {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  
+  .hero-background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  
+  .hero-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(21, 0, 18, 1) 0%,
+      rgba(21, 0, 18, 0.85) 40%,
+      rgba(72, 41, 59, 0.6) 60%,
+      rgba(21, 0, 18, 0.2) 100%
+    );
+  }
+  
+  @media (max-width: 768px) {
+    .hero-gradient {
+      background: linear-gradient(
+        110deg,
+        rgba(21, 0, 18, 1) 0%,
+        rgba(21, 0, 18, 0.85) 35%,
+        rgba(72, 41, 59, 0.6) 65%,
+        rgba(21, 0, 18, 0.2) 100%
+      );
+    }
+  }
+  
+  .hero-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* ✅ MODIFICADO: reducido de 700px a 580px */
+  .hero-content {
+    max-width: 580px;
+  }
+  
+  .logo-hero {
+    max-width: 100px;
+    height: auto;
+    position: absolute;
+    top: -2rem;
+    left: 2rem;
+    z-index: 10;
+    display: block;
+  }
+
+  .logo-hero-mobile {
+    display: none;
+  }
+  
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--color-citas);
+    border: 1px solid var(--color-border-citas);
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
+  }
+  
+  .badge-icon {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-border-citas);
+    border-radius: 50%;
+    vertical-align: middle;
+  }
+
+  
+  .badge-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--color-violeta-light);
+  }
+  
+  /* ✅ MODIFICADO: reducido de 4.5rem a 3.5rem */
+  .hero-title {
+    font-family: 'Urbanist', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0 0 1.5rem 0;
+    color: #fff;
+  }
+  
+  .highlight {
+    color: var(--color-violeta);
+    font-family: 'Urbanist', sans-serif;
+  }
+  
+  .hero-description {
+    font-family: 'Urbanist', sans-serif;
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: #fff;
+    margin: 0 0 2.5rem 0;
+    opacity: 0.95;
+  }
+  
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+  }
+  
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--color-btn-primary);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-family: 'Urbanist', sans-serif;
+  }
+  
+  .btn-primary:hover {
+    background: var(--color-btn-primary-hover);
+    transform: translateY(-2px);
+  }
+  
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: transparent;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-family: 'Urbanist', sans-serif;
+    backdrop-filter: blur(5px);
+  }
+  
+  .btn-secondary:hover {
+    border-color: rgba(255, 255, 255, 0.85); /* Mejorado: 0.5 → 0.85 */
+    background: rgba(255, 255, 255, 0.12); /* Mejorado: 0.08 → 0.12 */
+    transform: translateY(-2px);
+  }
+
+  .btn-separator {
+    margin-right: 0.5rem;
+    opacity: 0.8;
+  }
+
+  .arrow-down {
+    transform: rotate(90deg);
+    transition: transform 0.3s ease;
+  }
+  
+  .hero-info {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .info-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--color-plomo);
+    border: 1px solid var(--color-border-plomo);
+    padding: 1rem 2rem;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    flex: 1;
+    min-width: 250px;
+  }
+
+  .info-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-fondo-icon);
+    color: #E9D5F0;
+    font-size: 1.5rem;
+    border-radius: 20px;
+    padding: 0.75rem;
+    min-width: 50px;
+    height: 50px;
+  }
+
+  .info-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .info-label {
+    font-family: 'Urbanist', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #fff;
+  }
+
+  .info-detail {
+    font-family: 'Urbanist', sans-serif;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .iconBtn {
+    vertical-align: middle;
+  }
+
+  /* ✅ MODIFICADO: Laptops grandes — título reducido de 5rem a 4rem */
+  @media (min-width: 1440px) {
+    .hero-container {
+      padding: 4rem 2.5rem;
+    }
+
+    .hero-content {
+      max-width: 560px;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-description {
+      font-size: 1rem;
+      margin-bottom: 2.25rem;
+    }
+
+    .btn-primary {
+      padding: 0.8rem 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .btn-secondary {
+      padding: 0.8rem 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .hero-info {
+      gap: 0.875rem;
+    }
+
+    .info-card {
+      padding: 0.75rem 1.25rem;
+      min-width: 200px;
+    }
+
+    .info-icon {
+      min-width: 42px;
+      height: 42px;
+    }
+
+    .info-label {
+      font-size: 0.85rem;
+    }
+
+    .info-detail {
+      font-size: 0.75rem;
+    }
+  }
+
+  /* ✅ MODIFICADO: Laptops medianas — título reducido de 4.25rem a 3.75rem */
+  @media (min-width: 1200px) and (max-width: 1439px) {
+    .hero-container {
+      padding: 4rem 2rem;
+    }
+
+    .hero-title {
+      font-size: 3.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-description {
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+
+    .btn-primary {
+      padding: 0.75rem 1.4rem;
+      font-size: 0.85rem;
+    }
+
+    .btn-secondary {
+      padding: 0.75rem 1.4rem;
+      font-size: 0.85rem;
+    }
+
+    .hero-info {
+      gap: 0.875rem;
+    }
+
+    .info-card {
+      padding: 0.75rem 1.25rem;
+      min-width: 200px;
+    }
+
+    .info-icon {
+      min-width: 42px;
+      height: 42px;
+    }
+
+    .info-label {
+      font-size: 0.85rem;
+    }
+
+    .info-detail {
+      font-size: 0.75rem;
+    }
+  }
+
+  /* Pantallas intermedias 1024px-1199px */
+  @media (min-width: 1024px) and (max-width: 1199px) {
+    .hero-container {
+      padding: 2.5rem 1.5rem;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero-description {
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-badge {
+      margin-bottom: 0.6rem;
+    }
+
+    .hero-actions {
+      gap: 0.6rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .btn-primary {
+      padding: 0.7rem 1.3rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-secondary {
+      padding: 0.7rem 1.3rem;
+      font-size: 0.8rem;
+      gap: 0.9rem;
+    }
+
+    .hero-info {
+      gap: 0.75rem;
+    }
+
+    .info-card {
+      padding: 0.65rem 1.1rem;
+      min-width: 180px;
+    }
+
+    .info-icon {
+      min-width: 38px;
+      height: 38px;
+    }
+
+    .info-label {
+      font-size: 0.8rem;
+    }
+
+    .info-detail {
+      font-size: 0.7rem;
+    }
+  }
+
+  /* Tablets medianas */
+  @media (min-width: 800px) and (max-width: 1023px) {
+    .hero-container {
+      padding: 2rem 1.5rem;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+
+    .hero-description {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-badge {
+      margin-bottom: 1rem;
+      padding: 0.4rem 0.9rem;
+    }
+
+    .badge-text {
+      font-size: 0.7rem;
+    }
+
+    .hero-actions {
+      gap: 0.875rem;
+      margin-bottom: 2rem;
+    }
+
+    .btn-primary {
+      padding: 0.85rem 1.75rem;
+      font-size: 0.9rem;
+    }
+
+    .btn-secondary {
+      padding: 0.85rem 1.75rem;
+      font-size: 0.9rem;
+    }
+
+    .hero-info {
+      gap: 1rem;
+    }
+
+    .info-card {
+      padding: 0.875rem 1.5rem;
+      min-width: 220px;
+    }
+
+    .info-icon {
+      min-width: 45px;
+      height: 45px;
+    }
+
+    .info-label {
+      font-size: 0.9rem;
+    }
+
+    .info-detail {
+      font-size: 0.8rem;
+    }
+  }
+
+  /* Tablets pequeñas */
+  @media (min-width: 640px) and (max-width: 700px) {
+    .hero-container {
+      padding: 2rem 1.25rem;
+    }
+
+    .hero-title {
+      font-size: 2.25rem;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+
+    .hero-description {
+      font-size: 0.95rem;
+      line-height: 1.55;
+      margin-bottom: 1.5rem;
+      max-width: 90%;
+    }
+
+    .hero-actions {
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .btn-primary {
+      width: fit-content;
+      padding: 0.8rem 1.5rem;
+      font-size: 0.85rem;
+    }
+
+    .btn-secondary {
+      width: auto;
+      padding: 0;
+      font-size: 0.85rem;
+    }
+
+    .hero-info {
+      gap: 0.75rem;
+      flex-direction: column;
+    }
+
+    .info-card {
+      width: auto;
+      padding: 0.6rem 1rem;
+    }
+
+    .info-icon {
+      min-width: 40px;
+      height: 40px;
+    }
+
+    .info-label {
+      font-size: 0.85rem;
+    }
+
+    .info-detail {
+      font-size: 0.75rem;
+    }
+  }
+  
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .hero-container {
+      padding: 3rem 1.5rem;
+    }
+    
+    .hero-title {
+      font-size: 3.5rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .logo-hero {
+      display: none;
+    }
+
+    .logo-hero-mobile {
+      display: block;
+      max-width: 65px;
+      height: auto;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 0;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    .hero-container {
+      padding: 1.25rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      box-sizing: border-box;
+    }
+
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      width: 100%;
+    }
+
+    .hero-title {
+      font-size: 1.85rem;
+      line-height: 1.15;
+      margin-bottom: 0.75rem;
+      max-width: 80%;
+    }
+
+    .hero-description {
+      font-size: 0.875rem;
+      line-height: 1.55;
+      margin-bottom: 1.25rem;
+      max-width: 80%;
+    }
+
+    .hero-badge {
+      padding: 0.25rem 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .badge-icon {
+      width: 6px;
+      height: 6px;
+    }
+
+    .badge-text {
+      font-size: 0.6rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .hero-description br {
+      display: none;
+    }
+
+    .hero-actions {
+      flex-direction: column;
+      align-items: center;
+      align-self: stretch;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn-primary {
+      width: fit-content;
+      justify-content: center;
+      padding: 0.65rem 1.5rem;
+      font-size: 0.825rem;
+    }
+
+    .btn-secondary {
+      width: auto;
+      padding: 0;
+      background: transparent;
+      backdrop-filter: none;
+      font-size: 0.825rem;
+      gap: 0.4rem;
+    }
+
+    .btn-separator {
+      display: none;
+    }
+
+    .hero-info {
+      flex-direction: column;
+      align-items: center;
+      align-self: stretch;
+      gap: 0.5rem;
+    }
+    
+    .info-card {
+      width: 85%;
+      max-width: 320px;
+      flex: none;
+      padding: 0.45rem 0.875rem;
+      border-radius: 12px;
+      gap: 0.6rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: none;
+    }
+
+    .info-text {
+      gap: 0;
+    }
+
+    .info-label {
+      font-size: 0.8rem;
+      line-height: 1.2;
+    }
+
+    .info-detail {
+      font-size: 0.72rem;
+      line-height: 1.2;
+    }
+
+    .info-icon {
+      min-width: 38px;
+      height: 38px;
+      padding: 0.5rem;
+      border-radius: 12px;
+    }
+
+    .info-label {
+      font-size: 0.825rem;
+    }
+
+    .info-detail {
+      font-size: 0.75rem;
+    }
+  }
+  /* === Club JYZA Button === */
+.club-jyza-btn {
+  position: absolute;
+  top: 0rem;
+  right: 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  padding: 0.6rem 1.1rem 0.7rem;
+  text-decoration: none;
+  color: #fff;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.club-jyza-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(4px);
+}
+
+.club-jyza-icon {
+  display: block;
+  color: var(--color-violeta, #c084fc);
+  flex-shrink: 0;
+}
+
+.club-jyza-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.club-jyza-label {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0.7;
+  line-height: 1;
+}
+
+.club-jyza-title {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-violeta, #c084fc);
+}
+
+.club-jyza-arrow {
+  opacity: 0.7;
+}
+
+/* Móvil - Side Right */
+@media (max-width: 768px) {
+  .club-jyza-btn {
+    display: inline-flex;
+    top: 1.5rem;
+    right: 0.75rem;
+    left: auto;
+    width: auto;
+    justify-content: flex-start;
+    padding: 0.6rem 0.9rem 0.7rem;
+    border-radius: 0 0 14px 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-right: none;
+  }
+
+  .club-jyza-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .club-jyza-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0;
+  }
+
+  .club-jyza-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.8px;
+  }
+
+  .club-jyza-title {
+    font-size: 0.75rem;
+  }
+
+  .club-jyza-arrow {
+    width: 12px;
+    height: 12px;
+    display: none;
+  }
+}
+</style>

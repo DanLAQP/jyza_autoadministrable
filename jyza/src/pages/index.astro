@@ -1,0 +1,183 @@
+---
+import Layout from "../layouts/Layout.astro"
+import Header from "../components/landing/Header.astro"
+import Bienvenida from "../components/landing/Bienvenida.astro"
+import Especialistas from "../components/landing/Especialistas.astro"
+import Especialidades from "../components/landing/Especialidades.astro"
+import PorQueElegirnos from "../components/landing/PorQueElegirnos.astro"
+import Indicadores from "../components/landing/Indicadores.astro"
+import Paquetes from "../components/landing/Paquetes.astro"
+import TestimoniosReact from "../components/landing/TestimoniosReact.jsx"
+import Citas from "../components/landing/Citas.astro"
+import Agendamiento from "../components/landing/Agendamiento.astro"
+import ComoLLegar from "../components/landing/ComoLLegar.astro"
+import ClubJyza from "../components/landing/ClubJyza.astro"
+import { API_ENDPOINTS } from "../config/api"
+
+interface ContentBlock {
+    type: string;
+    content: string;
+    metadata?: Record<string, any>;
+}
+
+interface SectionContent {
+    id: number;
+    slug: string;
+    title?: string;
+    description?: string;
+    metadata?: Record<string, any>;
+    blocks: Record<string, ContentBlock>;
+    images: Array<{
+        id: number;
+        url: string;
+        alt: string;
+        title?: string;
+        dimensions?: string;
+    }>;
+}
+
+// Usar endpoints configurados desde config/api.ts
+const apiCandidates = {
+    bienvenida: [API_ENDPOINTS.bienvenida],
+    porqueelegirnos: [API_ENDPOINTS.porqueelegirnos],
+    especialistas: [API_ENDPOINTS.especialistas],
+    especialidades: [API_ENDPOINTS.especialidades],
+    clubjyza: [API_ENDPOINTS.clubjyza],
+    paquetes: [API_ENDPOINTS.paquetes],
+    testimonios: [API_ENDPOINTS.testimonios],
+    citas: [API_ENDPOINTS.citas],
+    agendamiento: [API_ENDPOINTS.agendamiento],
+    comollegar: [API_ENDPOINTS.comollegar],
+    indicadores: [API_ENDPOINTS.indicadores],
+};
+
+async function fetchSectionContent(urls: string[]): Promise<SectionContent | null> {
+    for (const url of urls) {
+        try {
+            console.log(`[API] Intentando conectar a: ${url}`);
+            const response = await fetch(url, { cache: 'no-store' });
+            if (!response.ok) {
+                console.log(`[API] Error en ${url}: ${response.status}`);
+                continue;
+            }
+            console.log(`[API] ✓ Éxito en ${url}`);
+            return await response.json();
+        } catch (error) {
+            console.log(`[API] Error de conexión en ${url}:`, error);
+            continue;
+        }
+    }
+
+    console.warn(`[API] No se pudo conectar a ningún endpoint`);
+    return null;
+}
+
+const bienvenidaContent = await fetchSectionContent(apiCandidates.bienvenida);
+const porqueelegirnosContent = await fetchSectionContent(apiCandidates.porqueelegirnos);
+const especialistasContent = await fetchSectionContent(apiCandidates.especialistas);
+const especialidadesContent = await fetchSectionContent(apiCandidates.especialidades);
+const clubjyzaContent = await fetchSectionContent(apiCandidates.clubjyza);
+const paquetesContent = await fetchSectionContent(apiCandidates.paquetes);
+const citasContent = await fetchSectionContent(apiCandidates.citas);
+const agendamientoContent = await fetchSectionContent(apiCandidates.agendamiento);
+const comoLlegarContent = await fetchSectionContent(apiCandidates.comollegar);
+const indicadoresContent = await fetchSectionContent(apiCandidates.indicadores);
+---
+
+<Layout 
+    title="Consultorio Gineco Obstetrico especializado de HUÁNUCO" 
+  description="Clínica Gineco-Obstétrica en Huánuco dedicada a brindar atención integral, ética y de alta calidad en salud femenina. Nos enfocamos en la prevención, diagnóstico oportuno y acompañamiento cálido y confidencial en todas las etapas de la vida de la mujer. Con RUC: 20609186039">
+
+    <!-- HEADER FIJO -->
+    <!-- <Header /> -->
+
+    <main>
+        <!-- <Header /> -->
+         
+        <section id="inicio" >
+              <Bienvenida content={bienvenidaContent ?? undefined} />
+        </section>
+        
+
+        <!-- SERVICIOS -->
+        
+        <!-- NOSOTROS -->
+        <section id="por-que-elegirnos">
+            <PorQueElegirnos content={porqueelegirnosContent ?? undefined} />
+        </section>
+        <section id="especialistas">
+            <Especialistas content={especialistasContent ?? undefined} />
+        </section>
+        <!-- PROYECTOS -->
+        <section id="especialidades">
+            <Especialidades content={especialidadesContent ?? undefined} />
+        </section>
+        <section id="club-jyza">
+            <ClubJyza content={clubjyzaContent ?? undefined} />
+        </section>
+        
+        <section id="paquetes">
+            <Paquetes content={paquetesContent ?? undefined} />
+        </section>
+         <section id="testimonios">
+            <TestimoniosReact client:load />
+        </section>
+        <section id="citas">
+            <Citas content={citasContent ?? undefined} />
+        </section>
+        <section id="agendamiento">
+            <Agendamiento content={agendamientoContent ?? undefined} />
+        </section>
+        <section id="como-llegar">
+            <ComoLLegar content={comoLlegarContent ?? undefined} />
+        </section>
+        <section id="indicadores">
+            <Indicadores content={indicadoresContent ?? undefined} />
+        </section>
+        
+        <!-- WhatsApp Floating Button -->
+        <!-- <a href="https://wa.me/51901562110" class="whatsapp-float" target="_blank" aria-label="Contactar por WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+        </a> -->
+
+    </main>
+
+    <script src="../scripts/scripts.js"></script>
+
+</Layout>
+
+<style>
+    .whatsapp-float {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #4b9aab 0%, #5aafbf 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 32px;
+        box-shadow: 0 4px 12px rgba(75, 154, 171, 0.4);
+        transition: all 0.3s ease;
+        z-index: 999;
+        text-decoration: none;
+    }
+
+    .whatsapp-float:hover {
+        transform: translateY(-5px) scale(1.1);
+        box-shadow: 0 8px 20px rgba(75, 154, 171, 0.6);
+    }
+
+    @media (max-width: 768px) {
+        .whatsapp-float {
+            bottom: 20px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            font-size: 28px;
+        }
+    }
+</style>

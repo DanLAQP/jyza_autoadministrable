@@ -1,0 +1,334 @@
+---
+interface ContentBlock {
+  type: string;
+  content: string;
+  metadata?: Record<string, any>;
+  is_active?: number;
+}
+
+interface SectionContent {
+  id: number;
+  slug: string;
+  blocks?: Record<string, ContentBlock>;
+  images?: Array<{
+    id: number;
+    url: string;
+    alt: string;
+  }>;
+}
+
+const content = Astro.props.content as SectionContent | undefined;
+const blocks = content?.blocks ?? {};
+const images = content?.images ?? [];
+
+const getBlockContent = (blockKey: string): string | undefined => {
+  return blocks?.[blockKey]?.content;
+};
+
+const getImageUrl = (imageId: string | number): string => {
+  if (!imageId) return '';
+  const image = images.find(img => String(img.id) === String(imageId));
+  return image?.url || '';
+};
+
+// Section header
+const sectionLabel = getBlockContent('section_label');
+const titleParte1 = getBlockContent('titulo_parte1');
+const titleParte2 = getBlockContent('titulo_parte2');
+
+// Helper function to get package data
+const getPackage = (num: number) => ({
+  image: getImageUrl(blocks[`paquete${num}_image`]?.content),
+  badge: getBlockContent(`paquete${num}_badge`),
+  title: getBlockContent(`paquete${num}_title`),
+  description: getBlockContent(`paquete${num}_description`),
+  item1: getBlockContent(`paquete${num}_item_1`),
+  item2: getBlockContent(`paquete${num}_item_2`),
+  item3: getBlockContent(`paquete${num}_item_3`),
+  item4: getBlockContent(`paquete${num}_item_4`),
+  item5: getBlockContent(`paquete${num}_item_5`),
+  whatsappUrl: getBlockContent(`paquete${num}_whatsapp_url`),
+  buttonText: getBlockContent(`paquete${num}_button_text`),
+  isActive: blocks[`paquete${num}_title`]?.is_active === 1,
+});
+
+// Get all packages
+const packages = [1, 2, 3, 4].map(getPackage).filter(p => p.isActive && p.title);
+---
+
+<section class="packages-section">
+    <div class="container">
+      <div class="section-header">
+        {sectionLabel && <span class="section-label">{sectionLabel}</span>}
+        {(titleParte1 || titleParte2) && (
+          <h2 class="section-title">
+            {titleParte1}{titleParte2 && <span class="highlight">{titleParte2}</span>}
+          </h2>
+        )}
+      </div>
+
+      <div class="packages-grid">
+        {packages.map((pkg) => (
+          <div class={`package-card ${pkg.badge ? 'featured' : ''}`}>
+            <div class="package-image">
+              {pkg.badge && <div class="package-badge">{pkg.badge}</div>}
+              <div class="image-gradient"></div>
+              <img src={pkg.image || '/default.webp'} alt={pkg.title} loading="lazy" width="400" height="300" />
+            </div>
+            <div class="package-content">
+              <h3 class="package-title">{pkg.title}</h3>
+              {pkg.description && <p class="package-description">{pkg.description}</p>}
+              <div class="package-includes">
+                <span class="includes-label">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  INCLUYE
+                </span>
+              </div>
+              <ul class="package-list">
+                {pkg.item1 && <li>{pkg.item1}</li>}
+                {pkg.item2 && <li>{pkg.item2}</li>}
+                {pkg.item3 && <li>{pkg.item3}</li>}
+                {pkg.item4 && <li>{pkg.item4}</li>}
+                {pkg.item5 && <li>{pkg.item5}</li>}
+              </ul>
+              {pkg.whatsappUrl && pkg.buttonText && (
+                <a href={pkg.whatsappUrl} target="_blank" rel="noopener noreferrer" class="btn-package">
+                  {pkg.buttonText} <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+<style>
+    .packages-section {
+      padding: 4rem 0;
+      background: var(--color-segunda-bg);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-label {
+      display: inline-block;
+      color: var(--color-paquetes-titulo-sup);
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .section-title {
+      font-size: 2.25rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--color-dark) !important;
+      margin: 0;
+    }
+
+    .highlight { color: var(--color-violeta); }
+
+    .packages-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .package-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      display: flex;
+    }
+
+    .package-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(186,41,134,0.15);
+    }
+
+    .package-badge {
+      position: absolute;
+      top: 0.75rem;
+      left: 0.75rem;
+      background: #B45309;
+      color: white;
+      padding: 0.3rem 0.9rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      z-index: 10;
+      letter-spacing: 0.5px;
+    }
+
+    .package-image {
+      width: 160px;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .package-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .image-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right,
+        rgba(153, 74, 218, 0.20) 0%,
+        transparent 80%
+      );
+      z-index: 1;
+      pointer-events: none;
+    }
+
+
+
+
+    .package-content {
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 0;
+    }
+
+    .package-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-dark);
+      margin: 0 0 0.4rem 0;
+      line-height: 1.3;
+    }
+
+    .package-description {
+      font-size: 0.825rem;
+      color: var(--color-text);
+      opacity: 0.8;
+      line-height: 1.5;
+      margin: 0 0 0.875rem 0;
+    }
+
+    .package-includes { margin-bottom: 0.5rem; }
+
+    .includes-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--color-paquetes-incluye);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .package-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1rem 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .package-list li {
+      padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+      font-size: 0.825rem;
+      color: var(--color-text);
+      position: relative;
+      background: var(--color-paquetes-bg-list);
+      border-radius: 8px;
+      transition: background 0.2s ease;
+      line-height: 1.3;
+    }
+
+    .package-list li:hover { background: var(--color-paquetes-bg-list-hover); }
+
+    .package-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0.6rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      background-color: var(--color-paquetes-bg-check);
+      border-radius: 50%;
+      color: var(--color-paquetes-incluye);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: bold;
+    }
+
+    .btn-package {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: #6B2DA7;
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 0.825rem;
+    }
+
+    .btn-package:hover {
+      background: transparent;
+      color: #6B2DA7;
+      border-color: #6B2DA7;
+      transform: translateY(-2px);
+    }
+
+    .btn-package svg { transition: transform 0.3s ease; stroke: currentColor; }
+    .btn-package:hover svg { transform: translateX(3px); }
+
+    /* Responsive */
+    @media (max-width: 968px) {
+      .package-badge {
+        font-size: 0.6rem;
+        padding: 0.25rem 0.6rem;
+        letter-spacing: 0;
+      }
+
+      .packages-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .section-title { font-size: 1.75rem; }
+      .package-image { width: 130px; }
+      .package-content { padding: 1rem 1.25rem; }
+      .package-title { font-size: 1rem; }
+      .package-description { font-size: 0.8rem; margin-bottom: 0.6rem; }
+      .package-list li { font-size: 0.78rem; padding: 0.4rem 0.75rem 0.4rem 2.25rem; }
+      .btn-package { font-size: 0.72rem; padding: 0.5rem 0.75rem; border-radius: 10px; }
+    }
+
+    @media (max-width: 480px) {
+      .packages-section { padding: 2.5rem 0; }
+      .section-header { margin-bottom: 1.75rem; }
+      .package-image { width: 110px; }
+      .package-content { padding: 0.875rem 1rem; }
+      .package-list { gap: 0.25rem; margin-bottom: 0.75rem; }
+    }
+</style>

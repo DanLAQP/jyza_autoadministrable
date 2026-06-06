@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Host: ginecologiajyza.pe
+Sitemap: https://ginecologiajyza.pe/sitemap.xml
+Sitemap: https://ginecologiajyza.com/sitemap.xml

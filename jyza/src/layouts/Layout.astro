@@ -1,0 +1,129 @@
+---
+const {
+  title = 'Consultorio Gineco Obstetrico especializado de HUANUCO',
+  description = 'Clinica Gineco-Obstetrica en Huanuco dedicada a brindar atencion integral, etica y de alta calidad en salud femenina.',
+} = Astro.props;
+
+const site = Astro.site ?? new URL('https://ginecologiajyza.pe');
+const canonicalUrl = new URL(Astro.url.pathname, site).toString();
+const ogImage = new URL('/herofondo.webp', site).toString();
+const pageTitle = `Jyza | ${title}`;
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'MedicalClinic',
+  name: 'Consultorio Ginecologico JYZA',
+  url: canonicalUrl,
+  image: ogImage,
+  description,
+  telephone: '+51961295024',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Jirón Dos de Mayo 1600 con Pedro Puelles, esquina del Parque Amarilis',
+    addressLocality: 'Huánuco',
+    addressCountry: 'PE',
+  },
+  openingHours: 'Mo-Su 08:00-21:00',
+  areaServed: {
+    '@type': 'City',
+    name: 'Huanuco',
+  },
+  sameAs: [
+    'https://www.facebook.com/jyza.cmeg',
+    'https://www.instagram.com/consultorio_ginecologico_jyza',
+    'https://www.tiktok.com/@jyza.ginecologia',
+  ],
+};
+// Importar CSS de estilos globales
+import '../styles/Layout.css'
+---
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{pageTitle}</title>
+    <link rel="icon" href="/logoJizaicon.webp" type="image/x-icon">
+    <link rel="canonical" href={canonicalUrl}>
+    <link rel="alternate" hrefLang="es-PE" href={canonicalUrl}>
+    <link rel="alternate" hrefLang="x-default" href={canonicalUrl}>
+
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="theme-color" content="#BA2986">
+    <meta name="author" content="QP Secure Solutions SAC">
+    <meta name="description" content={description}>
+    <meta name="keywords" content="RUC 20609186039, Jyza Ginecologia, ginecologia Huanuco, obstetricia Huanuco, salud femenina, control prenatal, oncologia ginecologica, fertilidad, consulta ginecologica Huanuco">
+
+    <meta property="og:locale" content="es_PE">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Consultorio Ginecologico JYZA">
+    <meta property="og:title" content={pageTitle}>
+    <meta property="og:description" content={description}>
+    <meta property="og:url" content={canonicalUrl}>
+    <meta property="og:image" content={ogImage}>
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content={pageTitle}>
+    <meta name="twitter:description" content={description}>
+    <meta name="twitter:image" content={ogImage}>
+
+
+    <!-- DNS Prefetch y Preconnect para CDNs -->
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+    <!-- Font Awesome CDN - Carga asíncrona -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    </noscript>
+
+    <!-- Critical CSS Inline para prevenir FOUC -->
+    <style>
+      :root { --color-primary: #BA2986; --color-violeta: #B458D4; --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body { font-family: var(--font-sans); background: #202020; color: #fff; line-height: 1.5; }
+      img { display: block; max-width: 100%; height: auto; flex-shrink: 0; }
+    </style>
+
+    <!-- Script ULTRA-LIGERO: Activar CSS sin bloquear -->
+    <script>
+      // Estrategia: Activar CSS lo antes posible sin MutationObserver (TBT culprit)
+      (() => {
+        const activateCSS = () => {
+          // Cambiar stylesheets a media="print" + immediate callback
+          const links = document.head.querySelectorAll('link[rel="stylesheet"]');
+          links.forEach(link => {
+            if (!link.href.includes('font-awesome')) {
+              link.media = 'print';
+              // Activar inmediatamente en próximo microtask
+              Promise.resolve().then(() => { link.media = 'all'; });
+            }
+          });
+        };
+
+        // Ejecutar cuando DOM está listo, pero NO bloquear con MutationObserver
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', activateCSS);
+        } else {
+          activateCSS();
+        }
+
+        // Fallback: Activar cualquier CSS rezagado en load event
+        window.addEventListener('load', () => {
+          document.head.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+            if (link.media !== 'all' && !link.href.includes('font-awesome')) {
+              link.media = 'all';
+            }
+          });
+        }, { once: true });
+      })();
+    </script>
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
+</head>
+<body>
+    <slot/>
+</body>
+</html>

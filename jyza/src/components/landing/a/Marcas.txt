@@ -1,0 +1,483 @@
+---
+// Componente Marcas
+---
+
+<section id="marcas" class="underwater-section">
+    <!-- Rayos de luz de fondo -->
+    <div class="light-rays">
+        <div class="light-ray"></div>
+        <div class="light-ray"></div>
+        <div class="light-ray"></div>
+        <div class="light-ray"></div>
+    </div>
+
+    <!-- Burbujas sutiles en los costados -->
+    <div class="subtle-bubbles subtle-bubbles-left">
+        <div class="bg-bubble" style="--size: 8px; --duration: 18s; --drift: 20px;"></div>
+        <div class="bg-bubble" style="--size: 12px; --duration: 22s; --drift: -15px;"></div>
+        <div class="bg-bubble" style="--size: 6px; --duration: 25s; --drift: 25px;"></div>
+        <div class="bg-bubble" style="--size: 10px; --duration: 20s; --drift: -10px;"></div>
+        <div class="bg-bubble" style="--size: 14px; --duration: 24s; --drift: 30px;"></div>
+        <div class="bg-bubble" style="--size: 7px; --duration: 19s; --drift: -20px;"></div>
+    </div>
+
+    <div class="subtle-bubbles subtle-bubbles-right">
+        <div class="bg-bubble" style="--size: 9px; --duration: 21s; --drift: -25px;"></div>
+        <div class="bg-bubble" style="--size: 11px; --duration: 23s; --drift: 15px;"></div>
+        <div class="bg-bubble" style="--size: 5px; --duration: 26s; --drift: -30px;"></div>
+        <div class="bg-bubble" style="--size: 13px; --duration: 18s; --drift: 20px;"></div>
+        <div class="bg-bubble" style="--size: 8px; --duration: 27s; --drift: -18px;"></div>
+        <div class="bg-bubble" style="--size: 15px; --duration: 19s; --drift: 25px;"></div>
+    </div>
+
+    <div class="container">
+        <div class="brands-header">
+            <h2 class="brands-title">Marcas que Respaldan Nuestro Trabajo</h2>
+            <p class="brands-subtitle">Colaboramos con las mejores marcas del sector dental para ofrecerte servicios de calidad excepcional</p>
+        </div>
+
+        <div class="brands-grid">
+            <div class="brand-card">
+                <div class="brand-logo">
+                    <img src="./spaziodentale.png" alt="Spazio Dentale" />
+                </div>
+                <div class="brand-overlay"></div>
+            </div>
+
+            <div class="brand-card">
+                <div class="brand-logo">
+                    <img src="./odentOdontologia.png" alt="Odent Odontología" />
+                </div>
+                <div class="brand-overlay"></div>
+            </div>
+
+            <div class="brand-card">
+                <div class="brand-logo">
+                    <img src="./dentalart.png" alt="Dental Art" />
+                </div>
+                <div class="brand-overlay"></div>
+            </div>
+
+            <div class="brand-card">
+                <div class="brand-logo">
+                    <img src="./polident.png" alt="Polident" />
+                </div>
+                <div class="brand-overlay"></div>
+            </div>
+
+            <div class="brand-card">
+                <div class="brand-logo">
+                    <img src="./odontocenterhap.png" alt="Odontocenter HAP" />
+                </div>
+                <div class="brand-overlay"></div>
+            </div>
+
+            <div class="brand-card">
+                <div class="brand-logo">
+                    <img src="./melchorita.png" alt="Melchorita" />
+                </div>
+                <div class="brand-overlay"></div>
+            </div>
+
+            <div class="brand-card">
+                <div class="brand-logo">
+                    <img src="./hidalgo.png" alt="Hidalgo" />
+                </div>
+                <div class="brand-overlay"></div>
+            </div>
+
+            <div class="brand-card">
+                <div class="brand-logo">
+                    <img src="./headent.png" alt="Headent" />
+                </div>
+                <div class="brand-overlay"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .underwater-section {
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+        /* background: linear-gradient(to bottom, 
+            #1a5f7a 0%,
+            #159895 30%,
+            #0d7377 60%,
+            #0a4d5c 100%
+        ); */
+        display: flex;
+        align-items: center;
+        padding: 4rem 0;
+    }
+
+    /* Rayos de luz - igual que servicios */
+    .underwater-section .light-rays {
+        position: absolute;
+        top: -10%;
+        left: 0;
+        width: 100%;
+        height: 120%;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.3;
+    }
+
+    .underwater-section .light-ray {
+        position: absolute;
+        top: 0;
+        width: 2px;
+        height: 100%;
+        background: linear-gradient(to bottom, 
+            rgba(255, 255, 255, 0.6) 0%,
+            rgba(255, 255, 255, 0.3) 20%,
+            transparent 60%
+        );
+        transform-origin: top center;
+    }
+
+    .underwater-section .light-ray:nth-child(1) {
+        left: 15%;
+        animation: sway 6s ease-in-out infinite;
+    }
+
+    .underwater-section .light-ray:nth-child(2) {
+        left: 35%;
+        animation: sway 7s ease-in-out infinite 1s;
+    }
+
+    .underwater-section .light-ray:nth-child(3) {
+        left: 55%;
+        animation: sway 8s ease-in-out infinite 2s;
+    }
+
+    .underwater-section .light-ray:nth-child(4) {
+        left: 75%;
+        animation: sway 7s ease-in-out infinite 1.5s;
+    }
+
+    @keyframes sway {
+        0%, 100% { transform: translateX(0) rotate(2deg); }
+        50% { transform: translateX(30px) rotate(-2deg); }
+    }
+
+    /* Burbujas sutiles en los costados - igual que servicios */
+    .subtle-bubbles {
+        position: absolute;
+        bottom: 0;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 4;
+        overflow: visible;
+        display: block;
+        width: 12%;
+    }
+
+    .subtle-bubbles-left { left: 0; }
+    .subtle-bubbles-right { right: 0; }
+
+    .bg-bubble {
+        position: absolute;
+        bottom: 0;
+        border-radius: 50%;
+        width: var(--size, 12px);
+        height: var(--size, 12px);
+        background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.98), rgba(255,255,255,0.3) 36%, rgba(200,240,255,0.15));
+        opacity: 0;
+        filter: blur(0.8px);
+        border: 1px solid rgba(255,255,255,0.25);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.10) inset;
+        will-change: transform, opacity;
+        mix-blend-mode: screen;
+        animation: riseSide var(--duration, 20s) linear infinite;
+    }
+
+    /* Posición de burbujas en diferentes posiciones horizontales dentro de la franja */
+    .bg-bubble:nth-child(1) { left: 10%; animation-delay: 0s; }
+    .bg-bubble:nth-child(2) { left: 25%; animation-delay: 3s; }
+    .bg-bubble:nth-child(3) { left: 40%; animation-delay: 6s; }
+    .bg-bubble:nth-child(4) { left: 55%; animation-delay: 9s; }
+    .bg-bubble:nth-child(5) { left: 70%; animation-delay: 12s; }
+    .bg-bubble:nth-child(6) { left: 85%; animation-delay: 15s; }
+
+    @keyframes riseSide {
+        0% {
+            bottom: 0;
+            transform: translateX(0) scale(1);
+            opacity: 0;
+        }
+        5% {
+            opacity: 0.45;
+        }
+        25% { 
+            opacity: 0.5;
+        }
+        50% { 
+            opacity: 0.4;
+        }
+        75% { 
+            opacity: 0.25;
+            transform: translateX(var(--drift, 0px)) scale(1.1);
+        }
+        95% {
+            opacity: 0.1;
+        }
+        100% {
+            bottom: 100vh;
+            transform: translateX(var(--drift, 0px)) scale(1.2);
+            opacity: 0;
+        }
+    }
+
+    /* Contenedor principal */
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Encabezado de la sección */
+    .brands-header {
+        text-align: center;
+        margin-bottom: 4rem;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .brands-title {
+        font-size: clamp(2rem, 4.5vw, 3rem);
+        font-weight: 300;
+        color: #ffffff;
+        margin: 0 0 1rem;
+        opacity: 0;
+        transform: translateY(10px);
+        animation: fadeUp 700ms ease-out 120ms forwards, floatTitle 4s ease-in-out infinite;
+        animation-delay: 120ms, 1s;
+        text-shadow: 0 2px 20px rgba(135, 206, 250, 0.4);
+    }
+
+    .brands-subtitle {
+        font-size: 1.125rem;
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.6;
+        opacity: 0;
+        transform: translateY(10px);
+        animation: fadeUp 700ms ease-out 300ms forwards;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes floatTitle {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+
+    /* Grid de marcas */
+    .brands-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        opacity: 0;
+        animation: fadeUp 800ms ease-out 500ms forwards;
+    }
+
+    /* Cards de marcas */
+    .brand-card {
+        position: relative;
+        background: linear-gradient(135deg, 
+            rgba(70, 130, 180, 0.25), 
+            rgba(100, 149, 237, 0.15)
+        );
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(135, 206, 250, 0.3);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        transition: all 0.4s ease;
+        opacity: 0;
+        animation: floatUp 1s ease-out forwards, float 6s ease-in-out infinite;
+        cursor: pointer;
+        overflow: hidden;
+        height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Delays escalonados para las animaciones */
+    .brand-card:nth-child(1) {
+        animation-delay: 0.6s, 0.6s;
+    }
+
+    .brand-card:nth-child(2) {
+        animation-delay: 0.8s, 1.3s;
+    }
+
+    .brand-card:nth-child(3) {
+        animation-delay: 1s, 2.1s;
+    }
+
+    .brand-card:nth-child(4) {
+        animation-delay: 1.2s, 2.8s;
+    }
+
+    .brand-card:nth-child(5) {
+        animation-delay: 1.4s, 3.5s;
+    }
+
+    .brand-card:nth-child(6) {
+        animation-delay: 1.6s, 4.2s;
+    }
+
+    .brand-card:nth-child(7) {
+        animation-delay: 1.8s, 4.9s;
+    }
+
+    .brand-card:nth-child(8) {
+        animation-delay: 2s, 5.6s;
+    }
+
+    @keyframes floatUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+        25% {
+            transform: translateY(-10px) rotate(0.5deg);
+        }
+        50% {
+            transform: translateY(-5px) rotate(0deg);
+        }
+        75% {
+            transform: translateY(-12px) rotate(-0.5deg);
+        }
+    }
+
+    /* Hover effect */
+    .brand-card:hover {
+        transform: translateY(-15px) scale(1.02);
+        box-shadow: 
+            0 15px 45px rgba(135, 206, 250, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        border-color: rgba(135, 206, 250, 0.5);
+    }
+
+    .brand-card:hover .brand-overlay {
+        opacity: 1;
+    }
+
+    /* Logos de marcas */
+    .brand-logo {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .brand-logo img {
+        max-width: 100%;
+        max-height: 80px;
+        object-fit: contain;
+        transition: all 0.4s ease;
+    }
+
+
+    .brand-card:hover .brand-logo img {
+        transform: scale(1.1);
+    }
+
+    /* Overlay para hover effect */
+    .brand-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+            rgba(135, 206, 250, 0.1), 
+            rgba(100, 149, 237, 0.05)
+        );
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        border-radius: 18px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .container {
+            padding: 0 1rem;
+        }
+
+        .brands-header {
+            margin-bottom: 3rem;
+        }
+
+        .brands-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .brand-card {
+            padding: 1.5rem;
+            height: 150px;
+        }
+
+        .brand-logo img {
+            max-height: 60px;
+        }
+
+        .underwater-section {
+            padding: 3rem 0;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .brands-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .brand-card {
+            padding: 1rem;
+            height: 120px;
+        }
+
+        .brand-logo img {
+            max-height: 50px;
+        }
+    }
+</style>

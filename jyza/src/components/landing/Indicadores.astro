@@ -1,0 +1,137 @@
+---
+interface ContentBlock {
+  type: string;
+  content: string;
+  metadata?: Record<string, any>;
+}
+
+interface SectionContent {
+  id: number;
+  slug: string;
+  blocks?: Record<string, ContentBlock>;
+}
+
+const content = Astro.props.content as SectionContent | undefined;
+const blocks = content?.blocks ?? {};
+
+// Extract statistics from API with is_active check for ALL fields
+const buildStat = (num: number) => {
+  const numberBlock = blocks[`stat_${num}_number`];
+  const symbolBlock = blocks[`stat_${num}_symbol`];
+  const labelBlock = blocks[`stat_${num}_label`];
+
+  // Only show stat if all required fields are active
+  if (!numberBlock || numberBlock.is_active !== 1) return null;
+  if (!symbolBlock || symbolBlock.is_active !== 1) return null;
+  if (!labelBlock || labelBlock.is_active !== 1) return null;
+
+  return {
+    number: numberBlock.content,
+    symbol: symbolBlock.content,
+    label: labelBlock.content,
+  };
+};
+
+const stats = [1, 2, 3]
+  .map(buildStat)
+  .filter((s): s is typeof buildStat extends () => infer T ? Exclude<T, null> : never => s !== null);
+---
+
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-grid">
+      {stats.map((stat) => (
+        <div class="stat-item">
+          <h3 class="stat-number">
+            {stat.number}<span class="stat-symbol">{stat.symbol}</span>
+          </h3>
+          <p class="stat-label">{stat.label}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .stats-section {
+    padding: 6rem 0;
+    background: radial-gradient(circle, #250925 0%, #180518 100%);
+    position: relative;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 0.5rem 0;
+    line-height: 1;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+  }
+
+  .stat-symbol {
+    color: var(--color-violeta);
+    font-size: 1.8rem;
+    font-weight: 900;
+  }
+
+    .stat-div {
+        color: var(--color-violeta);
+        font-size: 3.5rem;
+        font-weight: 900;
+    }
+  .stat-label {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    font-weight: 400;
+  }
+
+  /* Responsive */
+  @media (max-width: 968px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+    }
+
+    .stat-number {
+      font-size: 3.5rem;
+    }
+
+    .stat-symbol {
+      font-size: 1.5rem; /* Mitad del tamaño responsive */
+    }
+  }
+
+  @media (max-width: 640px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .stat-number {
+      font-size: 3.5rem;
+    }
+
+    .stat-symbol {
+      font-size: 1.75rem; /* Mitad del tamaño responsive */
+    }
+  }
+</style>

@@ -1,0 +1,140 @@
+---
+/**
+ * pages/index.astro - EJEMPLO DE IMPLEMENTACIÓN
+ * 
+ * Muestra dos estrategias:
+ * 1. Build-time: Pregenerar todo el contenido en build
+ * 2. Runtime: Cargar contenido dinámicamente (SSR)
+ * 
+ * Escoge la que mejor se adapte a tu caso de uso
+ */
+
+// ESTRATEGIA 1: BUILD-TIME (Recomendado para mejor SEO y rendimiento)
+// ====================================================================
+
+import { getAllContent, getSectionContent, getSEOMetadata } from '../hooks/useContent';
+import Bienvenida from '../components/landing/Bienvenida.astro';
+
+// En build time, obtener todo el contenido
+const allContent = await getAllContent();
+const bienvenidaContent = allContent?.['bienvenida'];
+
+// Extraer SEO
+const seo = getSEOMetadata(bienvenidaContent);
+
+// ESTRATEGIA 2: RUNTIME (Si quieres contenido dinámico)
+// ====================================================================
+// Descomentar si prefieres cargar en tiempo de ejecución
+
+/*
+import { getSectionContent } from '../hooks/useContent';
+
+let bienvenidaContent = null;
+try {
+  bienvenidaContent = await getSectionContent('bienvenida');
+} catch (error) {
+  console.error('Error cargando contenido:', error);
+}
+
+const seo = getSEOMetadata(bienvenidaContent);
+*/
+
+// FALLBACK
+const defaultSEO = {
+  title: 'Clínica Ginecología Huánuco | Especialistas en Salud Femenina',
+  description: 'Clínica de ginecología y obstetricia en Huánuco. Más de 10 años de experiencia.',
+  ogImage: '/og-bienvenida.png',
+};
+
+const finalSeo = seo.title ? seo : defaultSEO;
+---
+
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO Dinámico -->
+    <title>{finalSeo.title}</title>
+    <meta name="description" content={finalSeo.description} />
+    <meta property="og:title" content={finalSeo.title} />
+    <meta property="og:description" content={finalSeo.description} />
+    <meta property="og:image" content={finalSeo.ogImage} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://jyza.com/" />
+    <link rel="canonical" href="https://jyza.com/" />
+
+    <!-- Otros meta tags importantes para SEO -->
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="Spanish" />
+    <meta name="author" content="Clínica JYZA" />
+    <meta
+      name="keywords"
+      content="ginecología, obstetricia, salud femenina, huánuco, citas médicas"
+    />
+
+    <!-- Open Graph adicional -->
+    <meta property="og:site_name" content="Clínica JYZA" />
+    <meta property="og:locale" content="es_PE" />
+
+    <!-- Preload de recursos críticos -->
+    <link rel="preload" as="image" href="/herofondo.webp" />
+
+    <!-- JSON-LD para rich snippets -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'MedicalBusiness',
+      name: 'Clínica JYZA',
+      description: finalSeo.description,
+      image: finalSeo.ogImage,
+      url: 'https://jyza.com',
+      telephone: '+51961295024',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'Jr. Dos de Mayo 1600',
+        addressLocality: 'Huánuco',
+        addressRegion: 'Huánuco',
+        postalCode: '',
+        addressCountry: 'PE'
+      },
+      medicalSpecialty: [
+        'Ginecología',
+        'Obstetricia'
+      ],
+      sameAs: [
+        'https://www.facebook.com/jyzaclinica',
+        'https://www.instagram.com/jyzaclinica'
+      ]
+    })} />
+  </head>
+  <body>
+    <!-- Bienvenida con contenido dinámico -->
+    <Bienvenida content={bienvenidaContent} />
+
+    <!-- Aquí iría el resto del contenido de las otras secciones -->
+    <!-- Por ejemplo: Nosotros, Servicios, Beneficios, Testimonios, Contacto, Footer -->
+
+    <!-- Script para manejar eventos -->
+    <script>
+      // Listeners globales si es necesario
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('Página cargada');
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  html {
+    font-family: system-ui, -apple-system, sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+</style>

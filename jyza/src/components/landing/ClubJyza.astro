@@ -1,0 +1,530 @@
+---
+interface ContentBlock {
+  type: string;
+  content: string;
+  metadata?: Record<string, any>;
+  is_active?: number;
+}
+
+interface SectionContent {
+  id: number;
+  slug: string;
+  blocks?: Record<string, ContentBlock>;
+  images?: Array<{
+    id: number;
+    url: string;
+    alt: string;
+  }>;
+}
+
+const content = Astro.props.content as SectionContent | undefined;
+const blocks = content?.blocks ?? {};
+const images = content?.images ?? [];
+
+const getBlockContent = (blockKey: string): string | undefined => {
+  return blocks?.[blockKey]?.content;
+};
+
+const getImageUrl = (imageId: string | number): string => {
+  if (!imageId) return '';
+  const image = images.find(img => String(img.id) === String(imageId));
+  return image?.url || '';
+};
+
+// Section header
+const sectionBadge = getBlockContent('section_badge');
+const titleParte1 = getBlockContent('titulo_parte1');
+const titleParte2 = getBlockContent('titulo_parte2');
+const description = getBlockContent('descripcion');
+
+// Helper function to get convenio data
+const getConvenio = (num: number) => ({
+  image: getImageUrl(blocks[`convenio_${num}_image`]?.content),
+  category: getBlockContent(`convenio_${num}_category`),
+  categoryColor: getBlockContent(`convenio_${num}_category_color`),
+  tag: getBlockContent(`convenio_${num}_tag`),
+  tagColor: getBlockContent(`convenio_${num}_tag_color`),
+  name: getBlockContent(`convenio_${num}_name`),
+  specialty: getBlockContent(`convenio_${num}_specialty`),
+  description_1: getBlockContent(`convenio_${num}_description_1`),
+  description_2: getBlockContent(`convenio_${num}_description_2`),
+  quote: getBlockContent(`convenio_${num}_quote`),
+  benefit: getBlockContent(`convenio_${num}_benefit`),
+  benefitColor: getBlockContent(`convenio_${num}_benefit_color`),
+  facebookUrl: getBlockContent(`convenio_${num}_facebook_url`),
+  instagramUrl: getBlockContent(`convenio_${num}_instagram_url`),
+  isActive: blocks[`convenio_${num}_name`]?.is_active === 1,
+});
+
+// Get all convenios - scan up to 20 to be flexible
+const convenios = Array.from({ length: 20 }, (_, i) => i + 1)
+  .map(getConvenio)
+  .filter(c => c.isActive && c.name);
+---
+
+<section class="convenios-section">
+  <div class="container">
+
+    <!-- Encabezado -->
+    <div class="section-header">
+      {sectionBadge && (
+        <div class="info-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016 2.993 2.993 0 0 0 2.25-1.016 3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/></svg>
+          <span>{sectionBadge}</span>
+        </div>
+      )}
+      {(titleParte1 || titleParte2) && (
+        <h2 class="section-title">
+          {titleParte1}<br />
+          {titleParte2 && <span class="highlight">{titleParte2}</span>}
+        </h2>
+      )}
+      {description && (
+        <p class="section-description">
+          {description}
+        </p>
+      )}
+    </div>
+
+    <!-- Carousel -->
+    <div class="carousel-wrapper" id="clubjyzaCarousel">
+      <div class="carousel-track" id="clubjyzaTrack">
+
+        {convenios.map((convenio) => (
+          <div class="carousel-slide">
+            <div class="convenio-content">
+              <div class="convenio-card">
+                <div class="convenio-image-wrapper">
+                  <img src={convenio.image || '/default.webp'} alt={convenio.name} class="convenio-image" loading="lazy" width="500" height="600" />
+                </div>
+              </div>
+              <div class="convenio-info">
+                <div class="convenio-header-row">
+                  <div class={`convenio-cat ${convenio.categoryColor}`}>{convenio.category}</div>
+                  <div class={`convenio-tag ${convenio.tagColor}`}>{convenio.tag}</div>
+                </div>
+                <div class="convenio-name-card">
+                  <h3 class="convenio-name">{convenio.name}</h3>
+                  <p class="convenio-specialty">{convenio.specialty}</p>
+                </div>
+                {convenio.description_1 && <p class="convenio-description">{convenio.description_1}</p>}
+                {convenio.description_2 && <p class="convenio-description">{convenio.description_2}</p>}
+                {convenio.quote && <div class="convenio-quote">"{convenio.quote}"</div>}
+                {convenio.benefit && (
+                  <div class={`convenio-pill ${convenio.benefitColor}`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z"/></svg>
+                    {convenio.benefit}
+                  </div>
+                )}
+                <div class="convenio-actions">
+                  <div class="social-links">
+                    {convenio.facebookUrl && (
+                      <a href={convenio.facebookUrl} class="btn-social" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12Z"/></svg>
+                        Facebook
+                      </a>
+                    )}
+                    {convenio.instagramUrl && (
+                      <a href={convenio.instagramUrl} class="btn-social" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069ZM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0Zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324ZM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881Z"/></svg>
+                        Instagram
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+
+      </div>
+
+      <!-- Dots -->
+      <div class="carousel-dots">
+        {convenios.map((_, index) => (
+          <button class={`dot ${index === 0 ? 'active' : ''}`} data-index={index} aria-label={`Ver convenio ${index + 1}`}></button>
+        ))}
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .convenios-section {
+    padding: 5rem 0 3rem;
+    background: radial-gradient(circle, #250925 0%, #180518 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+
+  .info-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: var(--color-violeta);
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 20px;
+    border: 1.5px solid var(--color-violeta);
+    margin-bottom: 1.25rem;
+    width: fit-content;
+  }
+
+  .section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: white !important;
+    margin: 0 0 1rem 0;
+  }
+
+  .highlight { color: var(--color-violeta); }
+
+  .section-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.7);
+    margin: 0;
+  }
+
+  /* Carousel */
+  .carousel-wrapper {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+  }
+
+  .carousel-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .carousel-slide {
+    flex: 0 0 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Layout imagen + info */
+  .convenio-content {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 4rem;
+    align-items: stretch;
+  }
+
+  .convenio-card {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+  }
+
+  .convenio-image-wrapper {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.04);
+    width: 100%;
+    display: flex;
+    min-height: 520px;
+  }
+
+  .convenio-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+
+  /* Header row: categoría + etiqueta lado a lado */
+  .convenio-header-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  /* Tag ahora en la info, no sobre la imagen */
+  .convenio-tag {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 999px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .tag-fundador { background: rgba(180,88,212,0.35); color: #e0aaff; border: 1px solid rgba(180,88,212,0.4); }
+  .tag-alianza  { background: rgba(216,90,48,0.3);   color: #f5b09a; border: 1px solid rgba(216,90,48,0.35); }
+  .tag-convenio { background: rgba(29,158,117,0.3);  color: #7de8c2; border: 1px solid rgba(29,158,117,0.35); }
+  .tag-bienest  { background: rgba(239,159,39,0.25); color: #f5c97a; border: 1px solid rgba(239,159,39,0.35); }
+
+  /* Info */
+  .convenio-info {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .convenio-cat {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .cat-gine   { color: #e87fb0; }
+  .cat-ped    { color: #f0896a; }
+  .cat-odonto { color: #34c991; }
+  .cat-estim  { color: #ef9f27; }
+
+  .convenio-name-card {
+    background: var(--color-fondo-suave-badge, rgba(255,255,255,0.06));
+    border: var(--borde-clinico-badge-medic, 1px solid rgba(255,255,255,0.12));
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    width: fit-content;
+  }
+
+  .convenio-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 0.25rem 0;
+  }
+
+  .convenio-specialty {
+    font-size: 0.85rem;
+    color: var(--color-violeta, #b458d4);
+    margin: 0;
+  }
+
+  .convenio-description {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.75);
+    margin: 0 0 1rem 0;
+    word-break: break-word;
+  }
+
+  .convenio-quote {
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-style: italic;
+    color: rgba(255,255,255,0.9);
+    padding-left: 1.5rem;
+    margin: 0.5rem 0 1.5rem;
+    border-left: 3px solid var(--color-violeta, #b458d4);
+    width: fit-content;
+  }
+
+  /* Pill de descuento */
+  .convenio-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    width: fit-content;
+  }
+
+  .pill-purple { background: rgba(180,88,212,0.25); color: #E0B3FF; border: 1px solid rgba(180,88,212,0.6); }
+  .pill-amber  { background: rgba(239,159,39,0.25);  color: #FFC961; border: 1px solid rgba(239,159,39,0.6); }
+  .pill-green  { background: rgba(29,158,117,0.25);  color: #7DFFB8; border: 1px solid rgba(29,158,117,0.6); }
+
+  .convenio-actions { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+
+  .social-links { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+  .btn-social {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    background: transparent;
+    color: white;
+    padding: 0.75rem 1.2rem;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-social:hover {
+    border-color: var(--color-violeta, #b458d4);
+    background: rgba(180,88,212,0.1);
+  }
+
+  /* Dots */
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+
+  .dot {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dot::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.6);
+    transition: all 0.3s ease;
+  }
+
+  .dot.active { background: rgba(124,58,237,0.15); }
+
+  .dot.active::before {
+    width: 24px;
+    background: var(--color-violeta, #b458d4);
+    border-radius: 4px;
+  }
+
+  /* Tablet */
+  @media (min-width: 768px) and (max-width: 968px) {
+    .convenios-section { padding: 2.5rem 0 2rem; }
+    .section-title { font-size: 1.75rem; }
+    .section-description br { display: none; }
+
+    .convenio-content {
+      grid-template-columns: 260px 1fr;
+      gap: 2.5rem;
+    }
+
+    .convenio-image-wrapper { min-height: 360px; }
+    .convenio-description { font-size: 0.9rem; }
+    .convenio-quote { font-size: 0.95rem; }
+    .btn-social { padding: 0.65rem 1rem; font-size: 0.8rem; }
+  }
+
+  /* Mobile */
+  @media (max-width: 767px) {
+    .convenios-section { padding: 2rem 0 1.5rem; }
+    .section-header { margin-bottom: 1.5rem; }
+    .section-title { font-size: 1.5rem; }
+    .section-description br { display: none; }
+    .section-description { font-size: 0.825rem; }
+
+    .convenio-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .convenio-image-wrapper {
+      min-height: 280px;
+      border-radius: 20px;
+    }
+
+    .convenio-name-card {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
+    }
+
+    .convenio-name { font-size: 0.95rem; }
+    .convenio-specialty { font-size: 0.775rem; }
+
+    .convenio-description {
+      font-size: 0.825rem;
+      line-height: 1.5;
+      margin-bottom: 0.6rem;
+    }
+
+    .convenio-quote {
+      font-size: 0.875rem;
+      margin: 0.5rem 0 1rem;
+      padding-left: 1rem;
+    }
+
+    .convenio-pill { font-size: 11px; margin-bottom: 1rem; }
+
+    .convenio-actions { flex-direction: column; align-items: center; }
+    .social-links { justify-content: center; }
+
+    .btn-social {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.8rem;
+      border-radius: 10px;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // Buscar la sección más cercana, no confiar en IDs globales
+    const section = document.querySelector('.convenios-section');
+    if (!section) return;
+
+    const track = section.querySelector('#clubjyzaTrack');
+    const dots  = section.querySelectorAll('.dot');
+    if (!track || dots.length === 0) return;
+
+    let current = 0;
+    const total = dots.length;
+    let timer = null;
+
+    function goTo(index) {
+      current = ((index % total) + total) % total;
+      track.style.transform = `translateX(-${current * 100}%)`;
+      dots.forEach((d, i) => d.classList.toggle('active', i === current));
+    }
+
+    function startTimer() {
+      clearInterval(timer);
+      timer = setInterval(() => goTo(current + 1), 8000);
+    }
+
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', () => { goTo(i); startTimer(); });
+    });
+
+    goTo(0);
+    startTimer();
+  })();
+</script>

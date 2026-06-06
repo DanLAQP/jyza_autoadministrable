@@ -1,0 +1,381 @@
+<style>
+        
+        .proceso-section {
+            /* background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); */
+            background: linear-gradient(135deg, #1f2d3a 0%, #111921 100%);
+            padding: 60px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
+        }
+
+        .proceso-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            color: #ffffff;
+            font-size: 2.8rem;
+            font-weight: 300;
+            margin-bottom: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .section-header .highlight {
+            color: #6bc4d4;
+            font-weight: 600;
+        }
+
+        .divider {
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, #4b9aab 0%, #6bc4d4 100%);
+            margin: 10px auto 18px;
+        }
+
+        .section-header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.05rem;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .proceso-timeline {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .timeline-line {
+            position: absolute;
+            top: 40px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(107, 196, 212, 0.2);
+            z-index: 0;
+        }
+
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #4b9aab 0%, #6bc4d4 100%);
+            animation: lineProgress 2s ease-out forwards;
+        }
+
+        @keyframes lineProgress {
+            to { width: 100%; }
+        }
+
+        .timeline-line-vertical {
+            display: none;
+        }
+
+        .proceso-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .proceso-step {
+            text-align: center;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
+        }
+
+        .proceso-step.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .step-number {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 25px;
+            border: 3px solid #4b9aab;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(26, 37, 47, 0.95);
+            font-size: 2rem;
+            font-weight: 600;
+            color: #6bc4d4;
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .proceso-step:nth-child(1) .step-number { animation-delay: 0.2s; }
+        .proceso-step:nth-child(2) .step-number { animation-delay: 0.4s; }
+        .proceso-step:nth-child(3) .step-number { animation-delay: 0.6s; }
+        .proceso-step:nth-child(4) .step-number { animation-delay: 0.8s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .proceso-step:hover .step-number {
+            background: linear-gradient(135deg, #4b9aab 0%, #6bc4d4 100%);
+            border-color: transparent;
+            color: white;
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 10px 30px rgba(107, 196, 212, 0.4);
+        }
+
+        .step-icon {
+            font-size: 2rem;
+        }
+
+        .step-content {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            /* background: rgba(13, 20, 26, 0.95); */
+            border: 1px solid transparent;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .proceso-step:hover .step-content {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(107, 196, 212, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .step-content h3 {
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .step-content p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+
+        .arrow {
+            display: none;
+        }
+
+        @media (max-width: 1024px) {
+            .proceso-grid {
+                grid-template-columns: 1fr;
+                gap: 50px;
+                position: relative;
+            }
+
+            .proceso-step {
+                display: grid;
+                grid-template-columns: 80px 1fr;
+                gap: 20px;
+                text-align: left;
+                align-items: start;
+            }
+
+            .step-number {
+                margin: 0;
+                grid-row: 1 / 3;
+            }
+
+            .step-content {
+                grid-column: 2;
+                min-height: auto;
+                padding: 15px;
+            }
+
+            .timeline-line {
+                display: none;
+            }
+
+            .timeline-line-vertical {
+                display: block;
+                position: absolute;
+                top: 40px;
+                left: 40px;
+                width: 2px;
+                height: calc(100% - 80px);
+                background: rgba(107, 196, 212, 0.2);
+                z-index: 0;
+            }
+
+            .timeline-line-vertical::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 0%;
+                background: linear-gradient(180deg, #4b9aab 0%, #6bc4d4 100%);
+                animation: lineProgressVertical 2s ease-out forwards;
+            }
+
+            @keyframes lineProgressVertical {
+                to { height: 100%; }
+            }
+
+            .arrow {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .proceso-section {
+                padding: 50px 20px;
+            }
+            .proceso-step .step-number{
+                margin-top: 20px;
+            }
+            .section-header {
+                margin-bottom: 40px;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .section-header p {
+                font-size: 0.95rem;
+            }
+
+            .step-content h3 {
+                font-size: 1.1rem;
+            }
+
+            .step-content p {
+                font-size: 0.85rem;
+            }
+            .timeline-line-vertical {
+                height: 80%;
+            }
+        }
+        
+    </style>
+
+    <script>
+        // Demorar IntersectionObserver (no critical above-the-fold)
+        const initProceso = () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const handleIntersection = (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            };
+
+            const observer = new IntersectionObserver(handleIntersection, observerOptions);
+            const sections = document.querySelectorAll('.proceso-section, .proceso-step');
+            sections.forEach(section => observer.observe(section));
+        };
+
+        // Usar requestIdleCallback para no bloquear
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(initProceso, { timeout: 2000 });
+        } else {
+            document.addEventListener('DOMContentLoaded', initProceso);
+        }
+    </script>
+
+    <section class="proceso-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>NUESTRO <span class="highlight">PROCESO</span></h2>
+                <div class="divider"></div>
+                <p>Un método probado y estructurado que garantiza resultados de excelencia en cada proyecto</p>
+            </div>
+
+            <div class="proceso-timeline">
+                <div class="timeline-line"></div>
+                <div class="timeline-line-vertical"></div>
+                
+                <div class="proceso-grid">
+                    <div class="proceso-step">
+                        <div class="step-number">
+                            <span class="step-icon"><i class="fas fa-clipboard-list"></i></span>
+                        </div>
+                        <div class="step-content">
+                            <h3>Consulta Inicial</h3>
+                            <p>Conocemos tus necesidades, objetivos y expectativas para diseñar la mejor estrategia de trabajo</p>
+                        </div>
+                    </div>
+
+                    <div class="proceso-step">
+                        <div class="step-number">
+                            <span class="step-icon"><i class="fas fa-chart-line"></i></span>
+                        </div>
+                        <div class="step-content">
+                            <h3>Planificación</h3>
+                            <p>Elaboramos un plan detallado con cronograma, metodología y recursos necesarios para tu proyecto</p>
+                        </div>
+                    </div>
+
+                    <div class="proceso-step">
+                        <div class="step-number">
+                            <span class="step-icon"><i class="fas fa-cogs"></i></span>
+                        </div>
+                        <div class="step-content">
+                            <h3>Ejecución</h3>
+                            <p>Desarrollamos el trabajo con seguimiento continuo y comunicación constante durante todo el proceso</p>
+                        </div>
+                    </div>
+
+                    <div class="proceso-step">
+                        <div class="step-number">
+                            <span class="step-icon"><i class="fas fa-check-circle"></i></span>
+                        </div>
+                        <div class="step-content">
+                            <h3>Entrega y Soporte</h3>
+                            <p>Presentamos el resultado final con retroalimentación y acompañamiento posterior a la entrega</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>

@@ -1,0 +1,247 @@
+---
+interface ContentBlock {
+  type: string;
+  content: string;
+  metadata?: Record<string, any>;
+}
+
+interface SectionContent {
+  id: number;
+  slug: string;
+  blocks?: Record<string, ContentBlock>;
+}
+
+const content = Astro.props.content as SectionContent | undefined;
+const blocks = content?.blocks ?? {};
+
+const getBlockContent = (blockKey: string): string | undefined => {
+  return blocks?.[blockKey]?.content;
+};
+
+// Main content
+const titulo = getBlockContent('titulo');
+const descripcion = getBlockContent('descripcion');
+const ctaButtonText = getBlockContent('cta_button_text');
+const ctaButtonUrl = getBlockContent('cta_button_url');
+const telefonoNumero = getBlockContent('telefono_numero');
+const telefonoUrl = getBlockContent('telefono_url');
+
+// Schedule section
+const horariosTitle = getBlockContent('horarios_titulo');
+const horario1Dia = getBlockContent('horario_1_dia');
+const horario1Horas = getBlockContent('horario_1_horas');
+const horario2Dia = getBlockContent('horario_2_dia');
+const horario2Horas = getBlockContent('horario_2_horas');
+const direccion = getBlockContent('direccion');
+---
+
+<section class="cta-section">
+  <div class="container">
+
+    <!-- Lado izquierdo -->
+    <div class="cta-left">
+      {titulo && <h2 class="cta-title">{titulo}</h2>}
+      {descripcion && <p class="cta-desc">{descripcion}</p>}
+      <div class="cta-actions">
+        {ctaButtonUrl && ctaButtonText && (
+          <a href={ctaButtonUrl} class="btn-primary" target="_blank" rel="noopener noreferrer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            {ctaButtonText}
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+        )}
+        {telefonoUrl && telefonoNumero && (
+          <a href={telefonoUrl} class="btn-phone">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.71 3.35 2 2 0 0 1 3.68 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.68a16 16 0 0 0 6 6l1.54-1.54a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 15.92z"/></svg>
+            {telefonoNumero}
+          </a>
+        )}
+      </div>
+    </div>
+
+    <!-- Lado derecho: horarios -->
+    <div class="cta-right">
+      <div class="schedule-card">
+        {horariosTitle && <h3 class="schedule-title">{horariosTitle}</h3>}
+        <div class="schedule-rows">
+          {horario1Dia && horario1Horas && (
+            <div class="schedule-row">
+              <span class="schedule-day">{horario1Dia}</span>
+              <span class="schedule-hours">{horario1Horas}</span>
+            </div>
+          )}
+
+          {horario2Dia && horario2Horas && (
+            <div class="schedule-row">
+              <span class="schedule-day">{horario2Dia}</span>
+              <span class="schedule-hours emerg">{horario2Horas}</span>
+            </div>
+          )}
+        </div>
+        {direccion && (
+          <div class="schedule-address">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            {direccion}
+          </div>
+        )}
+      </div>
+    </div>
+</section>
+
+<style is:global>
+  .cta-section {
+    background: radial-gradient(ellipse at left, #2a0a3e 0%, #130118 60%, #0d0118 100%);
+    padding: 4.5rem 0;
+  }
+
+  .cta-section .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  /* Left */
+  .cta-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1.2;
+    margin: 0 0 1rem 0;
+  }
+
+  .cta-desc {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.7;
+    margin: 0 0 2rem 0;
+    max-width: 380px;
+  }
+
+  .cta-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--color-btn-primary, #7c3aed);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    background: var(--color-btn-primary-hover, #6b21a8);
+    transform: translateY(-2px);
+  }
+
+  .btn-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: rgba(255,255,255,0.85);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .btn-phone svg { color: var(--color-violeta, #7c3aed); }
+  .btn-phone:hover { color: white; }
+
+  /* Right - Schedule card */
+  .schedule-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 2rem;
+  }
+
+  .schedule-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .schedule-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .schedule-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.875rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .schedule-row:last-child { border-bottom: none; }
+
+  .schedule-day {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .schedule-hours {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+  }
+
+  .schedule-hours.emerg {
+    color: var(--color-violeta, #7c3aed);
+  }
+
+  .schedule-address {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(255,255,255,0.1); /* Mejorado: 0.07 → 0.1 */
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.75); /* Mejorado: 0.4 → 0.75 */
+    line-height: 1.5;
+    letter-spacing: 0.3px;
+  }
+
+  .schedule-address svg {
+    flex-shrink: 0;
+    color: var(--color-violeta, #7c3aed);
+    margin-top: 1px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .cta-section .container {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+
+    .cta-title { font-size: 1.75rem; }
+    .cta-desc { max-width: 100%; }
+  }
+
+  @media (max-width: 480px) {
+    .cta-section { padding: 3rem 0; }
+    .cta-title { font-size: 1.5rem; }
+    .btn-primary { font-size: 0.85rem; padding: 0.7rem 1.25rem; }
+  }
+  
+
+</style>
